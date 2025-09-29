@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Algoritmo de Asignación Húngaro</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Animate.css -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <!-- html2canvas para exportar imagen -->
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <style>
+    :root{
+      --bg:#a2185b;
+      --bg2:#0a192e; /* fondo 2 degrade*/
+      --panel: #070b11cc; /* conteedores */
+      --panel-border: #ffffff14;
+      /* paletita */
+      --pastel-orange: #FBBD40;
+      --carrot-orange: #EE9029;
+      --hot-pink: #E75CB4;
+      --violet-red: #8C144E;
+      --dark-purple: #2F0C33;
+      /* losss fallbackes*/
+      --accent: var(--pastel-orange, #FBBD40);
+      --accent-2: var(--carrot-orange, #EE9029);
+      --ink: #eaf6ff;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      min-height: 100%; /* cubree altura del nuestra web */
+      height: auto; /* Permite que crezca con el contenido */
+      background:
+        radial-gradient(1200px 600px at 10% -10%, #1a2a6c22, transparent 60%),
+        radial-gradient(1000px 700px at 110% 10%, #00d4ff22, transparent 60%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+      color: var(--ink);
+      font-family: Poppins, Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    .container-fluid{padding:16px;}
+    .card-lite{
+      background: var(--panel);
+      border:1px solid var(--panel-border);
+      border-radius:14px; padding:10px 12px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    #canvas{
+      border-radius:14px; display:block;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 30px rgba(0,0,0,0.5);
+    }
+    .small-muted{color: rgba(255,255,255,0.65); font-size:.92rem;}/* dexripciones*/
+    .table-matrix th,.table-matrix td{padding:.25rem .5rem; text-align:center; font-size:.82rem;}
+
+    /* Header +titulo*/
+    .app-header{
+      position: sticky; top:0; z-index:3; margin-bottom:10px;
+      padding:20px; border-radius:20px;
+      background: linear-gradient(135deg, #233164cc, #4b6077cc); /* cajita del tituo*/
+      border:1px solid var(--panel-border);
+      backdrop-filter: blur(6px);
+      text-align: center;
+    }
+    /* containnnn*/
+    .title-wrap{
+      display:flex; align-items:center; justify-content: center; gap:12px; flex-wrap:wrap;
+    }
+    .app-title{
+      margin:0;
+      font-size: clamp(1.3rem, 2vw + 1rem, 2.2rem);
+      font-weight:800;
+      letter-spacing: .3px;
+      background: linear-gradient(90deg, #ffffff, var(--accent-2, #EE9029), #ffffff);/* TITULOO */
+      -webkit-background-clip: text; background-clip:text; color:transparent;
+      text-shadow: 0 0 18px rgba(238,144,41,.06); /* sombre*/
+    }
+    .app-sub{
+      margin:0; opacity:.85; font-weight:600; font-size:.98rem;
+    }
+
+    /* Smart toolbar */
+    .tool-group{gap:.35rem}
+    .btn-tool{
+      border-radius:12px;
+      border:1px solid var(--panel-border);
+      background: #0f1724;
+      color:#e8f6ff;
+      padding:.35rem .6rem;
+      transition: transform 0.2s;
+    }
+    .btn-tool:hover{ transform: translateY(-1px); }
+    .btn-tool.on{
+      background: linear-gradient(180deg, var(--pastel-orange, #FBBD40), var(--carrot-orange, #EE9029));
+      color:#05121a; border-color: transparent;
+      box-shadow: 0 6px 16px rgba(255,189,64,.3); 
+    }
+    .vr{border-left:1px solid var(--panel-border); height:22px; margin:0 6px;}
+    .pill{
+      border-radius:999px; background:#0c1730; border:1px solid var(--panel-border); padding:4px; /* botones aristasss */
+    }
+    .pill .btn{
+      border-radius:999px; border:1px solid transparent;
+    }
+    .pill .btn.active{
+      background: #0ff0d81a; border-color:var(--hot-pink, #E75CB4);
+      box-shadow: inset 0 0 0 1px var(--hot-pink, #E75CB4);
+    }
+
+    /* Right column sections */
+    h6{letter-spacing:.3px; font-weight:700; color: var(--violet-red, #8C144E)}
+    .section-card{padding-top:10px}
+
+    /* Edge table buttons */
+    .table-dark td,.table-dark th{border-color: #ffffff10 !important;}
+    .table-dark{--bs-table-bg: transparent;}
+
+    /* Helpers */
+    .fade-in{animation: fadeIn .4s ease both;}
+    @keyframes fadeIn{from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none}}
+
+    /* Fix for compact inputs */
+    .form-control-sm, .form-select-sm{background:#0b1326; color:#eaf6ff; border:1px solid #ffffff1a;}/* nombre img*/
+    .form-control:focus, .form-select:focus{box-shadow:0 0 0 .15rem var(--pastel-orange, #FBBD40); border-color:var(--pastel-orange, #FBBD40)}
+    .form-control-color{padding:.15rem}
+
+    /* Custom styles for the assignment app */
+    .matrix-input {
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--panel-border);
+      color: var(--ink);
+      text-align: center;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+    
+    .matrix-input:focus {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-color: var(--pastel-orange);
+      box-shadow: 0 0 0 0.2rem rgba(251, 189, 64, 0.25);
+      color: var(--ink);
+    }
+    
+    .matrix-table {
+      border-collapse: separate;
+      border-spacing: 4px;
+    }
+    
+    .matrix-table th, .matrix-table td {
+      border: none;
+      padding: 8px 12px;
+    }
+    
+    .matrix-table th {
+      background-color: rgba(140, 20, 78, 0.2);
+      color: var(--ink);
+      font-weight: 600;
+    }
+    
+    .matrix-cell {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+    
+    .matrix-cell:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .result-cell {
+      background-color: rgba(140, 20, 78, 0.15);
+      border-radius: 8px;
+    }
+    
+    .highlight {
+      background-color: rgba(251, 189, 64, 0.3) !important;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(251, 189, 64, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(251, 189, 64, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(251, 189, 64, 0); }
+    }
+    
+    .total-display {
+      background: linear-gradient(135deg, var(--violet-red), var(--hot-pink));
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+    
+    .step-indicator {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      line-height: 30px;
+      border-radius: 50%;
+      background-color: var(--dark-purple);
+      color: var(--ink);
+      text-align: center;
+      margin-right: 10px;
+    }
+    
+    .step-indicator.active {
+      background-color: var(--violet-red);
+    }
+    
+    .navbar-brand {
+      font-weight: 700;
+      color: var(--pastel-orange) !important;
+    }
+    
+    .hero-section {
+      background: linear-gradient(135deg, rgba(140, 20, 78, 0.1), rgba(231, 92, 180, 0.1));
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(180deg, var(--pastel-orange), var(--carrot-orange));
+      border: none;
+      color: #05121a;
+      font-weight: 600;
+    }
+    
+    .btn-primary:hover {
+      background: linear-gradient(180deg, var(--carrot-orange), var(--pastel-orange));
+      color: #05121a;
+    }
+    
+    .btn-success {
+      background: linear-gradient(180deg, var(--violet-red), var(--hot-pink));
+      border: none;
+      font-weight: 600;
+    }
+    
+    .btn-success:hover {
+      background: linear-gradient(180deg, var(--hot-pink), var(--violet-red));
+    }
+    
+    .help-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--pastel-orange), var(--carrot-orange));
+      color: #05121a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 4px 20px rgba(251, 189, 64, 0.4);
+      z-index: 1000;
+      transition: all 0.3s;
+    }
+    
+    .help-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 25px rgba(251, 189, 64, 0.6);
+    }
+    
+    .modal-content {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      color: var(--ink);
+    }
+    
+    .modal-header {
+      border-bottom: 1px solid var(--panel-border);
+    }
+    
+    .modal-footer {
+      border-top: 1px solid var(--panel-border);
+    }
+    
+    .theory-section {
+      background: linear-gradient(135deg, rgba(47, 12, 51, 0.3), rgba(140, 20, 78, 0.3));
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid var(--panel-border);
+    }
+    
+    .theory-title {
+      color: var(--pastel-orange);
+      font-weight: 700;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    
+    .theory-content {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    
+    .theory-card {
+      flex: 1;
+      min-width: 300px;
+      background: rgba(7, 11, 17, 0.7);
+      border-radius: 10px;
+      padding: 15px;
+      border: 1px solid var(--panel-border);
+    }
+    
+    .theory-card h5 {
+      color: var(--hot-pink);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .theory-card p {
+      margin-bottom: 0;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .export-section {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 15px;
+    }
+
+    .filename-input {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--panel-border);
+      color: var(--ink);
+      border-radius: 8px;
+      padding: 5px 10px;
+      width: 150px;
+    }
+
+    /* Estilos para la visualización de nodos */
+    .nodes-visualization {
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(7, 11, 17, 0.5);
+      border-radius: 10px;
+      border: 1px solid var(--panel-border);
+    }
+
+    .nodes-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .node-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+    }
+
+    .node {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      background: var(--pastel-orange);
+      color: #05121a;
+      box-shadow: 0 2px 8px rgba(251, 189, 64, 0.3);
+    }
+
+    .node.task {
+      background: var(--hot-pink);
+    }
+
+    .node.agent {
+      background: var(--violet-red);
+    }
+
+    .connection {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      font-size: 0.9rem;
+    }
+
+    .connection.highlight {
+      background: rgba(251, 189, 64, 0.3);
+      border: 1px solid var(--pastel-orange);
+    }
+
+    .arrow {
+      color: var(--carrot-orange);
+    }
+
+    .cost {
+      color: var(--pastel-orange);
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="app-header">
+    <div class="title-wrap">
+      <!-- Botón Home -->
+      <button id="btn-home" class="btn btn-tool" 
+              style="background-color: var(--carrot-orange, #EE9029); border-color: var(--carrot-orange, #EE9029); color: #05121a; font-weight: 600;" 
+              onclick="window.location.href='Asignacion.html'" 
+              title="Volver al Inicio">
+        <i class="bi bi-house-door me-1"></i> Home
+      </button>
+      
+      <h1 class="app-title">Algoritmo de Asignación</h1>
+      
+      <!-- Botones de Exportación -->
+      <div class="d-flex align-items-center gap-2">
+        <input id="filename" class="form-control filename-input" placeholder="nombre-archivo" value="asignacion" title="Nombre base para exportar">
+        <button id="btn-image" class="btn btn-sm btn-success" style="background-color: var(--hot-pink, #E75CB4); border-color: var(--hot-pink, #E75CB4)" title="Descargar imagen">
+          <i class="bi bi-image"></i> Imagen
+        </button>
+        <button id="btn-export" class="btn btn-sm btn-primary" style="background-color: var(--violet-red, #8C144E); border-color: var(--violet-red, #8C144E)" title="Exportar a JSON">
+          <i class="bi bi-filetype-json"></i> JSON
+        </button>
+        <label class="btn btn-sm btn-outline-light mb-0" title="Importar JSON">
+          <i class="bi bi-upload"></i> Importar <input id="importFile" type="file" accept="application/json" hidden>
+        </label>
+      </div>
+    </div>
+    <p class="app-sub">Resuelve problemas de asignación por matriz</p>
+  </div>
+
+  <div class="container-fluid my-4">
+    <!-- Theory Section -->
+    <div class="theory-section animate__animated animate__fadeIn">
+      <h3 class="theory-title">Fundamento Teórico</h3>
+      <div class="theory-content">
+        <div class="theory-card">
+          <h5><i class="fas fa-arrow-down"></i> Minimización</h5>
+          <p>El algoritmo húngaro encuentra la asignación que <strong>minimiza el costo total</strong> en problemas donde cada tarea debe asignarse a exactamente un agente y cada agente debe realizar exactamente una tarea.</p>
+          <p>El método se basa en transformaciones de la matriz de costos que preservan la asignación óptima, utilizando operaciones de resta de filas y columnas.</p>
+        </div>
+        <div class="theory-card">
+          <h5><i class="fas fa-arrow-up"></i> Maximización</h5>
+          <p>Para problemas de <strong>maximización</strong>, el algoritmo transforma la matriz original restando cada valor del valor máximo de la matriz, convirtiendo así el problema en uno de minimización.</p>
+          <p>La asignación óptima encontrada en la matriz transformada corresponde a la asignación que maximiza el beneficio en la matriz original.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row">
+      <!-- Left Panel - Matrix Input -->
+      <div class="col-lg-6 mb-4">
+        <div class="card-lite h-100 animate__animated animate__fadeInLeft">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Matriz de Costos</span>
+            <div class="d-flex align-items-center">
+              <label for="size" class="form-label me-2 mb-0">Tamaño:</label>
+              <input type="number" id="size" class="form-control matrix-input" style="width: 70px;" value="3" min="2" max="10">
+              <button class="btn btn-primary ms-2" onclick="createMatrix()">
+                <i class="fas fa-sync-alt me-1"></i>Actualizar
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="d-flex justify-content-center mb-3">
+              <span class="step-indicator active">1</span>
+              <span class="align-self-center">Define la matriz de costos</span>
+            </div>
+            <div id="matrix-container" class="overflow-auto">
+              <!-- Matrix will be generated here -->
+            </div>
+            <div class="mt-4">
+              <button class="btn btn-success me-2" onclick="solve('min')">
+                <i class="fas fa-arrow-down me-1"></i>Minimización
+              </button>
+              <button class="btn btn-success" onclick="solve('max')">
+                <i class="fas fa-arrow-up me-1"></i>Maximización
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel - Results -->
+      <div class="col-lg-6 mb-4">
+        <div class="card-lite h-100 animate__animated animate__fadeInRight">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Resultados</span>
+            <div class="d-flex">
+              <span class="step-indicator">2</span>
+              <span class="align-self-center">Visualiza la solución</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="result-placeholder" class="text-center py-5">
+              <i class="fas fa-chart-bar fa-3x mb-3" style="color: var(--violet-red);"></i>
+              <p class="small-muted">Los resultados aparecerán aquí después de resolver el problema.</p>
+            </div>
+            <div id="result" style="display: none;">
+              <!-- Results will be displayed here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visualización de Nodos -->
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="card-lite">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Visualización de la Asignación</span>
+            <button id="btn-toggle-nodes" class="btn btn-sm btn-outline-light">
+              <i class="bi bi-eye"></i> Mostrar/Ocultar
+            </button>
+          </div>
+          <div class="card-body">
+            <div id="nodes-visualization" class="nodes-visualization" style="display: none;">
+              <div class="nodes-container" id="nodes-container">
+                <!-- Los nodos y conexiones se generarán aquí -->
+              </div>
+            </div>
+            <div id="no-nodes-message" class="text-center py-3">
+              <i class="fas fa-project-diagram fa-2x mb-2" style="color: var(--violet-red);"></i>
+              <p class="small-muted">Resuelve un problema para ver la visualización de nodos</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help Button -->
+  <button type="button" class="help-btn" data-bs-toggle="modal" data-bs-target="#helpModal">
+    <i class="fas fa-question"></i>
+  </button>
+
+  <!-- Help Modal -->
+  <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="helpModalLabel">Información del Algoritmo Húngaro</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6">
+              <h6 class="mb-3">Minimización</h6>
+              <p>El algoritmo encuentra la asignación que minimiza el costo total cuando se resuelve un problema de minimización.</p>
+              <p>El método húngaro es un algoritmo de optimización que resuelve el problema de asignación en tiempo polinomial.</p>
+            </div>
+            <div class="col-md-6">
+              <h6 class="mb-3">Maximización</h6>
+              <p>Para problemas de maximización, el algoritmo transforma la matriz y encuentra la asignación que maximiza el beneficio total.</p>
+              <p>Se convierte el problema de maximización en uno de minimización restando cada valor del valor máximo de la matriz.</p>
+            </div>
+          </div>
+          <hr class="my-4">
+          <h6 class="mb-3">Instrucciones de uso</h6>
+          <ol>
+            <li>Selecciona el tamaño de la matriz cuadrada (entre 2x2 y 10x10)</li>
+            <li>Haz clic en "Actualizar" para generar la matriz</li>
+            <li>Introduce los valores de costo en cada celda</li>
+            <li>Selecciona "Minimización" o "Maximización" según tu problema</li>
+            <li>Revisa los resultados en el panel derecho</li>
+            <li>Visualiza la asignación óptima en la sección de nodos</li>
+            <li>Usa los botones de exportación para guardar tus resultados</li>
+          </ol>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendido</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    let matrix = [];
+    let currentMode = '';
+    let currentResult = null;
+
+    // Crear matriz de entrada
+    function createMatrix() {
+      const n = parseInt(document.getElementById("size").value);
+      let html = `
+        <div class="table-responsive">
+          <table class="matrix-table">
+            <thead>
+              <tr>
+                <th></th>
+      `;
+      
+      // Column headers
+      for (let j = 0; j < n; j++) {
+        html += `<th>Col ${j+1}</th>`;
+      }
+      html += `</tr></thead><tbody>`;
+      
+      // Rows with inputs
+      for (let i = 0; i < n; i++) {
+        html += `<tr><th>Fila ${i+1}</th>`;
+        for (let j = 0; j < n; j++) {
+          html += `
+            <td class="matrix-cell">
+              <input type="number" class="form-control matrix-input" id="cell-${i}-${j}" value="${i === j ? '1' : '0'}">
+            </td>
+          `;
+        }
+        html += "</tr>";
+      }
+      html += "</tbody></table></div>";
+      
+      document.getElementById("matrix-container").innerHTML = html;
+      
+      // Add animation to new matrix
+      const matrixTable = document.querySelector('.matrix-table');
+      matrixTable.classList.add('animate__animated', 'animate__zoomIn');
+    }
+
+    // Leer matriz desde los inputs
+    function getMatrix() {
+      const n = parseInt(document.getElementById("size").value);
+      const mat = [];
+      for (let i = 0; i < n; i++) {
+        mat[i] = [];
+        for (let j = 0; j < n; j++) {
+          const val = parseFloat(document.getElementById(`cell-${i}-${j}`).value) || 0;
+          mat[i][j] = val;
+        }
+      }
+      return mat;
+    }
+
+    // Algoritmo Húngaro para minimización
+    function hungarianMin(cost) {
+      const n = cost.length;
+      const u = new Array(n + 1).fill(0);
+      const v = new Array(n + 1).fill(0);
+      const p = new Array(n + 1).fill(0);
+      const way = new Array(n + 1).fill(0);
+
+      for (let i = 1; i <= n; i++) {
+        p[0] = i;
+        let j0 = 0;
+        const minv = new Array(n + 1).fill(Infinity);
+        const used = new Array(n + 1).fill(false);
+
+        do {
+          used[j0] = true;
+          const i0 = p[j0];
+          let delta = Infinity, j1 = 0;
+          for (let j = 1; j <= n; j++) {
+            if (used[j]) continue;
+            const cur = cost[i0 - 1][j - 1] - u[i0] - v[j];
+            if (cur < minv[j]) {
+              minv[j] = cur;
+              way[j] = j0;
+            }
+            if (minv[j] < delta) {
+              delta = minv[j];
+              j1 = j;
+            }
+          }
+          for (let j = 0; j <= n; j++) {
+            if (used[j]) {
+              u[p[j]] += delta;
+              v[j] -= delta;
+            } else {
+              minv[j] -= delta;
+            }
+          }
+          j0 = j1;
+        } while (p[j0] !== 0);
+
+        do {
+          const j1 = way[j0];
+          p[j0] = p[j1];
+          j0 = j1;
+        } while (j0);
+      }
+
+      const assignment = new Array(n).fill(-1);
+      for (let j = 1; j <= n; j++) {
+        if (p[j]) assignment[p[j] - 1] = j - 1;
+      }
+
+      const total = assignment.reduce((sum, j, i) => sum + cost[i][j], 0);
+      return { assignment, total };
+    }
+
+    // Resolver según el modo
+    function solve(mode) {
+      matrix = getMatrix();
+      const n = matrix.length;
+      let res;
+      currentMode = mode;
+
+      if (mode === "max") {
+        const maxVal = Math.max(...matrix.flat());
+        const converted = matrix.map(row => row.map(v => maxVal - v));
+        res = hungarianMin(converted);
+        res.total = res.assignment.reduce((sum, j, i) => sum + matrix[i][j], 0);
+      } else {
+        res = hungarianMin(matrix);
+      }
+
+      currentResult = res;
+      showResult(res, mode);
+      updateTheoryExplanation(res, mode);
+      visualizeNodes(res, mode);
+    }
+
+    // Mostrar resultado
+    function showResult(res, mode) {
+      const n = res.assignment.length;
+      
+      // Hide placeholder and show results
+      document.getElementById("result-placeholder").style.display = "none";
+      document.getElementById("result").style.display = "block";
+      
+      let html = `
+        <h4 class="mb-4" style="color: var(--pastel-orange);">${mode === "min" ? "Minimización" : "Maximización"}</h4>
+        <div class="table-responsive mb-4">
+          <table class="table table-dark matrix-table">
+            <thead>
+              <tr>
+                <th>Tarea</th>
+                <th>Asignada a</th>
+                <th>Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+      
+      for (let i = 0; i < n; i++) {
+        const j = res.assignment[i];
+        html += `
+          <tr>
+            <td class="matrix-cell">Fila ${i + 1}</td>
+            <td class="matrix-cell">Columna ${j + 1}</td>
+            <td class="result-cell">${matrix[i][j]}</td>
+          </tr>
+        `;
+      }
+      
+      html += `
+            </tbody>
+          </table>
+        </div>
+        <div class="total-display text-center">
+          <i class="fas fa-calculator me-2"></i>Total: ${res.total}
+        </div>
+      `;
+      
+      document.getElementById("result").innerHTML = html;
+      
+      // Add animation to results
+      const resultElement = document.getElementById("result");
+      resultElement.classList.add("animate__animated", "animate__zoomIn");
+      
+      // Highlight assigned cells in the matrix
+      highlightAssignedCells(res.assignment);
+    }
+
+    // Visualizar nodos y conexiones
+    function visualizeNodes(res, mode) {
+      const n = res.assignment.length;
+      const nodesContainer = document.getElementById('nodes-container');
+      const noNodesMessage = document.getElementById('no-nodes-message');
+      const nodesVisualization = document.getElementById('nodes-visualization');
+      
+      // Mostrar sección de visualización
+      noNodesMessage.style.display = 'none';
+      nodesVisualization.style.display = 'block';
+      
+      let html = '';
+      
+      for (let i = 0; i < n; i++) {
+        const j = res.assignment[i];
+        const cost = matrix[i][j];
+        const isOptimal = true; // Todas las asignaciones en el resultado son óptimas
+        
+        html += `
+          <div class="node-row ${isOptimal ? 'highlight' : ''}">
+            <div class="node task">T${i + 1}</div>
+            <div class="connection ${isOptimal ? 'highlight' : ''}">
+              <span class="cost">${cost}</span>
+              <span class="arrow">→</span>
+            </div>
+            <div class="node agent">A${j + 1}</div>
+          </div>
+        `;
+      }
+      
+      nodesContainer.innerHTML = html;
+      
+      // Agregar animación
+      nodesContainer.classList.add('animate__animated', 'animate__fadeInUp');
+      setTimeout(() => {
+        nodesContainer.classList.remove('animate__animated', 'animate__fadeInUp');
+      }, 1000);
+    }
+
+    // Actualizar explicación teórica
+    function updateTheoryExplanation(res, mode) {
+      const theoryCards = document.querySelectorAll('.theory-card');
+      
+      if (mode === 'min') {
+        theoryCards[0].innerHTML = `
+          <h5><i class="fas fa-arrow-down"></i> Minimización</h5>
+          <p>El algoritmo ha encontrado la asignación que <strong>minimiza el costo total</strong> a un valor de <strong>${res.total}</strong>.</p>
+          <p>Esta solución representa la combinación óptima donde cada tarea se asigna a un agente con el menor costo posible, cumpliendo con las restricciones de que cada agente realiza exactamente una tarea.</p>
+        `;
+      } else {
+        theoryCards[1].innerHTML = `
+          <h5><i class="fas fa-arrow-up"></i> Maximización</h5>
+          <p>El algoritmo ha encontrado la asignación que <strong>maximiza el beneficio total</strong> a un valor de <strong>${res.total}</strong>.</p>
+          <p>Esta solución representa la combinación óptima donde cada tarea se asigna a un agente con el mayor beneficio posible, cumpliendo con las restricciones de que cada agente realiza exactamente una tarea.</p>
+        `;
+      }
+      
+      // Animar la actualización
+      theoryCards.forEach(card => {
+        card.classList.add('animate__animated', 'animate__pulse');
+        setTimeout(() => {
+          card.classList.remove('animate__animated', 'animate__pulse');
+        }, 1000);
+      });
+    }
+
+    // Highlight assigned cells in the matrix
+    function highlightAssignedCells(assignment) {
+      // Remove previous highlights
+      const highlightedCells = document.querySelectorAll('.highlight');
+      highlightedCells.forEach(cell => {
+        cell.classList.remove('highlight');
+      });
+      
+      // Add highlight to assigned cells
+      for (let i = 0; i < assignment.length; i++) {
+        const j = assignment[i];
+        const cell = document.getElementById(`cell-${i}-${j}`);
+        if (cell) {
+          cell.parentElement.classList.add('highlight');
+        }
+      }
+    }
+
+    // Exportar a JSON
+    function exportToJSON() {
+      const data = {
+        matrix: matrix,
+        result: currentResult,
+        mode: currentMode,
+        timestamp: new Date().toISOString(),
+        size: matrix.length,
+        visualization: {
+          type: "assignment_matrix",
+          nodes: generateNodesData()
+        }
+      };
+      
+      const filename = document.getElementById('filename').value || 'asignacion';
+      const dataStr = JSON.stringify(data, null, 2);
+      const dataBlob = new Blob([dataStr], {type: 'application/json'});
+      
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(dataBlob);
+      link.download = `${filename}.json`;
+      link.click();
+    }
+
+    // Generar datos de nodos para exportación
+    function generateNodesData() {
+      if (!currentResult) return null;
+      
+      const nodes = [];
+      const n = currentResult.assignment.length;
+      
+      for (let i = 0; i < n; i++) {
+        const j = currentResult.assignment[i];
+        nodes.push({
+          task: `T${i + 1}`,
+          agent: `A${j + 1}`,
+          cost: matrix[i][j],
+          optimal: true
+        });
+      }
+      
+      return nodes;
+    }
+
+    // Importar desde JSON
+    function importFromJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          
+          // Establecer tamaño de matriz
+          document.getElementById('size').value = data.size;
+          createMatrix();
+          
+          // Llenar matriz con datos importados
+          setTimeout(() => {
+            for (let i = 0; i < data.size; i++) {
+              for (let j = 0; j < data.size; j++) {
+                const input = document.getElementById(`cell-${i}-${j}`);
+                if (input && data.matrix[i] && data.matrix[i][j] !== undefined) {
+                  input.value = data.matrix[i][j];
+                }
+              }
+            }
+            
+            // Si hay resultados, mostrarlos
+            if (data.result && data.mode) {
+              currentResult = data.result;
+              currentMode = data.mode;
+              matrix = data.matrix;
+              showResult(data.result, data.mode);
+              updateTheoryExplanation(data.result, data.mode);
+              visualizeNodes(data.result, data.mode);
+            }
+          }, 100);
+          
+        } catch (error) {
+          alert('Error al importar el archivo JSON: ' + error.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // Descargar imagen
+    function downloadImage() {
+      const resultElement = document.getElementById('result');
+      if (resultElement.style.display === 'none') {
+        alert('Primero resuelve un problema para poder descargar la imagen.');
+        return;
+      }
+      
+      const filename = document.getElementById('filename').value || 'asignacion';
+      
+      html2canvas(resultElement).then(canvas => {
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = `${filename}.png`;
+        link.click();
+      });
+    }
+
+    // Toggle visualización de nodos
+    function toggleNodesVisualization() {
+      const nodesVisualization = document.getElementById('nodes-visualization');
+      const noNodesMessage = document.getElementById('no-nodes-message');
+      
+      if (currentResult) {
+        if (nodesVisualization.style.display === 'none') {
+          nodesVisualization.style.display = 'block';
+          noNodesMessage.style.display = 'none';
+        } else {
+          nodesVisualization.style.display = 'none';
+          noNodesMessage.style.display = 'block';
+        }
+      }
+    }
+
+    // Event listeners para botones de exportación
+    document.getElementById('btn-export').addEventListener('click', exportToJSON);
+    document.getElementById('btn-image').addEventListener('click', downloadImage);
+    document.getElementById('importFile').addEventListener('change', importFromJSON);
+    document.getElementById('btn-toggle-nodes').addEventListener('click', toggleNodesVisualization);
+
+    // Initialize the matrix when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      createMatrix();
+    });
+  </script>
+</body>
+</html>

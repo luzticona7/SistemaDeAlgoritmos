@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Editor de Grafos</title>
+
+  <!-- Bootstrap + Icons + animate -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+  <!-- Google Fonts (letra bonita) -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <!-- html2canvas for matrix PNG (kept for potential future use) -->
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+  <!-- Link to external CSS file -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="container-fluid">
+    <div class="app-header card-lite fade-in">
+      <div class="title-wrap">
+        <i class="bi bi-diagram-3 fs-3 text-info"></i>
+        <div>
+          <h1 class="app-title">Genera tus grafos de forma dinámica</h1>
+          <p class="app-sub small-muted mb-0">Crea nodos, aristas y descarga tus resultados.</p>
+        </div>
+
+        <div class="ms-auto d-flex align-items-center gap-2">
+          <input id="filename" class="form-control form-control-sm" style="width:220px" placeholder="nombre-archivo" value="grafos" title="Nombre base para exportar">
+          <button id="btn-image" class="btn btn-sm btn-success" style="background-color: var(--hot-pink, #E75CB4); border-color: var(--hot-pink, #E75CB4)" title="Descargar imagen del grafo">
+            <i class="bi bi-image"></i> Imagen
+          </button>
+          <button id="btn-export" class="btn btn-sm btn-primary" style="background-color: var(--violet-red, #8C144E); border-color: var(--violet-red, #8C144E)" title="Exportar a JSON">
+            <i class="bi bi-filetype-json"></i> JSON
+          </button>
+          <label class="btn btn-sm btn-outline-light mb-0" title="Importar JSON">
+            <i class="bi bi-upload"></i> Importar <input id="importFile" type="file" accept="application/json" hidden>
+          </label>
+          <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#tutorialModal" title="Ayuda / Tutorial">
+            <i class="bi bi-question-circle"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="container-fluid">
+    <div class="card-lite mb-2 d-flex align-items-center gap-2 fade-in">
+      <div class="d-flex tool-group flex-wrap">
+        <button id="btn-select" class="btn btn-tool" style="background-color: var(--pastel-orange, #FBBD40)" title="Seleccionar (arrastrar nodos)">
+          <i class="bi bi-cursor"></i> Seleccionar
+        </button>
+        <button id="btn-move" class="btn btn-tool" style="background-color: var(--carrot-orange, #EE9029)" title="Mover lienzo">
+          <i class="bi bi-arrows-move"></i> Mover
+        </button>
+        <button id="btn-add-node" class="btn btn-tool" style="background-color: var(--hot-pink, #E75CB4)" title="Crear nodo">
+          <i class="bi bi-plus-circle"></i> Nodo
+        </button>
+        <button id="btn-add-edge" class="btn btn-tool" style="background-color: var(--violet-red, #8C144E)" title="Crear arista">
+          <i class="bi bi-bezier"></i> Arista
+        </button>
+        <button id="btn-delete" class="btn btn-tool" style="background-color: var(--dark-purple, #2F0C33)" title="Borrar (nodo/arista)">
+          <i class="bi bi-eraser"></i> Borrar
+        </button>
+
+        <button id="btn-clear" class="btn btn-tool">Limpiar</button>
+<div>
+
+      </div>
+
+      <div class="vr"></div>
+
+      <button id="btn-assignment" class="btn btn-outline-warning">
+  <i class="bi bi-grid-3x3-gap"></i> Asignación
+</button>
+
+      <div class="pill d-flex align-items-center gap-1" title="Tipo de arista">
+        
+        <input type="radio" class="btn-check" name="edgeType" id="edgeDirected" autocomplete="off" checked>
+        <label class="btn btn-sm btn-outline-light" for="edgeDirected" style="color: var(--pastel-orange, #FBBD40)"><i class="bi bi-arrow-right"></i> Dirigida</label>
+
+        <input type="radio" class="btn-check" name="edgeType" id="edgeUndirected" autocomplete="off">
+        <label class="btn btn-sm btn-outline-light" for="edgeUndirected" style="color: var(--carrot-orange, #EE9029)"><i class="bi bi-arrow-left-right"></i> No dirigida</label>
+
+        <input type="radio" class="btn-check" name="edgeType" id="edgeBidirectional" autocomplete="off">
+        <label class="btn btn-sm btn-outline-light" for="edgeBidirectional" style="color: var(--hot-pink, #E75CB4)"><i class="bi bi-arrow-repeat"></i> Bidireccional</label>
+      </div>
+
+      
+
+    </div>
+  </div>
+
+    <div class="card-lite section-card">
+          <div class="d-flex align-items-center mb-2">
+            <h6 class="m-0"><i class="bi bi-star me-2 text-danger"></i>Ruta Crítica</h6>
+          </div>
+          <div id="critical-path-result" class="small-muted"></div>
+        </div>
+</div>
+<div>
+<button id="btn-assignment" class="btn btn-tool" 
+          style="background-color: var(--pastel-orange, #FBBD40); border-color: var(--pastel-orange, #FBBD40); color: #05121a; font-weight: 600;" 
+          onclick="window.location.href='Asig.html'" 
+          title="Ir al Algoritmo de Asignación">
+    <i class="bi bi-grid-3x3-gap me-1"></i> Algoritmo de Asignación por Matriz
+  </button>
+
+</div>
+
+
+  <div class="container-fluid">
+    <div class="row g-3">
+      <div class="col-lg-8">
+        <div class="card-lite" style="height:80vh; display:flex; flex-direction:column;">
+          <div style="flex:1; position:relative;">
+            <canvas id="canvas"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card-lite mb-2 section-card">
+          <div class="d-flex align-items-center">
+            <h6 class="m-0"><i class="bi bi-sliders me-2 text-info"></i>Propiedades</h6>
+          </div>
+
+          <div id="no-selection" class="small-muted mt-2">Ningún nodo seleccionado. Selecciona un nodo en el lienzo para editarlo.</div>
+
+          <form id="node-form" class="d-none mt-2">
+            <div class="mb-2">
+              <label class="form-label small mb-1">Nombre</label>
+              <input id="node-label" class="form-control form-control-sm" placeholder="Etiqueta del nodo">
+            </div>
+            <div class="mb-2 d-flex gap-2">
+              <div style="flex:1">
+                <label class="form-label small mb-1">Color</label>
+                <input id="node-color" type="color" class="form-control form-control-color form-control-sm" list="preset-colors">
+              </div>
+              <datalist id="preset-colors">
+                <option value="#FBBD40">
+                <option value="#EE9029">
+                <option value="#E75CB4">
+                <option value="#8C144E">
+                <option value="#2F0C33">
+              </datalist>
+              <div style="width:150px">
+                <label class="form-label small mb-1">Tamaño</label>
+                <input id="node-size" type="range" min="12" max="40" class="form-range" />
+              </div>
+            </div>
+            <div class="d-flex gap-2 justify-content-end">
+              <button id="node-save" type="button" class="btn btn-sm btn-success" style="background-color: var(--hot-pink, #E75CB4); border-color: var(--hot-pink, #E75CB4)"><i class="bi bi-check2-circle"></i> Guardar</button>
+              <button id="node-delete" type="button" class="btn btn-sm btn-outline-danger" style="color: var(--violet-red, #8C144E)"><i class="bi bi-trash3"></i> Borrar</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card-lite mb-2 section-card">
+          <h6 class="m-0"><i class="bi bi-diagram-3 me-2 text-warning"></i>Aristas</h6>
+          <div class="table-responsive" style="max-height:180px; overflow:auto; margin-top:.6rem;">
+            <table class="table table-sm table-dark align-middle mb-0">
+              <thead><tr><th>#</th><th>Origen</th><th>Destino</th><th>Tipo</th><th>Peso</th><th>Holgura</th><th></th></tr></thead>
+              <tbody id="edges-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card-lite section-card">
+          <div class="d-flex align-items-center mb-2">
+            <h6 class="m-0"><i class="bi bi-grid-1x2 me-2 text-primary"></i>Matriz de Adyacencia</h6>
+            <div class="ms-auto d-flex gap-1">
+              <button id="refresh-matrix" class="btn btn-sm btn-outline-light" title="Refrescar"><i class="bi bi-arrow-repeat"></i></button>
+              <button id="show-matrix-modal" class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#matrixModal" title="Ver grande"><i class="bi bi-table"></i></button>
+            </div>
+          </div>
+          <div style="max-height:180px; overflow:auto">
+            <table class="table table-sm table-matrix table-dark mb-0" id="matrix-table"></table>
+          </div>
+          <div>
+            <!-- Matrix modal -->
+  <div class="modal fade" id="matrixModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-table me-2 text-primary"></i>Matriz de Adyacencia</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="table-responsive">
+            <table class="table table-sm table-matrix table-dark mb-0" id="matrix-table-modal"></table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-light" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+    
+      </div>
+    </div>
+  </div>
+
+  <!-- Tutorial modal -->
+  <div class="modal fade" id="tutorialModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-lightbulb me-2 text-warning"></i>Ayuda / Tutorial</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <ol>
+            <li>Selecciona <b>Nodo</b> y haz clic en el lienzo para crear un nodo.</li>
+            <li>Selecciona <b>Arista</b>, luego clic en origen y clic en destino para crear una arista. Para <em>loop</em> haz clic dos veces en el mismo nodo.</li>
+            <li>Selecciona un nodo para editar su nombre, color y tamaño en el panel.</li>
+            <li>En la tabla de aristas puedes cambiar su tipo, peso o eliminarla.</li>
+            <li>Pulsa <b>Imagen</b> para descargar la imagen del grafo.</li>
+            <li>Pulsa <b>JSON</b> para exportar el grafo o usa <b>Importar</b> para cargar uno.</li>
+          </ol>
+          <p class="small-muted">Consejo: Usa <i class="bi bi-arrows-move"></i> <b>Mover</b> para desplazarte por el lienzo cuando el grafo crezca.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-light" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <!-- Enhanced Custom Input Modal -->
+  <div class="modal fade" id="inputModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-transparent border-0" style="background: linear-gradient(135deg, var(--dark-purple, #2F0C33), var(--violet-red, #8C144E)); border-radius: 15px; box-shadow: 0 10px 30px rgba(47, 12, 51, 0.7);">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title text-white animate__animated animate__fadeIn" id="inputModalTitle" style="font-family: 'Poppins', sans-serif; font-weight: 600; color: var(--pastel-orange, #FBBD40); text-shadow: 1px 1px 3px rgba(0,0,0,0.5);"></h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <input id="inputModalValue" type="text" class="form-control form-control-lg animate__animated animate__fadeInUp" style="background: rgba(255,255,255,0.1); border: 2px solid var(--hot-pink, #E75CB4); border-radius: 10px; color: var(--pastel-orange, #FBBD40); font-size: 1.1rem; padding: 10px; transition: all 0.3s ease;" placeholder="Ingresa tu valor...">
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-outline-light animate__animated animate__fadeIn" data-bs-dismiss="modal" style="border-color: var(--carrot-orange, #EE9029); color: var(--carrot-orange, #EE9029);">Cancelar</button>
+          <button id="inputModalConfirm" type="button" class="btn animate__animated animate__fadeIn" style="background: linear-gradient(90deg, var(--hot-pink, #E75CB4), var(--pastel-orange, #FBBD40)); color: var(--ink, #05121a); font-weight: 600; border-radius: 10px; padding: 8px 20px; box-shadow: 0 4px 10px rgba(231, 92, 180, 0.4);">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/algorithm.js"></script>
+</body>
+</html>
