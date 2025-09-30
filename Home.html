@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PH - Sistema de Algoritmos Educativos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root{
+          --bg:#a2185b;
+          --bg2:#0a192e; /* fondo 2 degrade*/
+          --panel: #070b11cc; /* conteedores */
+          --panel-border: #ffffff14;
+          /* paletita */
+          --pastel-orange: #FBBD40;
+          --carrot-orange: #EE9029;
+          --hot-pink: #E75CB4;
+          --violet-red: #8C144E;
+          --dark-purple: #2F0C33;
+          /* losss fallbackes*/
+          --accent: var(--pastel-orange, #FBBD40);
+          --accent-2: var(--carrot-orange, #EE9029);
+          --ink: #eaf6ff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Poppins, Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        }
+        
+        html, body {
+            height: 100%;
+            margin: 0;
+            min-height: 100%; /* cubree altura del nuestra web */
+            height: auto; /* Permite que crezca con el contenido */
+            background:
+                radial-gradient(1200px 600px at 10% -10%, #1a2a6c22, transparent 60%),
+                radial-gradient(1000px 700px at 110% 10%, #00d4ff22, transparent 60%),
+                linear-gradient(180deg, var(--bg), var(--bg2));
+            color: var(--ink);
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+        
+        /* Header */
+        header {
+            background: var(--panel);
+            border-bottom: 1px solid var(--panel-border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+        
+        header.scrolled {
+            box-shadow: 0 10px 30px rgba(0,0,0,.35);
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: transparent;
+            background: linear-gradient(90deg, #ffffff, var(--accent-2, #EE9029), #ffffff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            text-shadow: 0 0 18px rgba(238,144,41,.06);
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            align-items: center;
+        }
+        
+        .nav-links li {
+            margin-left: 1.5rem;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--ink);
+            font-weight: 500;
+            transition: all 0.3s;
+            position: relative;
+            opacity: 0.85;
+            font-size: 0.95rem;
+            padding: 0.5rem 0;
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background: linear-gradient(90deg, var(--pastel-orange), var(--hot-pink));
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        
+        .nav-links a:hover {
+            color: white;
+            opacity: 1;
+        }
+        
+        .nav-links a.special {
+            background: linear-gradient(135deg, var(--hot-pink), var(--violet-red));
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .nav-links a.special::after {
+            display: none;
+        }
+        
+        .nav-links a.special:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 92, 180, 0.3);
+        }
+        
+        .cta-button {
+            background: linear-gradient(135deg, var(--pastel-orange), var(--carrot-orange));
+            color: #05121a;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 6px 16px rgba(255,189,64,.3);
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255,189,64,.4);
+        }
+        
+        .mobile-menu {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--ink);
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 10rem 0 5rem;
+            position: relative;
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        
+        .hero-content {
+            max-width: 600px;
+            z-index: 2;
+            position: relative;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            font-weight: 800;
+            color: transparent;
+            background: linear-gradient(90deg, #ffffff, var(--accent-2, #EE9029), #ffffff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            text-shadow: 0 0 18px rgba(238,144,41,.06);
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--pastel-orange), var(--carrot-orange));
+            color: #05121a;
+            padding: 0.8rem 1.8rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-block;
+            box-shadow: 0 6px 16px rgba(255,189,64,.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255,189,64,.4);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--ink);
+            padding: 0.8rem 1.8rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid var(--panel-border);
+            transition: all 0.3s;
+            display: inline-block;
+            backdrop-filter: blur(8px);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.05);
+            transform: translateY(-2px);
+            border-color: var(--pastel-orange);
+        }
+        
+        .hero-visual {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .algorithm-visual {
+            width: 500px;
+            height: 500px;
+            position: relative;
+        }
+        
+        .node {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--hot-pink), var(--violet-red));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 20px rgba(231, 92, 180, 0.3);
+            animation: float 4s infinite ease-in-out;
+        }
+        
+        .node:nth-child(1) {
+            top: 15%;
+            left: 30%;
+            animation-delay: 0s;
+        }
+        
+        .node:nth-child(2) {
+            top: 45%;
+            left: 15%;
+            animation-delay: 0.5s;
+            background: linear-gradient(135deg, var(--pastel-orange), var(--carrot-orange));
+        }
+        
+        .node:nth-child(3) {
+            top: 45%;
+            left: 65%;
+            animation-delay: 1s;
+            background: linear-gradient(135deg, #8C144E, #2F0C33);
+        }
+        
+        .node:nth-child(4) {
+            top: 75%;
+            left: 40%;
+            animation-delay: 1.5s;
+            background: linear-gradient(135deg, var(--pastel-orange), var(--hot-pink));
+        }
+        
+        .connection {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--hot-pink), transparent);
+            transform-origin: left center;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                transform: translateY(-15px) scale(1.05);
+            }
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 6rem 0;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        
+        .section-header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 800;
+            color: transparent;
+            background: linear-gradient(90deg, #ffffff, var(--accent-2, #EE9029), #ffffff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            text-shadow: 0 0 18px rgba(238,144,41,.06);
+        }
+        
+        .section-header p {
+            color: rgba(255,255,255,0.8);
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+        }
+        
+        .feature-card {
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 14px;
+            padding: 2.5rem 2rem;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 10px 30px rgba(0,0,0,.35);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--pastel-orange), var(--hot-pink));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.5s ease;
+        }
+        
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        }
+        
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--pastel-orange), var(--carrot-orange));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 15px rgba(255,189,64,.3);
+        }
+        
+        .feature-icon i {
+            font-size: 1.8rem;
+            color: #05121a;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: var(--ink);
+        }
+        
+        .feature-card p {
+            color: rgba(255,255,255,0.7);
+        }
+        
+        /* Categories Section */
+        .categories {
+            padding: 6rem 0;
+        }
+        
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2.5rem;
+        }
+        
+        .category-card {
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 14px;
+            overflow: hidden;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 10px 30px rgba(0,0,0,.35);
+            transition: transform 0.5s, box-shadow 0.5s;
+            position: relative;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-10px) rotate(1deg);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        
+        .category-image {
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .category-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.3));
+        }
+        
+        .category-content {
+            padding: 2rem;
+            position: relative;
+        }
+        
+        .category-content h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.8rem;
+            color: var(--ink);
+        }
+        
+        .category-content p {
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 1.5rem;
+        }
+        
+        .category-link {
+            color: var(--pastel-orange);
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .category-link i {
+            margin-left: 0.5rem;
+            transition: transform 0.3s;
+        }
+        
+        .category-link:hover {
+            color: var(--hot-pink);
+        }
+        
+        .category-link:hover i {
+            transform: translateX(8px);
+        }
+        
+        /* Stats Section */
+        .stats {
+            padding: 5rem 0;
+            background: var(--panel);
+            border-top: 1px solid var(--panel-border);
+            border-bottom: 1px solid var(--panel-border);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            text-align: center;
+        }
+        
+        .stat-item h3 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            color: var(--pastel-orange);
+        }
+        
+        .stat-item p {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            padding: 6rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 10s infinite linear;
+        }
+        
+        .cta-section h2 {
+            font-size: 2.8rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            font-weight: 800;
+            color: transparent;
+            background: linear-gradient(90deg, #ffffff, var(--accent-2, #EE9029), #ffffff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            text-shadow: 0 0 18px rgba(238,144,41,.06);
+        }
+        
+        .cta-section p {
+            max-width: 700px;
+            margin: 0 auto 2.5rem;
+            color: rgba(255,255,255,0.8);
+            font-size: 1.2rem;
+            position: relative;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--panel);
+            color: white;
+            padding: 4rem 0 1.5rem;
+            border-top: 1px solid var(--panel-border);
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2.5rem;
+            margin-bottom: 2.5rem;
+        }
+        
+        .footer-column h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.8rem;
+            color: var(--pastel-orange);
+        }
+        
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(to right, var(--pastel-orange), var(--hot-pink));
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+        
+        .footer-links a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .footer-links a i {
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .footer-links a:hover {
+            color: var(--pastel-orange);
+            transform: translateX(5px);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--panel-border);
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1100px) {
+            .nav-links li {
+                margin-left: 1rem;
+            }
+            
+            .nav-links a {
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .hero-visual {
+                display: none;
+            }
+            
+            .hero-content {
+                max-width: 100%;
+                text-align: center;
+            }
+            
+            .hero-buttons {
+                justify-content: center;
+            }
+            
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--panel);
+                flex-direction: column;
+                padding: 1rem;
+                border-top: 1px solid var(--panel-border);
+                box-shadow: 0 10px 30px rgba(0,0,0,.35);
+            }
+            
+            .nav-links.active {
+                display: flex;
+            }
+            
+            .nav-links li {
+                margin: 0.5rem 0;
+                width: 100%;
+                text-align: center;
+            }
+            
+            .nav-links a {
+                display: block;
+                padding: 0.8rem;
+            }
+            
+            .mobile-menu {
+                display: block;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 1rem 0;
+            }
+            
+            .nav-links {
+                margin-top: 1.5rem;
+            }
+            
+            .hero {
+                padding: 8rem 0 4rem;
+                text-align: center;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn-primary, .btn-secondary {
+                width: 80%;
+                margin-bottom: 1rem;
+            }
+            
+            .mobile-menu {
+                position: absolute;
+                top: 1.5rem;
+                right: 1.5rem;
+            }
+        }
+        
+        /* Scroll Animations */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        
+        .animate-on-scroll.animated {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Floating elements */
+        .floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .floating-element {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--pastel-orange);
+            opacity: 0.3;
+            animation: float-random 15s infinite linear;
+        }
+        
+        .floating-element:nth-child(2) {
+            background: var(--hot-pink);
+            width: 15px;
+            height: 15px;
+            animation-delay: 2s;
+            top: 20%;
+            left: 80%;
+        }
+        
+        .floating-element:nth-child(3) {
+            background: var(--violet-red);
+            width: 25px;
+            height: 25px;
+            animation-delay: 5s;
+            top: 60%;
+            left: 10%;
+        }
+        
+        .floating-element:nth-child(4) {
+            background: var(--carrot-orange);
+            width: 10px;
+            height: 10px;
+            animation-delay: 8s;
+            top: 80%;
+            left: 70%;
+        }
+        
+        @keyframes float-random {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(100px, 50px) rotate(90deg);
+            }
+            50% {
+                transform: translate(50px, 100px) rotate(180deg);
+            }
+            75% {
+                transform: translate(-50px, 50px) rotate(270deg);
+            }
+            100% {
+                transform: translate(0, 0) rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating elements -->
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+
+    <!-- Header -->
+    <header id="header">
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo animate__animated animate__fadeInLeft">P<span>H</span></div>
+                <div class="mobile-menu">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#" class="animate__animated animate__fadeInDown" style="animation-delay: 0.1s;">Home</a></li>
+                    <li><a href="#" class="animate__animated animate__fadeInDown" style="animation-delay: 0.2s;">Categories</a></li>
+                    <li><a href="#" class="animate__animated animate__fadeInDown" style="animation-delay: 0.3s;">About</a></li>
+                    <li><a href="#" class="animate__animated animate__fadeInDown" style="animation-delay: 0.4s;">Contact Us</a></li>
+                    <li><a href="#" class="animate__animated animate__fadeInDown" style="animation-delay: 0.5s;">Blogs</a></li>
+                    <li><a href="Asignacion.html" class="animate__animated animate__fadeInDown special" style="animation-delay: 0.6s;">Asignación</a></li>
+                    <li><a href="Johnson.html" class="animate__animated animate__fadeInDown special" style="animation-delay: 0.7s;">Johnson</a></li>
+                </ul>
+                <button class="cta-button animate__animated animate__fadeInRight">Get Started</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="animate__animated animate__fadeInUp">Algoritmos Educativos Inteligentes para Tu Aprendizaje</h1>
+                <p class="animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">Oxzon utiliza algoritmos avanzados para personalizar tu experiencia educativa, adaptándose a tu ritmo y estilo de aprendizaje.</p>
+                <div class="hero-buttons">
+                    <a href="#" class="btn-primary animate__animated animate__fadeInUp" style="animation-delay: 0.4s;">Comenzar Ahora</a>
+                    <a href="#" class="btn-secondary animate__animated animate__fadeInUp" style="animation-delay: 0.5s;">Ver Demo</a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="algorithm-visual">
+                    <div class="node animate__animated animate__bounceIn" style="animation-delay: 0.3s;">1</div>
+                    <div class="node animate__animated animate__bounceIn" style="animation-delay: 0.5s;">2</div>
+                    <div class="node animate__animated animate__bounceIn" style="animation-delay: 0.7s;">3</div>
+                    <div class="node animate__animated animate__bounceIn" style="animation-delay: 0.9s;">4</div>
+                    <div class="connection" style="width: 100px; top: 35%; left: 30%; transform: rotate(30deg);"></div>
+                    <div class="connection" style="width: 120px; top: 50%; left: 20%; transform: rotate(45deg);"></div>
+                    <div class="connection" style="width: 90px; top: 65%; left: 40%; transform: rotate(-20deg);"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="animate-on-scroll">Nuestro Sistema de Algoritmos</h2>
+                <p class="animate-on-scroll">Descubre cómo nuestra tecnología transforma la educación personalizada</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>Algoritmos Adaptativos</h3>
+                    <p>Nuestro sistema se ajusta automáticamente a tu nivel de conocimiento y ritmo de aprendizaje, optimizando tu progreso educativo.</p>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Seguimiento de Progreso</h3>
+                    <p>Monitorea tu avance con análisis detallados y recomendaciones personalizadas basadas en tus fortalezas y áreas de mejora.</p>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Aprendizaje Colaborativo</h3>
+                    <p>Conecta con otros estudiantes con intereses similares mediante nuestro algoritmo de emparejamiento inteligente.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="categories">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="animate-on-scroll">Categorías Educativas</h2>
+                <p class="animate-on-scroll">Explora nuestras áreas de conocimiento impulsadas por algoritmos inteligentes</p>
+            </div>
+            <div class="categories-grid">
+                <div class="category-card animate-on-scroll">
+                    <div class="category-image" style="background: linear-gradient(135deg, var(--hot-pink), var(--violet-red));">
+                        <i class="fas fa-running"></i>
+                    </div>
+                    <div class="category-content">
+                        <h3>Deportes</h3>
+                        <p>Educación deportiva gratuita. Primer paso hacia una carrera en periodismo deportivo. Familiarízate con las reglas y estrategias.</p>
+                        <a href="#" class="category-link">Explorar <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                <div class="category-card animate-on-scroll">
+                    <div class="category-image" style="background: linear-gradient(135deg, var(--pastel-orange), var(--carrot-orange));">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div class="category-content">
+                        <h3>Finanzas</h3>
+                        <p>Contenido educativo financiero gratuito que ayuda a llenar tu canal de ventas con leads calificados cuando se considera estratégicamente.</p>
+                        <a href="#" class="category-link">Explorar <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                <div class="category-card animate-on-scroll">
+                    <div class="category-image" style="background: linear-gradient(135deg, #8C144E, #2F0C33);">
+                        <i class="fas fa-flask"></i>
+                    </div>
+                    <div class="category-content">
+                        <h3>Ciencia</h3>
+                        <p>Descubre los misterios del universo con nuestros cursos de ciencia adaptativos, desde física cuántica hasta biología molecular.</p>
+                        <a href="#" class="category-link">Explorar <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                <div class="category-card animate-on-scroll">
+                    <div class="category-image" style="background: linear-gradient(135deg, var(--pastel-orange), var(--hot-pink));">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                    <div class="category-content">
+                        <h3>Diseño</h3>
+                        <p>Aprende principios de diseño, herramientas y técnicas con nuestro sistema adaptativo que se ajusta a tu creatividad y estilo.</p>
+                        <a href="#" class="category-link">Explorar <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item animate-on-scroll">
+                    <h3 class="counter" data-target="50000">0</h3>
+                    <p>Estudiantes Activos</p>
+                </div>
+                <div class="stat-item animate-on-scroll">
+                    <h3 class="counter" data-target="1500">0</h3>
+                    <p>Cursos Disponibles</p>
+                </div>
+                <div class="stat-item animate-on-scroll">
+                    <h3 class="counter" data-target="98">0</h3>
+                    <p>Tasa de Satisfacción</p>
+                </div>
+                <div class="stat-item animate-on-scroll">
+                    <h3 class="counter" data-target="45">0</h3>
+                    <p>Países Alcanzados</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2 class="animate-on-scroll">¿Listo para Transformar tu Aprendizaje?</h2>
+            <p class="animate-on-scroll">Únete a miles de estudiantes que ya están utilizando nuestro sistema de algoritmos educativos para alcanzar sus metas.</p>
+            <a href="#" class="btn-primary animate-on-scroll">Comenzar Gratis</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column animate-on-scroll">
+                    <h3>Oxzon</h3>
+                    <p>Plataforma educativa impulsada por algoritmos inteligentes para un aprendizaje personalizado y efectivo.</p>
+                </div>
+                <div class="footer-column animate-on-scroll">
+                    <h3>Enlaces Rápidos</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Home</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Categorías</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Acerca de</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Contacto</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Blog</a></li>
+                        <li><a href="Asignacion.html"><i class="fas fa-chevron-right"></i> Asignación</a></li>
+                        <li><a href="Johnson.html"><i class="fas fa-chevron-right"></i> Johnson</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column animate-on-scroll">
+                    <h3>Categorías</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Deportes</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Finanzas</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Ciencia</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Diseño</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column animate-on-scroll">
+                    <h3>Contacto</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-envelope"></i> info@oxzon.com</a></li>
+                        <li><a href="#"><i class="fas fa-phone"></i> +1 (555) 123-4567</a></li>
+                        <li><a href="#"><i class="fas fa-map-marker-alt"></i> 123 Education St, Learning City</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 Oxzon. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Scroll animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Header scroll effect
+            const header = document.getElementById('header');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+            
+            // Scroll animation for elements
+            const animateElements = document.querySelectorAll('.animate-on-scroll');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animated');
+                        
+                        // If it's a counter element, animate the counting
+                        if (entry.target.querySelector('.counter')) {
+                            const counters = entry.target.querySelectorAll('.counter');
+                            counters.forEach(counter => {
+                                const target = +counter.getAttribute('data-target');
+                                const count = +counter.innerText;
+                                const increment = target / 100;
+                                
+                                if (count < target) {
+                                    counter.innerText = Math.ceil(count + increment);
+                                    setTimeout(() => {
+                                        counter.innerText = target;
+                                    }, 2000);
+                                }
+                            });
+                        }
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            animateElements.forEach(el => {
+                observer.observe(el);
+            });
+            
+            // Mobile menu toggle
+            const mobileMenu = document.querySelector('.mobile-menu');
+            const navLinks = document.querySelector('.nav-links');
+            
+            mobileMenu.addEventListener('click', function() {
+                navLinks.classList.toggle('active');
+            });
+        });
+    </script>
+</body>
+</html>
