@@ -1,0 +1,1037 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Método Esquina Noroeste Mejorado — Demo HTML + JS</title>
+  <style>
+    :root{
+      --bg: #f7fafc;
+      --card: #ffffff;
+      --muted: #556;
+      --accent: #6b46c1;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --info: #3b82f6;
+    }
+    body{
+      font-family: 'Inter', system-ui, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--muted);
+      margin: 0;
+      padding: 24px;
+      line-height: 1.5;
+    }
+    .wrap{
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 24px;
+    }
+    .card{
+      background: var(--card);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      transition: box-shadow 0.2s ease;
+    }
+    .card:hover{
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+    h1{
+      font-size: 20px;
+      margin: 0 0 12px;
+      color: #222;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h1 svg{
+      width: 24px;
+      height: 24px;
+    }
+    label{
+      display: block;
+      font-size: 13px;
+      margin: 8px 0 4px;
+      font-weight: 500;
+    }
+    input[type=number]{
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      transition: border-color 0.2s;
+    }
+    input[type=number]:focus{
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.1);
+    }
+    button{
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    button:hover{
+      background: #5a3eb0;
+      transform: translateY(-1px);
+    }
+    button:active{
+      transform: translateY(0);
+    }
+    button.secondary{
+      background: #e2e8f0;
+      color: #222;
+    }
+    button.secondary:hover{
+      background: #cbd5e1;
+    }
+    button.success{
+      background: var(--success);
+    }
+    button.warning{
+      background: var(--warning);
+    }
+    button.error{
+      background: var(--error);
+    }
+    .matrix{
+      overflow: auto;
+      max-height: 300px;
+      border: 1px solid #eee;
+      padding: 12px;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    table{
+      border-collapse: collapse;
+      font-size: 13px;
+      width: 100%;
+    }
+    td, th{
+      padding: 8px 10px;
+      border: 1px solid #e2e8f0;
+      text-align: center;
+    }
+    th{
+      background: #f1f5f9;
+      font-weight: 600;
+    }
+    .controls{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    .output{
+      white-space: pre-wrap;
+      font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+      background: #f1f5f9;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    #svgBox{
+      width: 100%;
+      height: 360px;
+      background: linear-gradient(180deg, #fff, #fafafa);
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+    }
+    .small{
+      font-size: 13px;
+      color: #6b7280;
+    }
+    footer{
+      margin-top: 16px;
+      font-size: 13px;
+      color: #7a7a7a;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 12px;
+    }
+    .status{
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin: 12px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status.info{
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--info);
+    }
+    .status.success{
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+    .status.warning{
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+    }
+    .status.error{
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+    }
+    .highlight{
+      background: rgba(107, 70, 193, 0.1);
+      border: 1px solid rgba(107, 70, 193, 0.3);
+    }
+    .current-step{
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid var(--warning);
+    }
+    .tooltip{
+      position: relative;
+      display: inline-block;
+    }
+    .tooltip .tooltiptext{
+      visibility: hidden;
+      width: 200px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 8px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -100px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 12px;
+    }
+    .tooltip:hover .tooltiptext{
+      visibility: visible;
+      opacity: 1;
+    }
+    .legend{
+      display: flex;
+      gap: 16px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .legend-item{
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+    .legend-color{
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+    }
+    .progress-bar{
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      margin: 12px 0;
+      overflow: hidden;
+    }
+    .progress-fill{
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .icon{
+      width: 16px;
+      height: 16px;
+    }
+    @media (max-width: 900px) {
+      .wrap{
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        Método Esquina Noroeste Mejorado
+      </h1>
+      <p class="small">Implementación mejorada del método de la esquina noroeste para resolver problemas de transporte. Incluye validaciones, visualización avanzada y manejo de casos especiales.</p>
+
+      <div id="statusArea"></div>
+
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <div style="flex:1">
+          <label>Número de orígenes (filas)</label>
+          <input id="nSources" type="number" min="1" value="3">
+        </div>
+        <div style="width:140px">
+          <label>Número de destinos (columnas)</label>
+          <input id="nTargets" type="number" min="1" value="3">
+        </div>
+      </div>
+
+      <div class="progress-bar">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+
+      <div class="controls">
+        <button id="btnGenerate">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Generar matriz
+        </button>
+        <button id="btnRandom" class="secondary">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+          </svg>
+          Llenar aleatorio
+        </button>
+        <button id="btnBalance" class="warning">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+          </svg>
+          Equilibrar
+        </button>
+      </div>
+
+      <div class="controls">
+        <button id="btnRun" class="success">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Ejecutar NW
+        </button>
+        <button id="btnStep" class="secondary">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+          Paso a paso
+        </button>
+        <button id="btnReset" class="secondary">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Reset
+        </button>
+      </div>
+
+      <hr style="margin:16px 0; border: none; border-top: 1px solid #e2e8f0;">
+
+      <div class="matrix" id="matrixArea"></div>
+
+      <div style="display:flex;gap:10px;margin-top:16px;align-items:center">
+        <div style="flex:1">
+          <label>Total oferta / demanda (verificación de equilibrio)</label>
+          <div id="totals" class="small">—</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="card">
+      <h1>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        Visualización & Resultados
+      </h1>
+      
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-color" style="background: #6b46c1;"></div>
+          <span>Asignación actual</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: #f59e0b;"></div>
+          <span>Paso actual</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: #10b981;"></div>
+          <span>Asignación completada</span>
+        </div>
+      </div>
+      
+      <div id="svgBox"></div>
+      
+      <div style="margin-top:16px">
+        <label>Matriz de asignación X (flujos)</label>
+        <div id="assignOutput" class="output">—</div>
+      </div>
+      
+      <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
+        <div style="flex:1">
+          <label>Costo total</label>
+          <div id="totalCost" class="small">—</div>
+        </div>
+        <div style="width:140px">
+          <label>Modo</label>
+          <div id="modeLabel" class="small">Automático</div>
+        </div>
+      </div>
+      
+      <footer>
+        <p><strong>Instrucciones:</strong></p>
+        <ul style="margin: 8px 0; padding-left: 20px;">
+          <li>Verifica que el problema esté balanceado antes de ejecutar</li>
+          <li>Usa "Paso a paso" para seguir el algoritmo en detalle</li>
+          <li>Las celdas resaltadas muestran el progreso del algoritmo</li>
+        </ul>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    // Estado mejorado
+    let state = {
+      m: 3, n: 3,
+      cost: [], supply: [], demand: [], X: [],
+      i: 0, j: 0, stepMode: false,
+      _S: null, _D: null,
+      balanced: true,
+      totalSteps: 0,
+      currentStep: 0
+    }
+
+    const el = id => document.getElementById(id)
+
+    // Inicialización mejorada
+    function createGrid(m, n) {
+      state.m = m;
+      state.n = n;
+      state.cost = Array.from({ length: m }, () => Array(n).fill(0));
+      state.supply = Array(m).fill(0);
+      state.demand = Array(n).fill(0);
+      state.X = Array.from({ length: m }, () => Array(n).fill(0));
+      state.i = 0;
+      state.j = 0;
+      state.stepMode = false;
+      state._S = null;
+      state._D = null;
+      state.balanced = true;
+      state.totalSteps = 0;
+      state.currentStep = 0;
+      
+      renderMatrixEditor();
+      renderTotals();
+      renderSVG();
+      updateProgressBar();
+      updateStatus("Listo para comenzar. Ingresa los datos del problema.", "info");
+    }
+
+    // Renderizado de matriz mejorado
+    function renderMatrixEditor() {
+      const container = el('matrixArea');
+      container.innerHTML = '';
+      
+      const tbl = document.createElement('table');
+      
+      // Encabezado
+      const thead = document.createElement('thead');
+      const headRow = document.createElement('tr');
+      headRow.appendChild(document.createElement('th'));
+      
+      for (let j = 0; j < state.n; j++) {
+        const th = document.createElement('th');
+        th.textContent = 'D' + (j + 1);
+        headRow.appendChild(th);
+      }
+      
+      const thSupply = document.createElement('th');
+      thSupply.textContent = 'Oferta';
+      headRow.appendChild(thSupply);
+      thead.appendChild(headRow);
+      tbl.appendChild(thead);
+
+      // Cuerpo de la tabla
+      const tbody = document.createElement('tbody');
+      
+      for (let i = 0; i < state.m; i++) {
+        const tr = document.createElement('tr');
+        const th = document.createElement('th');
+        th.textContent = 'F' + (i + 1);
+        tr.appendChild(th);
+        
+        for (let j = 0; j < state.n; j++) {
+          const td = document.createElement('td');
+          if (state.i === i && state.j === j && state.stepMode) {
+            td.classList.add('current-step');
+          }
+          
+          const inp = document.createElement('input');
+          inp.type = 'number';
+          inp.value = state.cost[i][j];
+          inp.min = 0;
+          inp.step = 1;
+          inp.style.width = '70px';
+          inp.onchange = () => {
+            state.cost[i][j] = Number(inp.value || 0);
+            renderSVG();
+            checkBalance();
+          };
+          td.appendChild(inp);
+          tr.appendChild(td);
+        }
+        
+        const tdSupply = document.createElement('td');
+        const inpS = document.createElement('input');
+        inpS.type = 'number';
+        inpS.value = state.supply[i];
+        inpS.min = 0;
+        inpS.step = 1;
+        inpS.style.width = '70px';
+        inpS.onchange = () => {
+          state.supply[i] = Number(inpS.value || 0);
+          renderTotals();
+          checkBalance();
+        };
+        tdSupply.appendChild(inpS);
+        tr.appendChild(tdSupply);
+        tbody.appendChild(tr);
+      }
+
+      // Pie de tabla
+      const foot = document.createElement('tr');
+      const th0 = document.createElement('th');
+      th0.textContent = 'Demanda';
+      foot.appendChild(th0);
+      
+      for (let j = 0; j < state.n; j++) {
+        const td = document.createElement('td');
+        const inpD = document.createElement('input');
+        inpD.type = 'number';
+        inpD.value = state.demand[j];
+        inpD.min = 0;
+        inpD.step = 1;
+        inpD.style.width = '70px';
+        inpD.onchange = () => {
+          state.demand[j] = Number(inpD.value || 0);
+          renderTotals();
+          checkBalance();
+        };
+        td.appendChild(inpD);
+        foot.appendChild(td);
+      }
+      
+      const last = document.createElement('td');
+      last.textContent = '';
+      foot.appendChild(last);
+      tbody.appendChild(foot);
+
+      tbl.appendChild(tbody);
+      container.appendChild(tbl);
+    }
+
+    // Verificación de balance mejorada
+    function checkBalance() {
+      const s = state.supply.reduce((a, b) => a + b, 0);
+      const d = state.demand.reduce((a, b) => a + b, 0);
+      
+      state.balanced = (s === d);
+      
+      if (s === d) {
+        updateStatus("El problema está balanceado. Puedes ejecutar el algoritmo.", "success");
+      } else if (s > d) {
+        updateStatus(`El problema NO está balanceado. Oferta (${s}) > Demanda (${d}). Usa el botón "Equilibrar".`, "warning");
+      } else {
+        updateStatus(`El problema NO está balanceado. Oferta (${s}) < Demanda (${d}). Usa el botón "Equilibrar".`, "warning");
+      }
+      
+      return state.balanced;
+    }
+
+    // Actualización de estado
+    function updateStatus(message, type) {
+      const statusArea = el('statusArea');
+      statusArea.innerHTML = '';
+      
+      const statusDiv = document.createElement('div');
+      statusDiv.classList.add('status', type);
+      statusDiv.textContent = message;
+      statusArea.appendChild(statusDiv);
+    }
+
+    // Renderizado de totales
+    function renderTotals() {
+      const s = state.supply.reduce((a, b) => a + b, 0);
+      const d = state.demand.reduce((a, b) => a + b, 0);
+      el('totals').textContent = `Oferta total = ${s}    |    Demanda total = ${d}`;
+    }
+
+    // Llenado aleatorio mejorado
+    function randomFill() {
+      // Asegurar que los valores sean razonables y el problema esté balanceado
+      const totalSupply = Math.floor(Math.random() * 100 + 50);
+      
+      // Distribuir oferta
+      let remainingSupply = totalSupply;
+      for (let i = 0; i < state.m; i++) {
+        if (i === state.m - 1) {
+          state.supply[i] = remainingSupply;
+        } else {
+          state.supply[i] = Math.floor(Math.random() * (remainingSupply / 2)) + 1;
+          remainingSupply -= state.supply[i];
+        }
+      }
+      
+      // Distribuir demanda (igual a oferta para estar balanceado)
+      let remainingDemand = totalSupply;
+      for (let j = 0; j < state.n; j++) {
+        if (j === state.n - 1) {
+          state.demand[j] = remainingDemand;
+        } else {
+          state.demand[j] = Math.floor(Math.random() * (remainingDemand / 2)) + 1;
+          remainingDemand -= state.demand[j];
+        }
+      }
+      
+      // Costos aleatorios
+      for (let i = 0; i < state.m; i++) {
+        for (let j = 0; j < state.n; j++) {
+          state.cost[i][j] = Math.floor(Math.random() * 20 + 1);
+        }
+      }
+      
+      renderMatrixEditor();
+      renderTotals();
+      renderSVG();
+      checkBalance();
+      updateStatus("Matriz generada aleatoriamente. El problema está balanceado.", "success");
+    }
+
+    // Balanceo mejorado
+    function balanceProblem() {
+      const s = state.supply.reduce((a, b) => a + b, 0);
+      const d = state.demand.reduce((a, b) => a + b, 0);
+      
+      if (s === d) {
+        updateStatus("El problema ya está balanceado.", "info");
+        return;
+      }
+      
+      if (s > d) {
+        // Añadir columna dummy
+        state.demand.push(s - d);
+        for (let i = 0; i < state.m; i++) {
+          state.cost[i].push(0);
+        }
+        state.n += 1;
+        updateStatus(`Se añadió un destino dummy con demanda ${s-d}.`, "info");
+      } else {
+        // Añadir fila dummy
+        state.supply.push(d - s);
+        state.m += 1;
+        state.cost.push(Array(state.n).fill(0));
+        updateStatus(`Se añadió un origen dummy con oferta ${d-s}.`, "info");
+      }
+      
+      // Reiniciar asignaciones
+      state.X = Array.from({length: state.m}, () => Array(state.n).fill(0));
+      state.i = 0;
+      state.j = 0;
+      
+      renderMatrixEditor();
+      renderTotals();
+      renderSVG();
+      checkBalance();
+    }
+
+    // Algoritmo NW mejorado
+    function runNorthwest(fullAuto = true) {
+      if (!checkBalance()) {
+        updateStatus("No se puede ejecutar el algoritmo: el problema no está balanceado.", "error");
+        return;
+      }
+      
+      // Copia de supply/demand
+      const S = state.supply.slice();
+      const D = state.demand.slice();
+      state.X = Array.from({length: state.m}, () => Array(state.n).fill(0));
+      
+      let i = 0, j = 0;
+      state.totalSteps = state.m + state.n - 1;
+      state.currentStep = 0;
+      
+      el('modeLabel').textContent = fullAuto ? 'Automático' : 'Paso a paso';
+      
+      while (i < state.m && j < state.n) {
+        const asign = Math.min(S[i], D[j]);
+        state.X[i][j] = asign;
+        S[i] -= asign;
+        D[j] -= asign;
+        
+        state.currentStep++;
+        updateProgressBar();
+        
+        // Actualizar y renderizar si paso a paso
+        if (!fullAuto) {
+          state.i = i;
+          state.j = j;
+          renderStep();
+          return;
+        }
+        
+        if (S[i] === 0) i++;
+        else if (D[j] === 0) j++;
+      }
+      
+      finalizeResult();
+    }
+
+    // Paso a paso mejorado
+    function stepNorthwest() {
+      // Si es la primera vez, inicializar copias
+      if (!state._S) {
+        state._S = state.supply.slice();
+        state._D = state.demand.slice();
+        state.X = Array.from({length: state.m}, () => Array(state.n).fill(0));
+        state.i = 0;
+        state.j = 0;
+        state.totalSteps = state.m + state.n - 1;
+        state.currentStep = 0;
+      }
+      
+      const i = state.i, j = state.j;
+      
+      if (i >= state.m || j >= state.n) {
+        finalizeResult();
+        return;
+      }
+      
+      const asign = Math.min(state._S[i], state._D[j]);
+      state.X[i][j] = asign;
+      state._S[i] -= asign;
+      state._D[j] -= asign;
+      
+      state.currentStep++;
+      updateProgressBar();
+      
+      // Mover
+      if (state._S[i] === 0) state.i++;
+      else if (state._D[j] === 0) state.j++;
+      
+      renderStep();
+      
+      // Comprobar si terminó
+      if (state.i >= state.m || state.j >= state.n) {
+        finalizeResult();
+      }
+    }
+
+    // Renderizado de paso
+    function renderStep() {
+      renderMatrixEditor();
+      renderSVG();
+      el('assignOutput').textContent = matrixToText(state.X);
+      el('totalCost').textContent = "(parcial) " + computeTotalCost();
+      el('modeLabel').textContent = `Paso a paso (posición i=${state.i}, j=${state.j})`;
+    }
+
+    // Finalización mejorada
+    function finalizeResult() {
+      renderMatrixEditor();
+      renderSVG();
+      el('assignOutput').textContent = matrixToText(state.X);
+      const total = computeTotalCost();
+      el('totalCost').textContent = total;
+      
+      // Verificar que la solución es factible
+      const isFeasible = verifySolution();
+      
+      if (isFeasible) {
+        updateStatus(`Solución completada. Costo total: ${total}. La solución es factible.`, "success");
+      } else {
+        updateStatus(`Solución completada. Costo total: ${total}. ADVERTENCIA: La solución podría no ser factible.`, "warning");
+      }
+      
+      // Limpiar variables de paso
+      delete state._S;
+      delete state._D;
+      state.currentStep = state.totalSteps;
+      updateProgressBar();
+    }
+
+    // Verificación de solución
+    function verifySolution() {
+      // Verificar que todas las ofertas se cumplen
+      for (let i = 0; i < state.m; i++) {
+        const rowSum = state.X[i].reduce((a, b) => a + b, 0);
+        if (rowSum !== state.supply[i]) {
+          console.warn(`La fila ${i} no cumple con la oferta: ${rowSum} vs ${state.supply[i]}`);
+          return false;
+        }
+      }
+      
+      // Verificar que todas las demandas se cumplen
+      for (let j = 0; j < state.n; j++) {
+        const colSum = state.X.map(row => row[j]).reduce((a, b) => a + b, 0);
+        if (colSum !== state.demand[j]) {
+          console.warn(`La columna ${j} no cumple con la demanda: ${colSum} vs ${state.demand[j]}`);
+          return false;
+        }
+      }
+      
+      return true;
+    }
+
+    // Cálculo de costo total
+    function computeTotalCost() {
+      let total = 0;
+      for (let i = 0; i < state.m; i++) {
+        for (let j = 0; j < state.n; j++) {
+          total += (state.X[i] || [])[j] * state.cost[i][j] || 0;
+        }
+      }
+      return total;
+    }
+
+    // Conversión de matriz a texto
+    function matrixToText(M) {
+      return M.map(r => r.map(v => String(v).padStart(3, ' ')).join(' | ')).join('\n');
+    }
+
+    // Actualización de barra de progreso
+    function updateProgressBar() {
+      const progressFill = el('progressFill');
+      if (state.totalSteps > 0) {
+        const progress = (state.currentStep / state.totalSteps) * 100;
+        progressFill.style.width = `${progress}%`;
+      } else {
+        progressFill.style.width = '0%';
+      }
+    }
+
+    // SVG drawing mejorado
+    function renderSVG() {
+      const box = el('svgBox');
+      box.innerHTML = '';
+      
+      const w = box.clientWidth;
+      const h = box.clientHeight;
+      
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('width', '100%');
+      svg.setAttribute('height', '100%');
+      svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      
+      // Posiciones
+      const leftX = 80, rightX = w - 120;
+      const padY = 40;
+      const usableH = h - 80;
+      
+      const ysLeft = [];
+      const ysRight = [];
+      
+      for (let i = 0; i < state.m; i++) {
+        ysLeft.push(60 + i * (usableH / (Math.max(1, state.m) - (state.m === 1 ? 1 : 0))));
+      }
+      
+      for (let j = 0; j < state.n; j++) {
+        ysRight.push(60 + j * (usableH / (Math.max(1, state.n) - (state.n === 1 ? 1 : 0))));
+      }
+
+      // Dibujar nodos izquierdos (orígenes)
+      for (let i = 0; i < state.m; i++) {
+        const g = document.createElementNS(svg.namespaceURI, 'g');
+        const cy = ysLeft[i];
+        
+        const circle = document.createElementNS(svg.namespaceURI, 'circle');
+        circle.setAttribute('cx', leftX);
+        circle.setAttribute('cy', cy);
+        circle.setAttribute('r', 18);
+        circle.setAttribute('fill', '#ffffff');
+        circle.setAttribute('stroke', '#667');
+        circle.setAttribute('stroke-width', '2');
+        g.appendChild(circle);
+        
+        const txt = document.createElementNS(svg.namespaceURI, 'text');
+        txt.setAttribute('x', leftX);
+        txt.setAttribute('y', cy + 5);
+        txt.setAttribute('text-anchor', 'middle');
+        txt.setAttribute('font-size', '12');
+        txt.setAttribute('font-weight', 'bold');
+        txt.textContent = 'F' + (i + 1);
+        g.appendChild(txt);
+        
+        const supplyTxt = document.createElementNS(svg.namespaceURI, 'text');
+        supplyTxt.setAttribute('x', leftX - 30);
+        supplyTxt.setAttribute('y', cy + 5);
+        supplyTxt.setAttribute('text-anchor', 'end');
+        supplyTxt.setAttribute('font-size', '11');
+        supplyTxt.textContent = `(${state.supply[i]})`;
+        g.appendChild(supplyTxt);
+        
+        svg.appendChild(g);
+      }
+
+      // Dibujar nodos derechos (destinos)
+      for (let j = 0; j < state.n; j++) {
+        const g = document.createElementNS(svg.namespaceURI, 'g');
+        const cy = ysRight[j];
+        
+        const circle = document.createElementNS(svg.namespaceURI, 'circle');
+        circle.setAttribute('cx', rightX);
+        circle.setAttribute('cy', cy);
+        circle.setAttribute('r', 18);
+        circle.setAttribute('fill', '#ffffff');
+        circle.setAttribute('stroke', '#667');
+        circle.setAttribute('stroke-width', '2');
+        g.appendChild(circle);
+        
+        const txt = document.createElementNS(svg.namespaceURI, 'text');
+        txt.setAttribute('x', rightX);
+        txt.setAttribute('y', cy + 5);
+        txt.setAttribute('text-anchor', 'middle');
+        txt.setAttribute('font-size', '12');
+        txt.setAttribute('font-weight', 'bold');
+        txt.textContent = 'D' + (j + 1);
+        g.appendChild(txt);
+        
+        const demandTxt = document.createElementNS(svg.namespaceURI, 'text');
+        demandTxt.setAttribute('x', rightX + 30);
+        demandTxt.setAttribute('y', cy + 5);
+        demandTxt.setAttribute('text-anchor', 'start');
+        demandTxt.setAttribute('font-size', '11');
+        demandTxt.textContent = `(${state.demand[j]})`;
+        g.appendChild(demandTxt);
+        
+        svg.appendChild(g);
+      }
+
+      // Dibujar aristas con costos y flujos
+      for (let i = 0; i < state.m; i++) {
+        for (let j = 0; j < state.n; j++) {
+          const x1 = leftX + 18;
+          const y1 = ysLeft[i];
+          const x2 = rightX - 18;
+          const y2 = ysRight[j];
+          
+          const path = document.createElementNS(svg.namespaceURI, 'path');
+          const d = `M ${x1} ${y1} C ${x1 + 80} ${y1} ${x2 - 80} ${y2} ${x2} ${y2}`;
+          path.setAttribute('d', d);
+          path.setAttribute('stroke', '#cbd5e1');
+          path.setAttribute('fill', 'none');
+          svg.appendChild(path);
+          
+          // Etiqueta de costo
+          const midx = (x1 + x2) / 2;
+          const midy = (y1 + y2) / 2;
+          
+          const t = document.createElementNS(svg.namespaceURI, 'text');
+          t.setAttribute('x', midx - 10);
+          t.setAttribute('y', midy - 6);
+          t.setAttribute('font-size', '11');
+          t.textContent = state.cost[i][j];
+          svg.appendChild(t);
+          
+          // Flujo si está asignado
+          const flow = (state.X[i] || [])[j] || 0;
+          if (flow > 0) {
+            const strokeW = Math.min(8, 1 + Math.log(flow + 1));
+            const p2 = document.createElementNS(svg.namespaceURI, 'path');
+            p2.setAttribute('d', d);
+            
+            // Color diferente para el paso actual
+            if (state.i === i && state.j === j && state.stepMode) {
+              p2.setAttribute('stroke', '#f59e0b'); // Paso actual - naranja
+            } else if (state.stepMode && (
+              (i < state.i) || 
+              (i === state.i && j < state.j)
+            )) {
+              p2.setAttribute('stroke', '#10b981'); // Completado - verde
+            } else {
+              p2.setAttribute('stroke', '#6b46c1'); // Normal - morado
+            }
+            
+            p2.setAttribute('stroke-width', strokeW);
+            p2.setAttribute('fill', 'none');
+            p2.setAttribute('opacity', '0.9');
+            svg.appendChild(p2);
+            
+            const tf = document.createElementNS(svg.namespaceURI, 'text');
+            tf.setAttribute('x', midx + 6);
+            tf.setAttribute('y', midy + 14);
+            tf.setAttribute('font-size', '12');
+            tf.setAttribute('font-weight', 'bold');
+            tf.textContent = flow;
+            svg.appendChild(tf);
+          }
+        }
+      }
+
+      box.appendChild(svg);
+    }
+
+    // UI hooks
+    el('btnGenerate').onclick = () => {
+      const m = Math.max(1, Number(el('nSources').value || 1));
+      const n = Math.max(1, Number(el('nTargets').value || 1));
+      createGrid(m, n);
+    };
+    
+    el('btnRandom').onclick = () => randomFill();
+    el('btnBalance').onclick = () => balanceProblem();
+    
+    el('btnRun').onclick = () => {
+      state.stepMode = false;
+      runNorthwest(true);
+    };
+    
+    el('btnStep').onclick = () => {
+      if (!state.stepMode) {
+        state.stepMode = true;
+        // Inicializar copias de paso
+        state._S = state.supply.slice();
+        state._D = state.demand.slice();
+        state.X = Array.from({length: state.m}, () => Array(state.n).fill(0));
+        state.i = 0;
+        state.j = 0;
+        state.totalSteps = state.m + state.n - 1;
+        state.currentStep = 0;
+        
+        el('btnStep').textContent = 'Siguiente paso';
+        el('modeLabel').textContent = 'Paso a paso (iniciado)';
+        updateProgressBar();
+        renderSVG();
+        updateStatus("Modo paso a paso iniciado. Usa 'Siguiente paso' para avanzar.", "info");
+      } else {
+        // Hacer un paso
+        if (state.i >= state.m || state.j >= state.n) {
+          finalizeResult();
+          el('btnStep').textContent = 'Paso a paso';
+          state.stepMode = false;
+        } else {
+          stepNorthwest();
+          el('btnStep').textContent = 'Siguiente paso';
+        }
+      }
+    };
+    
+    el('btnReset').onclick = () => {
+      createGrid(3, 3);
+      el('btnStep').textContent = 'Paso a paso';
+      updateStatus("Sistema reiniciado. Listo para comenzar.", "info");
+    };
+
+    // Inicialización
+    createGrid(3, 3);
+  </script>
+</body>
+</html>
