@@ -3,47 +3,153 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Método Esquina Noroeste Mejorado — Demo HTML + JS</title>
+  <title>Método Esquina Noroeste — Algoritmo Avanzado</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg: #f7fafc;
-      --card: #ffffff;
-      --muted: #556;
-      --accent: #6b46c1;
+      --bg:#a2185b;
+      --bg2:#0a192e; /* fondo 2 degrade*/
+      --panel: #070b11cc; /* conteedores */
+      --panel-border: #ffffff14;
+      /* paletita */
+      --pastel-orange: #FBBD40;
+      --carrot-orange: #EE9029;
+      --hot-pink: #E75CB4;
+      --violet-red: #8C144E;
+      --dark-purple: #2F0C33;
+      /* losss fallbackes*/
+      --accent: var(--pastel-orange, #FBBD40);
+      --accent-2: var(--carrot-orange, #EE9029);
+      --ink: #eaf6ff;
       --success: #10b981;
-      --warning: #f59e0b;
+      --warning: var(--carrot-orange);
       --error: #ef4444;
       --info: #3b82f6;
     }
-    body{
-      font-family: 'Inter', system-ui, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--muted);
+    html, body {
+      height: 100%;
       margin: 0;
-      padding: 24px;
-      line-height: 1.5;
+      min-height: 100%; /* cubree altura del nuestra web */
+      height: auto; /* Permite que crezca con el contenido */
+      background:
+        radial-gradient(1200px 600px at 10% -10%, #1a2a6c22, transparent 60%),
+        radial-gradient(1000px 700px at 110% 10%, #00d4ff22, transparent 60%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+      color: var(--ink);
+      font-family: Poppins, Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     }
+    .container-fluid{padding:16px;}
+    .card-lite{
+      background: var(--panel);
+      border:1px solid var(--panel-border);
+      border-radius:14px; padding:10px 12px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    #canvas{
+      border-radius:14px; display:block;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 30px rgba(0,0,0,0.5);
+    }
+    .small-muted{color: rgba(255,255,255,0.65); font-size:.92rem;}/* dexripciones*/
+    .table-matrix th,.table-matrix td{padding:.25rem .5rem; text-align:center; font-size:.82rem;}
+
+    /* Header +titulo*/
+    .app-header{
+      position: sticky; top:0; z-index:3; margin-bottom:10px;
+      padding:20px; border-radius:20px;
+      background: linear-gradient(135deg, #233164cc, #4b6077cc); /* cajita del tituo*/
+      border:1px solid var(--panel-border);
+      backdrop-filter: blur(6px);
+    }
+    /* containnnn*/
+    .title-wrap{
+      display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    }
+    .app-title{
+      margin:0;
+      font-size: clamp(1.3rem, 2vw + 1rem, 2.2rem);
+      font-weight:800;
+      letter-spacing: .3px;
+      background: linear-gradient(90deg, #ffffff, var(--accent-2, #EE9029), #ffffff);/* TITULOO */
+      -webkit-background-clip: text; background-clip:text; color:transparent;
+      text-shadow: 0 0 18px rgba(238,144,41,.06); /* sombre*/
+    }
+    .app-sub{
+      margin:0; opacity:.85; font-weight:600; font-size:.98rem;
+    }
+
+    /* Smart toolbar */
+    .tool-group{gap:.35rem}
+    .btn-tool{
+      border-radius:12px;
+      border:1px solid var(--panel-border);
+      background: #0f1724;
+      color:#e8f6ff;
+      padding:.35rem .6rem;
+      transition: transform 0.2s;
+    }
+    .btn-tool:hover{ transform: translateY(-1px); }
+    .btn-tool.on{
+      background: linear-gradient(180deg, var(--pastel-orange, #FBBD40), var(--carrot-orange, #EE9029));
+      color:#05121a; border-color: transparent;
+      box-shadow: 0 6px 16px rgba(255,189,64,.3); 
+    }
+    .vr{border-left:1px solid var(--panel-border); height:22px; margin:0 6px;}
+    .pill{
+      border-radius:999px; background:#0c1730; border:1px solid var(--panel-border); padding:4px; /* botones aristasss */
+    }
+    .pill .btn{
+      border-radius:999px; border:1px solid transparent;
+    }
+    .pill .btn.active{
+      background: #0ff0d81a; border-color:var(--hot-pink, #E75CB4);
+      box-shadow: inset 0 0 0 1px var(--hot-pink, #E75CB4);
+    }
+
+    /* Right column sections */
+    h6{letter-spacing:.3px; font-weight:700; color: var(--violet-red, #8C144E)}
+    .section-card{padding-top:10px}
+
+    /* Edge table buttons */
+    .table-dark td,.table-dark th{border-color: #ffffff10 !important;}
+    .table-dark{--bs-table-bg: transparent;}
+
+    /* Helpers */
+    .fade-in{animation: fadeIn .4s ease both;}
+    @keyframes fadeIn{from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none}}
+
+    /* Fix for compact inputs */
+    .form-control-sm, .form-select-sm{background:#0b1326; color:#eaf6ff; border:1px solid #ffffff1a;}/* nombre img*/
+    .form-control:focus, .form-select:focus{box-shadow:0 0 0 .15rem var(--pastel-orange, #FBBD40); border-color:var(--pastel-orange, #FBBD40)}
+    .form-control-color{padding:.15rem}
+
+    /* Custom styles for the algorithm */
     .wrap{
       max-width: 1200px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: 1fr 420px;
       gap: 24px;
+      padding: 16px;
     }
     .card{
-      background: var(--card);
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 20px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
       transition: box-shadow 0.2s ease;
     }
     .card:hover{
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      box-shadow: 0 12px 35px rgba(0,0,0,.45);
     }
     h1{
       font-size: 20px;
       margin: 0 0 12px;
-      color: #222;
+      color: var(--ink);
       display: flex;
       align-items: center;
       gap: 8px;
@@ -57,75 +163,84 @@
       font-size: 13px;
       margin: 8px 0 4px;
       font-weight: 500;
+      color: rgba(255,255,255,0.8);
     }
     input[type=number]{
       width: 100%;
       padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ddd;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(11, 19, 38, 0.7);
+      color: var(--ink);
       transition: border-color 0.2s;
     }
     input[type=number]:focus{
       outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.1);
+      border-color: var(--pastel-orange);
+      box-shadow: 0 0 0 3px rgba(251, 189, 64, 0.1);
     }
     button{
-      background: var(--accent);
-      color: #fff;
+      background: linear-gradient(180deg, var(--pastel-orange), var(--carrot-orange));
+      color: #05121a;
       border: none;
       padding: 10px 16px;
-      border-radius: 8px;
+      border-radius: 12px;
       cursor: pointer;
-      font-weight: 500;
+      font-weight: 600;
       transition: all 0.2s;
       display: flex;
       align-items: center;
       gap: 6px;
+      box-shadow: 0 4px 12px rgba(251, 189, 64, 0.2);
     }
     button:hover{
-      background: #5a3eb0;
-      transform: translateY(-1px);
+      background: linear-gradient(180deg, var(--carrot-orange), #e57c1a);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(251, 189, 64, 0.3);
     }
     button:active{
       transform: translateY(0);
     }
     button.secondary{
-      background: #e2e8f0;
-      color: #222;
+      background: rgba(15, 23, 36, 0.8);
+      color: var(--ink);
+      border: 1px solid var(--panel-border);
+      box-shadow: none;
     }
     button.secondary:hover{
-      background: #cbd5e1;
+      background: rgba(25, 35, 55, 0.9);
+      border-color: rgba(255,255,255,0.2);
     }
     button.success{
-      background: var(--success);
+      background: linear-gradient(180deg, #10b981, #0da271);
     }
     button.warning{
-      background: var(--warning);
+      background: linear-gradient(180deg, var(--carrot-orange), #e57c1a);
     }
     button.error{
-      background: var(--error);
+      background: linear-gradient(180deg, #ef4444, #dc2626);
     }
     .matrix{
       overflow: auto;
       max-height: 300px;
-      border: 1px solid #eee;
+      border: 1px solid rgba(255,255,255,0.1);
       padding: 12px;
-      border-radius: 8px;
-      background: #fafafa;
+      border-radius: 10px;
+      background: rgba(11, 19, 38, 0.5);
     }
     table{
       border-collapse: collapse;
       font-size: 13px;
       width: 100%;
+      color: var(--ink);
     }
     td, th{
       padding: 8px 10px;
-      border: 1px solid #e2e8f0;
+      border: 1px solid rgba(255,255,255,0.1);
       text-align: center;
     }
     th{
-      background: #f1f5f9;
+      background: rgba(15, 23, 36, 0.7);
       font-weight: 600;
     }
     .controls{
@@ -137,64 +252,71 @@
     .output{
       white-space: pre-wrap;
       font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
-      background: #f1f5f9;
+      background: rgba(11, 19, 38, 0.7);
       padding: 12px;
-      border-radius: 8px;
+      border-radius: 10px;
       font-size: 13px;
       max-height: 200px;
       overflow-y: auto;
+      color: var(--ink);
+      border: 1px solid rgba(255,255,255,0.1);
     }
     #svgBox{
       width: 100%;
       height: 360px;
-      background: linear-gradient(180deg, #fff, #fafafa);
-      border-radius: 8px;
-      border: 1px solid #e2e8f0;
+      background: rgba(11, 19, 38, 0.5);
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
       overflow: hidden;
     }
     .small{
       font-size: 13px;
-      color: #6b7280;
+      color: rgba(255,255,255,0.7);
     }
     footer{
       margin-top: 16px;
       font-size: 13px;
-      color: #7a7a7a;
-      border-top: 1px solid #e2e8f0;
+      color: rgba(255,255,255,0.7);
+      border-top: 1px solid rgba(255,255,255,0.1);
       padding-top: 12px;
     }
     .status{
       padding: 8px 12px;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 13px;
       margin: 12px 0;
       display: flex;
       align-items: center;
       gap: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
     }
     .status.info{
       background: rgba(59, 130, 246, 0.1);
-      color: var(--info);
+      color: #3b82f6;
+      border-color: rgba(59, 130, 246, 0.2);
     }
     .status.success{
       background: rgba(16, 185, 129, 0.1);
-      color: var(--success);
+      color: #10b981;
+      border-color: rgba(16, 185, 129, 0.2);
     }
     .status.warning{
-      background: rgba(245, 158, 11, 0.1);
-      color: var(--warning);
+      background: rgba(238, 144, 41, 0.1);
+      color: var(--carrot-orange);
+      border-color: rgba(238, 144, 41, 0.2);
     }
     .status.error{
       background: rgba(239, 68, 68, 0.1);
-      color: var(--error);
+      color: #ef4444;
+      border-color: rgba(239, 68, 68, 0.2);
     }
     .highlight{
       background: rgba(107, 70, 193, 0.1);
       border: 1px solid rgba(107, 70, 193, 0.3);
     }
     .current-step{
-      background: rgba(245, 158, 11, 0.2);
-      border: 1px solid var(--warning);
+      background: rgba(238, 144, 41, 0.2);
+      border: 1px solid var(--carrot-orange);
     }
     .tooltip{
       position: relative;
@@ -203,8 +325,8 @@
     .tooltip .tooltiptext{
       visibility: hidden;
       width: 200px;
-      background-color: #333;
-      color: #fff;
+      background-color: rgba(15, 23, 36, 0.9);
+      color: var(--ink);
       text-align: center;
       border-radius: 6px;
       padding: 8px;
@@ -216,6 +338,7 @@
       opacity: 0;
       transition: opacity 0.3s;
       font-size: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
     }
     .tooltip:hover .tooltiptext{
       visibility: visible;
@@ -240,14 +363,14 @@
     }
     .progress-bar{
       height: 6px;
-      background: #e2e8f0;
+      background: rgba(255,255,255,0.1);
       border-radius: 3px;
       margin: 12px 0;
       overflow: hidden;
     }
     .progress-fill{
       height: 100%;
-      background: var(--accent);
+      background: linear-gradient(90deg, var(--pastel-orange), var(--carrot-orange));
       width: 0%;
       transition: width 0.3s ease;
     }
@@ -263,15 +386,22 @@
   </style>
 </head>
 <body>
+  <div class="app-header">
+    <div class="title-wrap">
+      <h1 class="app-title">Algoritmo de la Esquina Noroeste</h1>
+      <p class="app-sub">Resolución avanzada de problemas de transporte</p>
+    </div>
+  </div>
+
   <div class="wrap">
     <div class="card">
       <h1>
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
-        Método Esquina Noroeste Mejorado
+        Configuración del Problema
       </h1>
-      <p class="small">Implementación mejorada del método de la esquina noroeste para resolver problemas de transporte. Incluye validaciones, visualización avanzada y manejo de casos especiales.</p>
+      <p class="small-muted">Ingresa los datos del problema de transporte: costos, ofertas y demandas.</p>
 
       <div id="statusArea"></div>
 
@@ -333,7 +463,7 @@
         </button>
       </div>
 
-      <hr style="margin:16px 0; border: none; border-top: 1px solid #e2e8f0;">
+      <hr style="margin:16px 0; border: none; border-top: 1px solid rgba(255,255,255,0.1);">
 
       <div class="matrix" id="matrixArea"></div>
 
@@ -356,15 +486,15 @@
       
       <div class="legend">
         <div class="legend-item">
-          <div class="legend-color" style="background: #6b46c1;"></div>
+          <div class="legend-color" style="background: var(--pastel-orange);"></div>
           <span>Asignación actual</span>
         </div>
         <div class="legend-item">
-          <div class="legend-color" style="background: #f59e0b;"></div>
+          <div class="legend-color" style="background: var(--carrot-orange);"></div>
           <span>Paso actual</span>
         </div>
         <div class="legend-item">
-          <div class="legend-color" style="background: #10b981;"></div>
+          <div class="legend-color" style="background: var(--success);"></div>
           <span>Asignación completada</span>
         </div>
       </div>
@@ -442,6 +572,7 @@
       container.innerHTML = '';
       
       const tbl = document.createElement('table');
+      tbl.classList.add('table-dark');
       
       // Encabezado
       const thead = document.createElement('thead');
@@ -481,6 +612,11 @@
           inp.min = 0;
           inp.step = 1;
           inp.style.width = '70px';
+          inp.style.background = 'rgba(11, 19, 38, 0.7)';
+          inp.style.border = '1px solid rgba(255,255,255,0.1)';
+          inp.style.color = 'var(--ink)';
+          inp.style.borderRadius = '4px';
+          inp.style.padding = '4px';
           inp.onchange = () => {
             state.cost[i][j] = Number(inp.value || 0);
             renderSVG();
@@ -497,6 +633,11 @@
         inpS.min = 0;
         inpS.step = 1;
         inpS.style.width = '70px';
+        inpS.style.background = 'rgba(11, 19, 38, 0.7)';
+        inpS.style.border = '1px solid rgba(255,255,255,0.1)';
+        inpS.style.color = 'var(--ink)';
+        inpS.style.borderRadius = '4px';
+        inpS.style.padding = '4px';
         inpS.onchange = () => {
           state.supply[i] = Number(inpS.value || 0);
           renderTotals();
@@ -521,6 +662,11 @@
         inpD.min = 0;
         inpD.step = 1;
         inpD.style.width = '70px';
+        inpD.style.background = 'rgba(11, 19, 38, 0.7)';
+        inpD.style.border = '1px solid rgba(255,255,255,0.1)';
+        inpD.style.color = 'var(--ink)';
+        inpD.style.borderRadius = '4px';
+        inpD.style.padding = '4px';
         inpD.onchange = () => {
           state.demand[j] = Number(inpD.value || 0);
           renderTotals();
@@ -856,8 +1002,8 @@
         circle.setAttribute('cx', leftX);
         circle.setAttribute('cy', cy);
         circle.setAttribute('r', 18);
-        circle.setAttribute('fill', '#ffffff');
-        circle.setAttribute('stroke', '#667');
+        circle.setAttribute('fill', 'rgba(11, 19, 38, 0.8)');
+        circle.setAttribute('stroke', 'var(--pastel-orange)');
         circle.setAttribute('stroke-width', '2');
         g.appendChild(circle);
         
@@ -867,6 +1013,7 @@
         txt.setAttribute('text-anchor', 'middle');
         txt.setAttribute('font-size', '12');
         txt.setAttribute('font-weight', 'bold');
+        txt.setAttribute('fill', 'var(--pastel-orange)');
         txt.textContent = 'F' + (i + 1);
         g.appendChild(txt);
         
@@ -875,6 +1022,7 @@
         supplyTxt.setAttribute('y', cy + 5);
         supplyTxt.setAttribute('text-anchor', 'end');
         supplyTxt.setAttribute('font-size', '11');
+        supplyTxt.setAttribute('fill', 'var(--ink)');
         supplyTxt.textContent = `(${state.supply[i]})`;
         g.appendChild(supplyTxt);
         
@@ -890,8 +1038,8 @@
         circle.setAttribute('cx', rightX);
         circle.setAttribute('cy', cy);
         circle.setAttribute('r', 18);
-        circle.setAttribute('fill', '#ffffff');
-        circle.setAttribute('stroke', '#667');
+        circle.setAttribute('fill', 'rgba(11, 19, 38, 0.8)');
+        circle.setAttribute('stroke', 'var(--pastel-orange)');
         circle.setAttribute('stroke-width', '2');
         g.appendChild(circle);
         
@@ -901,6 +1049,7 @@
         txt.setAttribute('text-anchor', 'middle');
         txt.setAttribute('font-size', '12');
         txt.setAttribute('font-weight', 'bold');
+        txt.setAttribute('fill', 'var(--pastel-orange)');
         txt.textContent = 'D' + (j + 1);
         g.appendChild(txt);
         
@@ -909,6 +1058,7 @@
         demandTxt.setAttribute('y', cy + 5);
         demandTxt.setAttribute('text-anchor', 'start');
         demandTxt.setAttribute('font-size', '11');
+        demandTxt.setAttribute('fill', 'var(--ink)');
         demandTxt.textContent = `(${state.demand[j]})`;
         g.appendChild(demandTxt);
         
@@ -926,7 +1076,7 @@
           const path = document.createElementNS(svg.namespaceURI, 'path');
           const d = `M ${x1} ${y1} C ${x1 + 80} ${y1} ${x2 - 80} ${y2} ${x2} ${y2}`;
           path.setAttribute('d', d);
-          path.setAttribute('stroke', '#cbd5e1');
+          path.setAttribute('stroke', 'rgba(255,255,255,0.2)');
           path.setAttribute('fill', 'none');
           svg.appendChild(path);
           
@@ -938,6 +1088,7 @@
           t.setAttribute('x', midx - 10);
           t.setAttribute('y', midy - 6);
           t.setAttribute('font-size', '11');
+          t.setAttribute('fill', 'var(--ink)');
           t.textContent = state.cost[i][j];
           svg.appendChild(t);
           
@@ -950,14 +1101,14 @@
             
             // Color diferente para el paso actual
             if (state.i === i && state.j === j && state.stepMode) {
-              p2.setAttribute('stroke', '#f59e0b'); // Paso actual - naranja
+              p2.setAttribute('stroke', 'var(--carrot-orange)'); // Paso actual - naranja
             } else if (state.stepMode && (
               (i < state.i) || 
               (i === state.i && j < state.j)
             )) {
-              p2.setAttribute('stroke', '#10b981'); // Completado - verde
+              p2.setAttribute('stroke', 'var(--success)'); // Completado - verde
             } else {
-              p2.setAttribute('stroke', '#6b46c1'); // Normal - morado
+              p2.setAttribute('stroke', 'var(--pastel-orange)'); // Normal - naranja pastel
             }
             
             p2.setAttribute('stroke-width', strokeW);
@@ -970,6 +1121,7 @@
             tf.setAttribute('y', midy + 14);
             tf.setAttribute('font-size', '12');
             tf.setAttribute('font-weight', 'bold');
+            tf.setAttribute('fill', 'var(--ink)');
             tf.textContent = flow;
             svg.appendChild(tf);
           }
