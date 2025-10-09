@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Ordenamiento Interactivo</title>
+    <title>Sistema de Ordenamiento Interactivo con Burbujas</title>
     <style>
         :root {
             --primary: #6c5ce7;
@@ -12,6 +12,10 @@
             --dark: #2d3436;
             --light: #dfe6e9;
             --success: #00b894;
+            --comparing: #fdcb6e;
+            --pivot: #e17055;
+            --partition: #74b9ff;
+            --stop: #e74c3c;
         }
         
         * {
@@ -25,17 +29,19 @@
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             color: var(--light);
             min-height: 100vh;
-            padding: 20px;
+            padding: 15px;
+            overflow: hidden;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 100%;
             margin: 0 auto;
+            padding: 0 10px;
         }
         
         header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             padding: 20px;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
@@ -58,31 +64,37 @@
         
         .main-content {
             display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 30px;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+            height: calc(100vh - 180px);
         }
         
         @media (max-width: 900px) {
             .main-content {
                 grid-template-columns: 1fr;
+                height: auto;
             }
         }
         
         .controls {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
-            padding: 25px;
+            padding: 20px;
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            overflow-y: auto;
+            max-height: 100%;
+            z-index: 100;
+            position: relative;
         }
         
         .control-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         
         h2 {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
+            font-size: 1.4rem;
+            margin-bottom: 12px;
             color: var(--secondary);
         }
         
@@ -90,16 +102,18 @@
             background: var(--primary);
             color: white;
             border: none;
-            padding: 12px 20px;
+            padding: 10px 15px;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 600;
             transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
+            flex: 1;
+            min-width: 110px;
         }
         
         .btn:hover {
@@ -114,7 +128,7 @@
         
         .btn-group {
             display: flex;
-            gap: 10px;
+            gap: 6px;
             flex-wrap: wrap;
         }
         
@@ -124,6 +138,27 @@
         
         .btn-accent {
             background: var(--accent);
+        }
+        
+        .btn-stop {
+            background: var(--stop);
+        }
+        
+        .btn-stop:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
         }
         
         .slider-container {
@@ -163,39 +198,120 @@
         .visualization {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
-            padding: 25px;
+            padding: 20px;
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
+            min-height: 100%;
+            position: relative;
+            overflow: hidden;
         }
         
-        .array-container {
+        .bubbles-container {
             flex: 1;
             display: flex;
             align-items: flex-end;
             justify-content: center;
-            gap: 2px;
+            gap: 12px;
             padding: 20px;
-            min-height: 400px;
             background: rgba(0, 0, 0, 0.2);
             border-radius: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            min-height: 400px;
+            position: relative;
+            transition: all 0.5s ease;
         }
         
-        .array-bar {
+        .bubble {
             background: var(--primary);
-            width: 30px;
-            transition: all 0.3s ease;
-            border-radius: 4px 4px 0 0;
+            border-radius: 50%;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
         }
         
-        .array-bar.comparing {
+        .bubble::after {
+            content: '';
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            width: 120%;
+            height: 120%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent 70%);
+            border-radius: 50%;
+        }
+        
+        .bubble.comparing {
+            background: var(--comparing);
+            transform: translateY(-40px) scale(1.2);
+            box-shadow: 0 0 30px var(--comparing), 0 10px 25px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            border-color: rgba(255, 255, 255, 0.5);
+            animation: float 1.5s ease-in-out infinite;
+        }
+        
+        .bubble.swapping {
             background: var(--accent);
+            transform: translateY(-60px) scale(1.3);
+            box-shadow: 0 0 40px var(--accent), 0 15px 30px rgba(0, 0, 0, 0.6);
+            z-index: 200;
+            border-color: rgba(255, 255, 255, 0.7);
+            animation: swapFloat 0.8s ease-in-out infinite;
         }
         
-        .array-bar.sorted {
+        .bubble.pivot {
+            background: var(--pivot);
+            transform: translateY(-80px) scale(1.4);
+            box-shadow: 0 0 50px var(--pivot), 0 20px 35px rgba(0, 0, 0, 0.7);
+            z-index: 300;
+            border-color: rgba(255, 255, 255, 0.9);
+            animation: pivotFloat 1s ease-in-out infinite;
+        }
+        
+        .bubble.partition {
+            background: var(--partition);
+            border-color: rgba(116, 185, 255, 0.6);
+            box-shadow: 0 0 20px var(--partition);
+        }
+        
+        .bubble.gap {
+            opacity: 0.4;
+            transform: scale(0.8);
+            background: var(--secondary);
+        }
+        
+        .bubble.sorted {
             background: var(--success);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .bubble.moving {
+            position: absolute;
+            transition: all 0.5s ease;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(-40px) scale(1.2); }
+            50% { transform: translateY(-50px) scale(1.25); }
+        }
+        
+        @keyframes swapFloat {
+            0%, 100% { transform: translateY(-60px) scale(1.3); }
+            50% { transform: translateY(-70px) scale(1.35); }
+        }
+        
+        @keyframes pivotFloat {
+            0%, 100% { transform: translateY(-80px) scale(1.4); }
+            50% { transform: translateY(-90px) scale(1.45); }
         }
         
         .stats {
@@ -209,6 +325,7 @@
         
         .stat-item {
             text-align: center;
+            flex: 1;
         }
         
         .stat-value {
@@ -223,7 +340,7 @@
         }
         
         .algorithm-info {
-            margin-top: 20px;
+            margin-top: 15px;
             padding: 15px;
             background: rgba(0, 0, 0, 0.2);
             border-radius: 10px;
@@ -249,12 +366,97 @@
         .sorting {
             pointer-events: none;
         }
+        
+        .collapsible {
+            margin-top: 10px;
+        }
+        
+        .collapsible-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .collapsible-content.expanded {
+            max-height: 600px;
+        }
+        
+        .arrow {
+            transition: transform 0.3s ease;
+        }
+        
+        .arrow.expanded {
+            transform: rotate(180deg);
+        }
+        
+        .algorithm-description {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+        
+        .current-operation {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--comparing);
+            border: 1px solid var(--comparing);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+        
+        .partition-boundary {
+            position: absolute;
+            height: 100%;
+            width: 3px;
+            background: var(--partition);
+            opacity: 0.7;
+            z-index: 50;
+        }
+        
+        .status-indicator {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: rgba(231, 76, 60, 0.8);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            color: white;
+            display: none;
+        }
+        
+        .status-indicator.active {
+            display: block;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Sistema de Ordenamiento Interactivo</h1>
+            <h1>Sistema de Ordenamiento Interactivo con Burbujas</h1>
             <p class="subtitle">Visualiza y compara algoritmos de ordenamiento en tiempo real</p>
         </header>
         
@@ -280,11 +482,10 @@
                 </div>
                 
                 <div class="control-group">
-                    <h2>Algoritmos</h2>
+                    <h2>Dirección</h2>
                     <div class="btn-group">
-                        <button class="btn" id="bubble-sort">Bubble Sort</button>
-                        <button class="btn" id="selection-sort">Selection Sort</button>
-                        <button class="btn" id="insertion-sort">Insertion Sort</button>
+                        <button class="btn" id="ascending">Ascendente</button>
+                        <button class="btn" id="descending">Descendente</button>
                     </div>
                 </div>
                 
@@ -293,15 +494,29 @@
                     <div class="btn-group">
                         <button class="btn btn-secondary" id="generate-array">Generar Nuevo Array</button>
                         <button class="btn btn-accent" id="start-sort">Iniciar Ordenamiento</button>
+                        <button class="btn btn-stop" id="stop-sort">Detener</button>
                         <button class="btn" id="reset">Reiniciar</button>
                     </div>
                 </div>
                 
                 <div class="control-group">
-                    <h2>Dirección</h2>
-                    <div class="btn-group">
-                        <button class="btn" id="ascending">Ascendente</button>
-                        <button class="btn" id="descending">Descendente</button>
+                    <div class="collapsible">
+                        <div class="collapsible-header" id="algorithms-header">
+                            <h2>Algoritmos (Opcional)</h2>
+                            <span class="arrow">▼</span>
+                        </div>
+                        <div class="collapsible-content" id="algorithms-content">
+                            <div class="btn-group" style="margin-top: 15px;">
+                                <button class="btn" id="bubble-sort">Bubble Sort</button>
+                                <button class="btn" id="selection-sort">Selection Sort</button>
+                                <button class="btn" id="insertion-sort">Insertion Sort</button>
+                                <button class="btn" id="shell-sort">Shell Sort</button>
+                                <button class="btn" id="quick-sort">Quick Sort</button>
+                            </div>
+                            <div class="algorithm-description">
+                                <p><span class="highlight">Nota:</span> Si no selecciona un algoritmo específico, se usará un método genérico de ordenamiento.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -309,12 +524,14 @@
                     <p><span class="highlight">Bubble Sort:</span> Compara elementos adyacentes y los intercambia si están en el orden incorrecto.</p>
                     <p><span class="highlight">Selection Sort:</span> Encuentra el elemento mínimo/máximo y lo coloca en su posición correcta.</p>
                     <p><span class="highlight">Insertion Sort:</span> Construye el array ordenado insertando un elemento a la vez en su posición correcta.</p>
+                    <p><span class="highlight">Shell Sort:</span> Ordena elementos separados por brechas que se reducen progresivamente.</p>
+                    <p><span class="highlight">Quick Sort:</span> Divide y vencerás usando un pivote para particionar el array.</p>
                 </div>
             </div>
             
             <div class="visualization">
-                <div class="array-container" id="array-container">
-                    <!-- Las barras se generarán dinámicamente con JavaScript -->
+                <div class="bubbles-container" id="bubbles-container">
+                    <!-- Las burbujas se generarán dinámicamente con JavaScript -->
                 </div>
                 
                 <div class="stats">
@@ -343,15 +560,21 @@
         let isSorting = false;
         let currentAlgorithm = null;
         let sortDirection = 'ascending'; // 'ascending' o 'descending'
+        let stopRequested = false;
+        let startTime = null;
+        let bubbleInterval = null;
+        let bubblePositions = [];
+        let currentSortPromise = null;
         
         // Elementos del DOM
-        const arrayContainer = document.getElementById('array-container');
+        const bubblesContainer = document.getElementById('bubbles-container');
         const arraySizeSlider = document.getElementById('array-size');
         const sizeValue = document.getElementById('size-value');
         const animationSpeedSlider = document.getElementById('animation-speed');
         const speedValue = document.getElementById('speed-value');
         const generateArrayBtn = document.getElementById('generate-array');
         const startSortBtn = document.getElementById('start-sort');
+        const stopSortBtn = document.getElementById('stop-sort');
         const resetBtn = document.getElementById('reset');
         const ascendingBtn = document.getElementById('ascending');
         const descendingBtn = document.getElementById('descending');
@@ -359,15 +582,24 @@
         const swapsElement = document.getElementById('swaps');
         const timeElement = document.getElementById('time');
         
+        // Elementos para sección colapsable
+        const algorithmsHeader = document.getElementById('algorithms-header');
+        const algorithmsContent = document.getElementById('algorithms-content');
+        const arrow = document.querySelector('.arrow');
+        
         // Botones de algoritmos
         const bubbleSortBtn = document.getElementById('bubble-sort');
         const selectionSortBtn = document.getElementById('selection-sort');
         const insertionSortBtn = document.getElementById('insertion-sort');
+        const shellSortBtn = document.getElementById('shell-sort');
+        const quickSortBtn = document.getElementById('quick-sort');
         
         // Inicialización
         document.addEventListener('DOMContentLoaded', () => {
             generateNewArray();
             setupEventListeners();
+            updateButtonStates();
+            startBubbleMovement();
         });
         
         // Configurar event listeners
@@ -389,6 +621,7 @@
             
             generateArrayBtn.addEventListener('click', generateNewArray);
             startSortBtn.addEventListener('click', startSorting);
+            stopSortBtn.addEventListener('click', stopSorting);
             resetBtn.addEventListener('click', resetVisualization);
             
             ascendingBtn.addEventListener('click', () => {
@@ -399,6 +632,12 @@
             descendingBtn.addEventListener('click', () => {
                 sortDirection = 'descending';
                 updateDirectionButtons();
+            });
+            
+            // Sección colapsable de algoritmos
+            algorithmsHeader.addEventListener('click', () => {
+                algorithmsContent.classList.toggle('expanded');
+                arrow.classList.toggle('expanded');
             });
             
             // Botones de algoritmos
@@ -416,6 +655,31 @@
                 currentAlgorithm = 'insertion';
                 updateAlgorithmButtons();
             });
+            
+            shellSortBtn.addEventListener('click', () => {
+                currentAlgorithm = 'shell';
+                updateAlgorithmButtons();
+            });
+            
+            quickSortBtn.addEventListener('click', () => {
+                currentAlgorithm = 'quick';
+                updateAlgorithmButtons();
+            });
+        }
+        
+        // Actualizar estados de los botones
+        function updateButtonStates() {
+            startSortBtn.disabled = isSorting;
+            stopSortBtn.disabled = !isSorting;
+            generateArrayBtn.disabled = isSorting;
+            arraySizeSlider.disabled = isSorting;
+            resetBtn.disabled = isSorting;
+            
+            // Deshabilitar botones de algoritmos durante el ordenamiento
+            const algorithmButtons = [bubbleSortBtn, selectionSortBtn, insertionSortBtn, shellSortBtn, quickSortBtn];
+            algorithmButtons.forEach(btn => {
+                btn.disabled = isSorting;
+            });
         }
         
         // Generar nuevo array aleatorio
@@ -427,94 +691,335 @@
                 array.push(Math.floor(Math.random() * 90) + 10); // Valores entre 10 y 100
             }
             
-            renderArray();
+            renderBubbles();
             resetStats();
+            startBubbleMovement();
         }
         
-        // Renderizar el array como barras
-        function renderArray() {
-            arrayContainer.innerHTML = '';
-            const maxValue = Math.max(...array);
+        // Renderizar el array como burbujas
+        function renderBubbles() {
+            bubblesContainer.innerHTML = '';
+            bubblePositions = [];
             
-            array.forEach(value => {
-                const bar = document.createElement('div');
-                bar.classList.add('array-bar');
-                bar.style.height = `${(value / maxValue) * 100}%`;
-                bar.style.width = `${100 / arraySize}%`;
-                arrayContainer.appendChild(bar);
+            const containerWidth = bubblesContainer.clientWidth;
+            const containerHeight = bubblesContainer.clientHeight;
+            const maxValue = Math.max(...array);
+            const minSize = 25; // Tamaño mínimo de burbuja
+            const maxSize = 120; // Tamaño máximo de burbuja
+            
+            array.forEach((value, index) => {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble', 'moving');
+                
+                // Calcular tamaño proporcional al valor con mayor contraste
+                const normalizedValue = (value - 10) / 90; // Normalizar entre 0 y 1
+                const size = minSize + (normalizedValue * (maxSize - minSize));
+                
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                
+                // Ajustar tamaño de fuente según el tamaño de la burbuja
+                const fontSize = Math.max(12, Math.min(20, size * 0.3));
+                bubble.style.fontSize = `${fontSize}px`;
+                
+                // Mostrar el valor dentro de la burbuja
+                bubble.textContent = value;
+                
+                // Posición inicial aleatoria dentro de los límites del contenedor
+                const x = Math.random() * (containerWidth - size);
+                const y = Math.random() * (containerHeight - size);
+                
+                bubble.style.left = `${x}px`;
+                bubble.style.top = `${y}px`;
+                
+                // Guardar posición y velocidad
+                bubblePositions.push({
+                    x: x,
+                    y: y,
+                    dx: (Math.random() - 0.5) * 2, // Velocidad en X (-1 a 1)
+                    dy: (Math.random() - 0.5) * 2, // Velocidad en Y (-1 a 1)
+                    element: bubble
+                });
+                
+                bubblesContainer.appendChild(bubble);
+            });
+        }
+        
+        // Iniciar movimiento de burbujas
+        function startBubbleMovement() {
+            if (bubbleInterval) {
+                clearInterval(bubbleInterval);
+            }
+            
+            bubbleInterval = setInterval(moveBubbles, 50);
+        }
+        
+        // Detener movimiento de burbujas
+        function stopBubbleMovement() {
+            if (bubbleInterval) {
+                clearInterval(bubbleInterval);
+                bubbleInterval = null;
+            }
+        }
+        
+        // Mover burbujas
+        function moveBubbles() {
+            if (isSorting) return;
+            
+            const containerWidth = bubblesContainer.clientWidth;
+            const containerHeight = bubblesContainer.clientHeight;
+            
+            bubblePositions.forEach((bubble, index) => {
+                // Actualizar posición
+                bubble.x += bubble.dx;
+                bubble.y += bubble.dy;
+                
+                // Rebotar en los bordes
+                const bubbleSize = parseInt(bubble.element.style.width);
+                
+                if (bubble.x <= 0 || bubble.x >= containerWidth - bubbleSize) {
+                    bubble.dx *= -1;
+                    bubble.x = Math.max(0, Math.min(containerWidth - bubbleSize, bubble.x));
+                }
+                
+                if (bubble.y <= 0 || bubble.y >= containerHeight - bubbleSize) {
+                    bubble.dy *= -1;
+                    bubble.y = Math.max(0, Math.min(containerHeight - bubbleSize, bubble.y));
+                }
+                
+                // Aplicar nueva posición
+                bubble.element.style.left = `${bubble.x}px`;
+                bubble.element.style.top = `${bubble.y}px`;
+            });
+        }
+        
+        // Alinear burbujas para el ordenamiento
+        function alignBubblesForSorting() {
+            stopBubbleMovement();
+            
+            const bubbles = bubblesContainer.querySelectorAll('.bubble');
+            const containerWidth = bubblesContainer.clientWidth;
+            const containerHeight = bubblesContainer.clientHeight;
+            
+            // NUEVA REGLA: Si hay más de 20 elementos, usar 2 filas
+            const rows = arraySize > 20 ? 2 : 1;
+            const bubblesPerRow = Math.ceil(array.length / rows);
+            
+            // Calcular el espacio entre burbujas
+            const horizontalMargin = 20;
+            const verticalMargin = 20;
+            const availableWidth = containerWidth - (2 * horizontalMargin);
+            const availableHeight = containerHeight - (2 * verticalMargin);
+            
+            const gapX = availableWidth / bubblesPerRow;
+            const gapY = availableHeight / rows;
+            
+            bubbles.forEach((bubble, index) => {
+                bubble.classList.remove('moving');
+                
+                // Calcular tamaño de la burbuja
+                const bubbleSize = parseInt(bubble.style.width);
+                
+                // Calcular fila y columna
+                const row = Math.floor(index / bubblesPerRow);
+                const col = index % bubblesPerRow;
+                
+                // Calcular posición X centrada en la columna
+                const x = horizontalMargin + (col * gapX) + (gapX - bubbleSize) / 2;
+                
+                // Calcular posición Y centrada en la fila
+                const y = verticalMargin + (row * gapY) + (gapY - bubbleSize) / 2;
+                
+                // Aplicar transición suave
+                bubble.style.transition = 'all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                bubble.style.position = 'absolute';
+                bubble.style.left = `${x}px`;
+                bubble.style.top = `${y}px`;
+                bubble.style.transform = 'none';
+            });
+            
+            // Esperar a que termine la transición
+            return new Promise(resolve => {
+                setTimeout(resolve, 1000);
             });
         }
         
         // Actualizar la visualización del array
-        function updateArrayVisualization(highlightIndices = [], sortedIndices = []) {
-            const bars = arrayContainer.querySelectorAll('.array-bar');
-            const maxValue = Math.max(...array);
+        function updateBubblesVisualization(highlightIndices = [], sortedIndices = [], swappingIndices = [], pivotIndex = null, partitionIndices = [], gapIndices = []) {
+            if (stopRequested) return;
             
-            bars.forEach((bar, index) => {
-                // Actualizar altura
-                bar.style.height = `${(array[index] / maxValue) * 100}%`;
+            const bubbles = bubblesContainer.querySelectorAll('.bubble');
+            const maxValue = Math.max(...array);
+            const minSize = 25;
+            const maxSize = 120;
+            
+            // Remover indicador de operación actual si existe
+            const existingOperation = document.querySelector('.current-operation');
+            if (existingOperation) {
+                existingOperation.remove();
+            }
+            
+            // Remover límites de partición si existen
+            const existingBoundaries = document.querySelectorAll('.partition-boundary');
+            existingBoundaries.forEach(boundary => boundary.remove());
+            
+            // Mostrar indicador de operación actual
+            if (highlightIndices.length > 0 || pivotIndex !== null) {
+                const operationIndicator = document.createElement('div');
+                operationIndicator.classList.add('current-operation');
+                
+                if (currentAlgorithm === 'bubble' && highlightIndices.length === 2) {
+                    operationIndicator.textContent = `Comparando: ${array[highlightIndices[0]]} vs ${array[highlightIndices[1]]}`;
+                    operationIndicator.style.color = 'var(--comparing)';
+                    operationIndicator.style.borderColor = 'var(--comparing)';
+                } else if (currentAlgorithm === 'shell' && gapIndices.length > 0) {
+                    operationIndicator.textContent = `Gap: ${gapIndices[0]} | Comparando elementos separados`;
+                    operationIndicator.style.color = 'var(--secondary)';
+                    operationIndicator.style.borderColor = 'var(--secondary)';
+                } else if (currentAlgorithm === 'quick' && pivotIndex !== null) {
+                    operationIndicator.textContent = `Pivote: ${array[pivotIndex]} | Particionando`;
+                    operationIndicator.style.color = 'var(--pivot)';
+                    operationIndicator.style.borderColor = 'var(--pivot)';
+                } else if (partitionIndices.length > 0) {
+                    operationIndicator.textContent = `Partición activa`;
+                    operationIndicator.style.color = 'var(--partition)';
+                    operationIndicator.style.borderColor = 'var(--partition)';
+                }
+                
+                bubblesContainer.appendChild(operationIndicator);
+            }
+            
+            // Mostrar límites de partición para Quick Sort
+            if (currentAlgorithm === 'quick' && partitionIndices.length === 2) {
+                const [start, end] = partitionIndices;
+                const bubblesArray = Array.from(bubbles);
+                
+                if (start > 0) {
+                    const leftBoundary = document.createElement('div');
+                    leftBoundary.classList.add('partition-boundary');
+                    leftBoundary.style.left = `${bubblesArray[start].offsetLeft - 6}px`;
+                    bubblesContainer.appendChild(leftBoundary);
+                }
+                
+                if (end < bubbles.length - 1) {
+                    const rightBoundary = document.createElement('div');
+                    rightBoundary.classList.add('partition-boundary');
+                    rightBoundary.style.left = `${bubblesArray[end].offsetLeft + bubblesArray[end].offsetWidth + 3}px`;
+                    bubblesContainer.appendChild(rightBoundary);
+                }
+            }
+            
+            bubbles.forEach((bubble, index) => {
+                // Actualizar tamaño con mayor contraste
+                const normalizedValue = (array[index] - 10) / 90;
+                const size = minSize + (normalizedValue * (maxSize - minSize));
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                
+                // Ajustar tamaño de fuente
+                const fontSize = Math.max(12, Math.min(20, size * 0.3));
+                bubble.style.fontSize = `${fontSize}px`;
+                
+                // Actualizar valor
+                bubble.textContent = array[index];
                 
                 // Quitar clases anteriores
-                bar.classList.remove('comparing', 'sorted');
+                bubble.classList.remove('comparing', 'sorted', 'swapping', 'pivot', 'partition', 'gap');
                 
                 // Aplicar clases según el estado
-                if (highlightIndices.includes(index)) {
-                    bar.classList.add('comparing');
+                if (pivotIndex === index) {
+                    bubble.classList.add('pivot');
+                } else if (gapIndices.includes(index)) {
+                    bubble.classList.add('gap');
+                } else if (partitionIndices.length >= 2 && index >= partitionIndices[0] && index <= partitionIndices[1]) {
+                    bubble.classList.add('partition');
+                } else if (swappingIndices.includes(index)) {
+                    bubble.classList.add('swapping');
+                } else if (highlightIndices.includes(index)) {
+                    bubble.classList.add('comparing');
                 }
                 
                 if (sortedIndices.includes(index)) {
-                    bar.classList.add('sorted');
+                    bubble.classList.add('sorted');
                 }
             });
         }
         
         // Iniciar el ordenamiento
-        function startSorting() {
-            if (isSorting || !currentAlgorithm) return;
+        async function startSorting() {
+            if (isSorting) return;
             
             isSorting = true;
-            startSortBtn.disabled = true;
-            generateArrayBtn.disabled = true;
-            arraySizeSlider.disabled = true;
+            stopRequested = false;
+            updateButtonStates();
             
             // Añadir clase para indicar que se está ordenando
             document.body.classList.add('sorting');
             
+            // Alinear burbujas antes de comenzar
+            await alignBubblesForSorting();
+            
             // Reiniciar estadísticas
             resetStats();
-            const startTime = performance.now();
+            startTime = performance.now();
             
-            // Ejecutar el algoritmo seleccionado
-            switch(currentAlgorithm) {
-                case 'bubble':
-                    bubbleSort().then(() => finishSorting(startTime));
-                    break;
-                case 'selection':
-                    selectionSort().then(() => finishSorting(startTime));
-                    break;
-                case 'insertion':
-                    insertionSort().then(() => finishSorting(startTime));
-                    break;
+            // Ejecutar el algoritmo seleccionado o uno genérico
+            try {
+                if (currentAlgorithm) {
+                    // Usar algoritmo específico
+                    switch(currentAlgorithm) {
+                        case 'bubble':
+                            await bubbleSort();
+                            break;
+                        case 'selection':
+                            await selectionSort();
+                            break;
+                        case 'insertion':
+                            await insertionSort();
+                            break;
+                        case 'shell':
+                            await shellSort();
+                            break;
+                        case 'quick':
+                            await quickSort();
+                            break;
+                    }
+                } else {
+                    // Usar algoritmo genérico (basado en la dirección)
+                    await genericSort();
+                }
+            } catch (e) {
+                console.log('Ordenamiento detenido:', e);
             }
+            
+            finishSorting();
+        }
+        
+        // Detener el ordenamiento - CORREGIDO
+        function stopSorting() {
+            if (!isSorting) return;
+            
+            stopRequested = true;
+            finishSorting();
         }
         
         // Finalizar el ordenamiento
-        function finishSorting(startTime) {
+        function finishSorting() {
             isSorting = false;
-            startSortBtn.disabled = false;
-            generateArrayBtn.disabled = false;
-            arraySizeSlider.disabled = false;
+            stopRequested = false;
+            updateButtonStates();
             
             // Quitar clase de ordenamiento
             document.body.classList.remove('sorting');
             
-            // Marcar todo el array como ordenado
-            const sortedIndices = Array.from({length: array.length}, (_, i) => i);
-            updateArrayVisualization([], sortedIndices);
+            // Actualizar tiempo final si se completó
+            if (startTime) {
+                const endTime = performance.now();
+                timeElement.textContent = `${Math.round(endTime - startTime)} ms`;
+            }
             
-            // Actualizar tiempo final
-            const endTime = performance.now();
-            timeElement.textContent = `${Math.round(endTime - startTime)} ms`;
+            // Limpiar variables
+            startTime = null;
         }
         
         // Reiniciar visualización
@@ -545,28 +1050,43 @@
             bubbleSortBtn.classList.toggle('pulse', currentAlgorithm === 'bubble');
             selectionSortBtn.classList.toggle('pulse', currentAlgorithm === 'selection');
             insertionSortBtn.classList.toggle('pulse', currentAlgorithm === 'insertion');
+            shellSortBtn.classList.toggle('pulse', currentAlgorithm === 'shell');
+            quickSortBtn.classList.toggle('pulse', currentAlgorithm === 'quick');
         }
         
-        // Función de utilidad para pausar la animación
+        // Función de utilidad para pausar la animación (con verificación de stop)
         function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
+            return new Promise(resolve => {
+                if (stopRequested) {
+                    resolve();
+                } else {
+                    setTimeout(resolve, ms);
+                }
+            });
         }
         
-        // Algoritmo Bubble Sort
-        async function bubbleSort() {
+        // Verificar si se solicitó detener
+        function shouldStop() {
+            return stopRequested;
+        }
+        
+        // Algoritmo genérico (cuando no se selecciona un algoritmo específico)
+        async function genericSort() {
             let comparisons = 0;
             let swaps = 0;
             
-            for (let i = 0; i < array.length - 1; i++) {
-                for (let j = 0; j < array.length - i - 1; j++) {
+            // Usamos un algoritmo simple basado en la dirección
+            for (let i = 0; i < array.length && !shouldStop(); i++) {
+                for (let j = 0; j < array.length - i - 1 && !shouldStop(); j++) {
                     // Resaltar elementos comparados
-                    updateArrayVisualization([j, j + 1]);
+                    updateBubblesVisualization([j, j + 1]);
                     
                     comparisons++;
                     comparisonsElement.textContent = comparisons;
                     
                     // Esperar para la animación
                     await sleep(animationSpeed);
+                    if (shouldStop()) return;
                     
                     const shouldSwap = sortDirection === 'ascending' 
                         ? array[j] > array[j + 1] 
@@ -579,17 +1099,70 @@
                         swapsElement.textContent = swaps;
                         
                         // Actualizar visualización
-                        updateArrayVisualization([j, j + 1]);
+                        updateBubblesVisualization([], [], [j, j + 1]);
+                        await sleep(animationSpeed);
+                        if (shouldStop()) return;
                     }
                 }
                 
+                if (shouldStop()) return;
+                
                 // Marcar el último elemento como ordenado
                 const sortedIndex = array.length - i - 1;
-                updateArrayVisualization([], [sortedIndex]);
+                updateBubblesVisualization([], [sortedIndex]);
+            }
+        }
+        
+        // Algoritmo Bubble Sort mejorado con visualización específica
+        async function bubbleSort() {
+            let comparisons = 0;
+            let swaps = 0;
+            
+            for (let i = 0; i < array.length - 1 && !shouldStop(); i++) {
+                for (let j = 0; j < array.length - i - 1 && !shouldStop(); j++) {
+                    // Resaltar elementos comparados (se elevan y cambian de color)
+                    updateBubblesVisualization([j, j + 1]);
+                    
+                    comparisons++;
+                    comparisonsElement.textContent = comparisons;
+                    
+                    // Esperar para la animación
+                    await sleep(animationSpeed);
+                    if (shouldStop()) return;
+                    
+                    const shouldSwap = sortDirection === 'ascending' 
+                        ? array[j] > array[j + 1] 
+                        : array[j] < array[j + 1];
+                    
+                    if (shouldSwap) {
+                        // Mostrar animación de intercambio
+                        updateBubblesVisualization([], [], [j, j + 1]);
+                        await sleep(animationSpeed * 0.7);
+                        if (shouldStop()) return;
+                        
+                        // Intercambiar elementos
+                        [array[j], array[j + 1]] = [array[j + 1], array[j]];
+                        swaps++;
+                        swapsElement.textContent = swaps;
+                        
+                        // Actualizar visualización después del intercambio
+                        updateBubblesVisualization([j, j + 1]);
+                        await sleep(animationSpeed * 0.3);
+                        if (shouldStop()) return;
+                    }
+                }
+                
+                if (shouldStop()) return;
+                
+                // Marcar el último elemento como ordenado
+                const sortedIndex = array.length - i - 1;
+                updateBubblesVisualization([], [sortedIndex]);
             }
             
-            // Marcar el primer elemento como ordenado
-            updateArrayVisualization([], [0]);
+            if (!shouldStop()) {
+                // Marcar el primer elemento como ordenado
+                updateBubblesVisualization([], [0]);
+            }
         }
         
         // Algoritmo Selection Sort
@@ -597,18 +1170,19 @@
             let comparisons = 0;
             let swaps = 0;
             
-            for (let i = 0; i < array.length - 1; i++) {
+            for (let i = 0; i < array.length - 1 && !shouldStop(); i++) {
                 let targetIndex = i;
                 
-                for (let j = i + 1; j < array.length; j++) {
+                for (let j = i + 1; j < array.length && !shouldStop(); j++) {
                     // Resaltar elementos comparados
-                    updateArrayVisualization([targetIndex, j]);
+                    updateBubblesVisualization([targetIndex, j]);
                     
                     comparisons++;
                     comparisonsElement.textContent = comparisons;
                     
                     // Esperar para la animación
                     await sleep(animationSpeed);
+                    if (shouldStop()) return;
                     
                     const shouldUpdateTarget = sortDirection === 'ascending' 
                         ? array[j] < array[targetIndex] 
@@ -619,23 +1193,33 @@
                     }
                 }
                 
+                if (shouldStop()) return;
+                
                 if (targetIndex !== i) {
+                    // Mostrar animación de intercambio
+                    updateBubblesVisualization([], [], [i, targetIndex]);
+                    await sleep(animationSpeed);
+                    if (shouldStop()) return;
+                    
                     // Intercambiar elementos
                     [array[i], array[targetIndex]] = [array[targetIndex], array[i]];
                     swaps++;
                     swapsElement.textContent = swaps;
                     
                     // Actualizar visualización
-                    updateArrayVisualization([i, targetIndex]);
+                    updateBubblesVisualization([i, targetIndex]);
                     await sleep(animationSpeed);
+                    if (shouldStop()) return;
                 }
                 
                 // Marcar el elemento actual como ordenado
-                updateArrayVisualization([], [i]);
+                updateBubblesVisualization([], [i]);
             }
             
-            // Marcar el último elemento como ordenado
-            updateArrayVisualization([], [array.length - 1]);
+            if (!shouldStop()) {
+                // Marcar el último elemento como ordenado
+                updateBubblesVisualization([], [array.length - 1]);
+            }
         }
         
         // Algoritmo Insertion Sort
@@ -643,18 +1227,19 @@
             let comparisons = 0;
             let swaps = 0;
             
-            for (let i = 1; i < array.length; i++) {
+            for (let i = 1; i < array.length && !shouldStop(); i++) {
                 let j = i;
                 
-                while (j > 0) {
+                while (j > 0 && !shouldStop()) {
                     // Resaltar elementos comparados
-                    updateArrayVisualization([j, j - 1]);
+                    updateBubblesVisualization([j, j - 1]);
                     
                     comparisons++;
                     comparisonsElement.textContent = comparisons;
                     
                     // Esperar para la animación
                     await sleep(animationSpeed);
+                    if (shouldStop()) return;
                     
                     const shouldSwap = sortDirection === 'ascending' 
                         ? array[j] < array[j - 1] 
@@ -662,26 +1247,197 @@
                     
                     if (!shouldSwap) break;
                     
+                    // Mostrar animación de intercambio
+                    updateBubblesVisualization([], [], [j, j - 1]);
+                    await sleep(animationSpeed * 0.7);
+                    if (shouldStop()) return;
+                    
                     // Intercambiar elementos
                     [array[j], array[j - 1]] = [array[j - 1], array[j]];
                     swaps++;
                     swapsElement.textContent = swaps;
                     
                     // Actualizar visualización
-                    updateArrayVisualization([j, j - 1]);
+                    updateBubblesVisualization([j, j - 1]);
+                    await sleep(animationSpeed * 0.3);
+                    if (shouldStop()) return;
                     
                     j--;
                 }
                 
+                if (shouldStop()) return;
+                
                 // Marcar elementos ordenados
                 const sortedIndices = Array.from({length: i + 1}, (_, idx) => idx);
-                updateArrayVisualization([], sortedIndices);
+                updateBubblesVisualization([], sortedIndices);
             }
         }
         
-        // Inicializar con Bubble Sort seleccionado
-        currentAlgorithm = 'bubble';
-        updateAlgorithmButtons();
+        // Algoritmo Shell Sort
+        async function shellSort() {
+            let comparisons = 0;
+            let swaps = 0;
+            
+            let gap = Math.floor(array.length / 2);
+            
+            while (gap > 0 && !shouldStop()) {
+                for (let i = gap; i < array.length && !shouldStop(); i++) {
+                    const temp = array[i];
+                    let j = i;
+                    
+                    // Mostrar elementos separados por el gap
+                    const gapIndices = [j, j - gap];
+                    updateBubblesVisualization([], [], [], null, [], gapIndices);
+                    await sleep(animationSpeed);
+                    if (shouldStop()) return;
+                    
+                    while (j >= gap && !shouldStop()) {
+                        // Resaltar elementos comparados
+                        updateBubblesVisualization([j, j - gap], [], [], null, [], gapIndices);
+                        
+                        comparisons++;
+                        comparisonsElement.textContent = comparisons;
+                        
+                        await sleep(animationSpeed);
+                        if (shouldStop()) return;
+                        
+                        const shouldSwap = sortDirection === 'ascending' 
+                            ? array[j - gap] > temp 
+                            : array[j - gap] < temp;
+                        
+                        if (!shouldSwap) break;
+                        
+                        // Mostrar animación de intercambio
+                        updateBubblesVisualization([], [], [j, j - gap], null, [], gapIndices);
+                        await sleep(animationSpeed * 0.7);
+                        if (shouldStop()) return;
+                        
+                        array[j] = array[j - gap];
+                        swaps++;
+                        swapsElement.textContent = swaps;
+                        
+                        updateBubblesVisualization([j, j - gap], [], [], null, [], gapIndices);
+                        await sleep(animationSpeed * 0.3);
+                        if (shouldStop()) return;
+                        
+                        j -= gap;
+                    }
+                    
+                    if (shouldStop()) return;
+                    
+                    array[j] = temp;
+                    updateBubblesVisualization([], [], [], null, [], gapIndices);
+                    await sleep(animationSpeed);
+                    if (shouldStop()) return;
+                }
+                
+                if (shouldStop()) return;
+                
+                gap = Math.floor(gap / 2);
+            }
+            
+            if (!shouldStop()) {
+                // Marcar todo como ordenado
+                updateBubblesVisualization([], Array.from({length: array.length}, (_, i) => i));
+            }
+        }
+        
+        // Algoritmo Quick Sort
+        async function quickSort() {
+            let comparisons = 0;
+            let swaps = 0;
+            
+            async function quickSortHelper(low, high) {
+                if (low < high && !shouldStop()) {
+                    const pivotIndex = await partition(low, high);
+                    if (shouldStop()) return;
+                    
+                    // Marcar el pivote como ordenado
+                    updateBubblesVisualization([], [pivotIndex], [], null, [low, high]);
+                    await sleep(animationSpeed);
+                    if (shouldStop()) return;
+                    
+                    await quickSortHelper(low, pivotIndex - 1);
+                    if (shouldStop()) return;
+                    await quickSortHelper(pivotIndex + 1, high);
+                } else if (low === high && !shouldStop()) {
+                    // Marcar elementos individuales como ordenados
+                    updateBubblesVisualization([], [low]);
+                    await sleep(animationSpeed);
+                }
+            }
+            
+            async function partition(low, high) {
+                const pivot = array[high];
+                let i = low - 1;
+                
+                // Resaltar el pivote
+                updateBubblesVisualization([], [], [], high, [low, high]);
+                await sleep(animationSpeed);
+                if (shouldStop()) return i + 1;
+                
+                for (let j = low; j < high && !shouldStop(); j++) {
+                    // Resaltar elementos comparados con el pivote
+                    updateBubblesVisualization([j], [], [], high, [low, high]);
+                    
+                    comparisons++;
+                    comparisonsElement.textContent = comparisons;
+                    
+                    await sleep(animationSpeed);
+                    if (shouldStop()) return i + 1;
+                    
+                    const shouldSwap = sortDirection === 'ascending' 
+                        ? array[j] <= pivot 
+                        : array[j] >= pivot;
+                    
+                    if (shouldSwap) {
+                        i++;
+                        
+                        if (i !== j && !shouldStop()) {
+                            // Mostrar animación de intercambio
+                            updateBubblesVisualization([], [], [i, j], high, [low, high]);
+                            await sleep(animationSpeed * 0.7);
+                            if (shouldStop()) return i + 1;
+                            
+                            [array[i], array[j]] = [array[j], array[i]];
+                            swaps++;
+                            swapsElement.textContent = swaps;
+                            
+                            updateBubblesVisualization([i, j], [], [], high, [low, high]);
+                            await sleep(animationSpeed * 0.3);
+                            if (shouldStop()) return i + 1;
+                        }
+                    }
+                }
+                
+                if (shouldStop()) return i + 1;
+                
+                // Intercambiar el pivote a su posición final
+                if (i + 1 !== high && !shouldStop()) {
+                    updateBubblesVisualization([], [], [i + 1, high], high, [low, high]);
+                    await sleep(animationSpeed * 0.7);
+                    if (shouldStop()) return i + 1;
+                    
+                    [array[i + 1], array[high]] = [array[high], array[i + 1]];
+                    swaps++;
+                    swapsElement.textContent = swaps;
+                    
+                    updateBubblesVisualization([i + 1, high], [], [], null, [low, high]);
+                    await sleep(animationSpeed * 0.3);
+                }
+                
+                return i + 1;
+            }
+            
+            await quickSortHelper(0, array.length - 1);
+            
+            if (!shouldStop()) {
+                // Marcar todo como ordenado
+                updateBubblesVisualization([], Array.from({length: array.length}, (_, i) => i));
+            }
+        }
+        
+        // Inicializar con dirección ascendente
         updateDirectionButtons();
     </script>
 </body>

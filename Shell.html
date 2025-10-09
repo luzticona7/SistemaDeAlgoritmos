@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bubble Sort - Sistema de Burbujas</title>
+    <title>Shell Sort - Sistema de Burbujas</title>
     <style>
         :root {
             --primary: #6c5ce7;
@@ -14,7 +14,9 @@
             --success: #00b894;
             --comparing: #fdcb6e;
             --stop: #e74c3c;
-            --bubble: #00cec9;
+            --shell: #74b9ff;
+            --gap: #a29bfe;
+            --current: #fdcb6e;
         }
         
         * {
@@ -51,7 +53,7 @@
         h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
-            background: linear-gradient(to right, var(--bubble), var(--accent));
+            background: linear-gradient(to right, var(--shell), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -103,7 +105,7 @@
         }
         
         .btn {
-            background: var(--bubble);
+            background: var(--shell);
             color: white;
             border: none;
             padding: 12px 20px;
@@ -187,7 +189,7 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: var(--bubble);
+            background: var(--shell);
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -271,13 +273,19 @@
             animation: swapFloat 0.8s ease-in-out infinite;
         }
         
-        .bubble.bubble-active {
-            background: var(--bubble);
+        .bubble.current {
+            background: var(--current);
             transform: translateY(-70px) scale(1.35);
-            box-shadow: 0 0 45px var(--bubble), 0 18px 32px rgba(0, 0, 0, 0.65);
+            box-shadow: 0 0 45px var(--current), 0 18px 32px rgba(0, 0, 0, 0.65);
             z-index: 250;
             border-color: rgba(255, 255, 255, 0.8);
-            animation: bubbleFloat 1s ease-in-out infinite;
+            animation: currentFloat 1s ease-in-out infinite;
+        }
+        
+        .bubble.gap {
+            background: var(--gap);
+            border: 3px dashed rgba(255, 255, 255, 0.5);
+            opacity: 0.8;
         }
         
         .bubble.sorted {
@@ -300,7 +308,7 @@
             50% { transform: translateY(-70px) scale(1.35); }
         }
         
-        @keyframes bubbleFloat {
+        @keyframes currentFloat {
             0%, 100% { transform: translateY(-70px) scale(1.35); }
             50% { transform: translateY(-80px) scale(1.4); }
         }
@@ -406,7 +414,7 @@
             color: var(--accent);
         }
         
-        .pass-indicator {
+        .gap-indicator {
             display: flex;
             justify-content: center;
             gap: 8px;
@@ -414,21 +422,38 @@
             flex-wrap: wrap;
         }
         
-        .pass-dot {
+        .gap-dot {
             width: 10px;
             height: 10px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.2);
             transition: all 0.3s ease;
+            position: relative;
         }
         
-        .pass-dot.active {
-            background: var(--bubble);
+        .gap-dot.active {
+            background: var(--shell);
             transform: scale(1.3);
         }
         
-        .pass-dot.completed {
+        .gap-dot.completed {
             background: var(--success);
+        }
+        
+        .gap-dot::after {
+            content: attr(data-gap);
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: var(--light);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .gap-dot:hover::after {
+            opacity: 1;
         }
         
         .current-operation {
@@ -444,6 +469,55 @@
             border: 1px solid var(--comparing);
             backdrop-filter: blur(10px);
             z-index: 1000;
+        }
+
+        .gap-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(116, 185, 255, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid var(--shell);
+        }
+
+        .gap-connection {
+            position: absolute;
+            height: 3px;
+            background: var(--gap);
+            opacity: 0.6;
+            z-index: 1;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .code-preview {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            line-height: 1.3;
+            overflow-x: auto;
+        }
+        
+        .code-line {
+            margin-bottom: 4px;
+        }
+        
+        .code-comment {
+            color: #6c757d;
+        }
+        
+        .code-keyword {
+            color: #fd79a8;
+        }
+        
+        .code-function {
+            color: #74b9ff;
+        }
+        
+        .code-variable {
+            color: #55efc4;
         }
 
         /* Responsive para pantallas muy grandes */
@@ -533,8 +607,8 @@
 <body>
     <div class="container">
         <header>
-            <h1>Bubble Sort - Sistema de Burbujas</h1>
-            <p class="subtitle">Visualiza el algoritmo de ordenamiento de burbuja con burbujas animadas</p>
+            <h1>Shell Sort - Sistema de Burbujas</h1>
+            <p class="subtitle">Visualiza el algoritmo de ordenamiento Shell Sort con burbujas animadas</p>
         </header>
         
         <div class="main-content">
@@ -562,7 +636,7 @@
                     <h2>Acciones</h2>
                     <div class="btn-group">
                         <button class="btn btn-secondary" id="generate-array">Generar Nuevo Array</button>
-                        <button class="btn" id="start-sort">Iniciar Bubble Sort</button>
+                        <button class="btn" id="start-sort">Iniciar Shell Sort</button>
                         <button class="btn btn-stop" id="stop-sort">Detener</button>
                         <button class="btn" id="reset">Reiniciar</button>
                     </div>
@@ -577,28 +651,47 @@
                 </div>
                 
                 <div class="control-group">
-                    <h2>Pasos del Algoritmo</h2>
-                    <div class="pass-indicator" id="pass-indicator">
-                        <!-- Los puntos de pasos se generarán dinámicamente -->
+                    <h2>Secuencia de Gaps</h2>
+                    <div class="gap-indicator" id="gap-indicator">
+                        <!-- Los puntos de gaps se generarán dinámicamente -->
+                    </div>
+                    <div class="gap-info">
+                        <strong>Gap Actual: <span id="current-gap">-</span></strong>
+                        <br>
+                        <small id="gap-description">Secuencia de Shell original (n/2, n/4, ...)</small>
                     </div>
                 </div>
                 
                 <div class="algorithm-info">
-                    <p><span class="highlight">Bubble Sort:</span> Compara elementos adyacentes y los intercambia si están en el orden incorrecto. Repite este proceso hasta que el array esté completamente ordenado.</p>
+                    <p><span class="highlight">Shell Sort:</span> Una generalización del Insertion Sort que permite el intercambio de elementos que están lejos entre sí. Utiliza una secuencia de gaps para ordenar subarrays.</p>
                     
                     <div class="complexity">
                         <div class="complexity-item">
                             <div class="complexity-title">Mejor Caso</div>
-                            <div class="complexity-value best">O(n)</div>
+                            <div class="complexity-value best">O(n log n)</div>
                         </div>
                         <div class="complexity-item">
                             <div class="complexity-title">Caso Promedio</div>
-                            <div class="complexity-value average">O(n²)</div>
+                            <div class="complexity-value average">O(n log² n)</div>
                         </div>
                         <div class="complexity-item">
                             <div class="complexity-title">Peor Caso</div>
                             <div class="complexity-value worst">O(n²)</div>
                         </div>
+                    </div>
+                    
+                    <div class="code-preview">
+                        <div class="code-line"><span class="code-comment">// Secuencia de gaps (Shell original)</span></div>
+                        <div class="code-line"><span class="code-keyword">for</span> (<span class="code-keyword">let</span> gap = <span class="code-variable">Math</span>.<span class="code-function">floor</span>(n/<span class="code-variable">2</span>); gap > <span class="code-variable">0</span>; gap = <span class="code-variable">Math</span>.<span class="code-function">floor</span>(gap/<span class="code-variable">2</span>)) {</div>
+                        <div class="code-line">&nbsp;&nbsp;<span class="code-keyword">for</span> (<span class="code-keyword">let</span> i = gap; i < n; i++) {</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">let</span> temp = <span class="code-variable">array</span>[i];</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">let</span> j;</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">for</span> (j = i; j >= gap && <span class="code-variable">array</span>[j - gap] > temp; j -= gap) {</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-variable">array</span>[j] = <span class="code-variable">array</span>[j - gap];</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-variable">array</span>[j] = temp;</div>
+                        <div class="code-line">&nbsp;&nbsp;}</div>
+                        <div class="code-line">}</div>
                     </div>
                 </div>
             </div>
@@ -618,8 +711,12 @@
                         <span>Elementos comparados</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #00cec9;"></div>
-                        <span>Burbuja activa</span>
+                        <div class="legend-color" style="background-color: #fdcb6e;"></div>
+                        <span>Elemento actual</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #a29bfe;"></div>
+                        <span>Elementos con gap</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-color" style="background-color: #fd79a8;"></div>
@@ -641,8 +738,8 @@
                         <div class="stat-label">Intercambios</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-value" id="passes">0</div>
-                        <div class="stat-label">Pasos Completados</div>
+                        <div class="stat-value" id="gaps">0</div>
+                        <div class="stat-label">Gaps Completados</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-value" id="time">0 ms</div>
@@ -663,10 +760,12 @@
         let stopRequested = false;
         let comparisons = 0;
         let swaps = 0;
-        let passes = 0;
+        let gapsCompleted = 0;
         let startTime = 0;
         let bubbleInterval = null;
         let bubblePositions = [];
+        let currentGap = 0;
+        let gapSequence = [];
         
         // Elementos del DOM
         const bubblesContainer = document.getElementById('bubbles-container');
@@ -682,15 +781,17 @@
         const descendingBtn = document.getElementById('descending');
         const comparisonsElement = document.getElementById('comparisons');
         const swapsElement = document.getElementById('swaps');
-        const passesElement = document.getElementById('passes');
+        const gapsElement = document.getElementById('gaps');
         const timeElement = document.getElementById('time');
-        const passIndicator = document.getElementById('pass-indicator');
+        const gapIndicator = document.getElementById('gap-indicator');
+        const currentGapElement = document.getElementById('current-gap');
+        const gapDescriptionElement = document.getElementById('gap-description');
         
         // Inicialización
         document.addEventListener('DOMContentLoaded', () => {
             generateNewArray();
             setupEventListeners();
-            updatePassIndicator();
+            updateGapIndicator();
         });
         
         // Configurar event listeners
@@ -699,7 +800,7 @@
                 arraySize = parseInt(arraySizeSlider.value);
                 sizeValue.textContent = arraySize;
                 generateNewArray();
-                updatePassIndicator();
+                updateGapIndicator();
             });
             
             animationSpeedSlider.addEventListener('input', () => {
@@ -876,13 +977,16 @@
         }
         
         // Actualizar la visualización del array
-        function updateBubblesVisualization(highlightIndices = [], sortedIndices = [], swappingIndices = [], bubbleActiveIndex = null) {
+        function updateBubblesVisualization(highlightIndices = [], sortedIndices = [], swappingIndices = [], currentIndex = null, gapIndices = []) {
             if (stopRequested) return;
             
             const bubbles = bubblesContainer.querySelectorAll('.bubble');
             const maxValue = Math.max(...array);
             const minSize = 25;
             const maxSize = 120;
+            
+            // Limpiar conexiones de gap anteriores
+            document.querySelectorAll('.gap-connection').forEach(el => el.remove());
             
             // Remover indicador de operación actual si existe
             const existingOperation = bubblesContainer.querySelector('.current-operation');
@@ -891,21 +995,30 @@
             }
             
             // Mostrar indicador de operación actual
-            if (highlightIndices.length > 0 || bubbleActiveIndex !== null) {
+            if (highlightIndices.length > 0 || currentIndex !== null || gapIndices.length > 0) {
                 const operationIndicator = document.createElement('div');
                 operationIndicator.classList.add('current-operation');
                 
-                if (highlightIndices.length === 2) {
+                if (gapIndices.length > 0) {
+                    operationIndicator.textContent = `Gap: ${currentGap} | Comparando elementos separados`;
+                    operationIndicator.style.color = 'var(--shell)';
+                    operationIndicator.style.borderColor = 'var(--shell)';
+                } else if (highlightIndices.length === 2) {
                     operationIndicator.textContent = `Comparando: ${array[highlightIndices[0]]} vs ${array[highlightIndices[1]]}`;
                     operationIndicator.style.color = 'var(--comparing)';
                     operationIndicator.style.borderColor = 'var(--comparing)';
-                } else if (bubbleActiveIndex !== null) {
-                    operationIndicator.textContent = `Burbuja activa en posición ${bubbleActiveIndex}`;
-                    operationIndicator.style.color = 'var(--bubble)';
-                    operationIndicator.style.borderColor = 'var(--bubble)';
+                } else if (currentIndex !== null) {
+                    operationIndicator.textContent = `Elemento actual: ${array[currentIndex]}`;
+                    operationIndicator.style.color = 'var(--current)';
+                    operationIndicator.style.borderColor = 'var(--current)';
                 }
                 
                 bubblesContainer.appendChild(operationIndicator);
+            }
+            
+            // Dibujar conexiones para elementos en el mismo gap
+            if (currentGap > 0 && gapIndices.length > 1) {
+                drawGapConnections(gapIndices);
             }
             
             bubbles.forEach((bubble, index) => {
@@ -923,15 +1036,17 @@
                 bubble.textContent = array[index];
                 
                 // Quitar clases anteriores
-                bubble.classList.remove('comparing', 'sorted', 'swapping', 'bubble-active');
+                bubble.classList.remove('comparing', 'sorted', 'swapping', 'current', 'gap');
                 
                 // Aplicar clases según el estado
                 if (swappingIndices.includes(index)) {
                     bubble.classList.add('swapping');
                 } else if (highlightIndices.includes(index)) {
                     bubble.classList.add('comparing');
-                } else if (index === bubbleActiveIndex) {
-                    bubble.classList.add('bubble-active');
+                } else if (index === currentIndex) {
+                    bubble.classList.add('current');
+                } else if (gapIndices.includes(index)) {
+                    bubble.classList.add('gap');
                 }
                 
                 if (sortedIndices.includes(index)) {
@@ -940,23 +1055,85 @@
             });
         }
         
-        // Actualizar indicador de pasos
-        function updatePassIndicator(currentPass = -1) {
-            passIndicator.innerHTML = '';
-            const totalPasses = arraySize - 1;
+        // Dibujar conexiones entre elementos en el mismo gap
+        function drawGapConnections(gapIndices) {
+            const bubbles = bubblesContainer.querySelectorAll('.bubble');
             
-            for (let i = 0; i < totalPasses; i++) {
-                const dot = document.createElement('div');
-                dot.classList.add('pass-dot');
+            for (let i = 0; i < gapIndices.length - 1; i++) {
+                const currentIndex = gapIndices[i];
+                const nextIndex = gapIndices[i + 1];
                 
-                if (i < passes) {
+                const currentBubble = bubbles[currentIndex];
+                const nextBubble = bubbles[nextIndex];
+                
+                if (currentBubble && nextBubble) {
+                    const currentRect = currentBubble.getBoundingClientRect();
+                    const nextRect = nextBubble.getBoundingClientRect();
+                    const containerRect = bubblesContainer.getBoundingClientRect();
+                    
+                    const connection = document.createElement('div');
+                    connection.classList.add('gap-connection');
+                    
+                    const startX = currentRect.left - containerRect.left + currentRect.width / 2;
+                    const startY = currentRect.top - containerRect.top + currentRect.height / 2;
+                    const endX = nextRect.left - containerRect.left + nextRect.width / 2;
+                    const endY = nextRect.top - containerRect.top + nextRect.height / 2;
+                    
+                    const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+                    const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+                    
+                    connection.style.width = `${length}px`;
+                    connection.style.left = `${startX}px`;
+                    connection.style.top = `${startY}px`;
+                    connection.style.transform = `rotate(${angle}deg)`;
+                    connection.style.transformOrigin = '0 0';
+                    
+                    bubblesContainer.appendChild(connection);
+                }
+            }
+        }
+        
+        // Actualizar indicador de gaps
+        function updateGapIndicator(currentGapIndex = -1) {
+            gapIndicator.innerHTML = '';
+            gapSequence = generateGapSequence();
+            
+            gapSequence.forEach((gap, index) => {
+                const dot = document.createElement('div');
+                dot.classList.add('gap-dot');
+                dot.dataset.gap = gap;
+                
+                if (index < gapsCompleted) {
                     dot.classList.add('completed');
-                } else if (i === currentPass) {
+                } else if (index === currentGapIndex) {
                     dot.classList.add('active');
                 }
                 
-                passIndicator.appendChild(dot);
+                gapIndicator.appendChild(dot);
+            });
+            
+            // Actualizar información del gap actual
+            if (currentGapIndex >= 0 && currentGapIndex < gapSequence.length) {
+                currentGap = gapSequence[currentGapIndex];
+                currentGapElement.textContent = currentGap;
+                gapDescriptionElement.textContent = `Comparando elementos separados por ${currentGap} posiciones`;
+            } else {
+                currentGapElement.textContent = '-';
+                gapDescriptionElement.textContent = 'Secuencia de Shell original (n/2, n/4, ...)';
             }
+        }
+        
+        // Generar secuencia de gaps (secuencia de Shell original)
+        function generateGapSequence() {
+            const sequence = [];
+            let gap = Math.floor(arraySize / 2);
+            
+            while (gap > 0) {
+                sequence.push(gap);
+                gap = Math.floor(gap / 2);
+            }
+            
+            return sequence;
         }
         
         // Iniciar el ordenamiento
@@ -976,9 +1153,9 @@
             resetStats();
             startTime = performance.now();
             
-            // Ejecutar Bubble Sort
+            // Ejecutar Shell Sort
             try {
-                await bubbleSort();
+                await shellSort();
             } catch (e) {
                 console.log('Ordenamiento detenido:', e);
             }
@@ -1022,12 +1199,12 @@
         function resetStats() {
             comparisons = 0;
             swaps = 0;
-            passes = 0;
+            gapsCompleted = 0;
             comparisonsElement.textContent = '0';
             swapsElement.textContent = '0';
-            passesElement.textContent = '0';
+            gapsElement.textContent = '0';
             timeElement.textContent = '0 ms';
-            updatePassIndicator();
+            updateGapIndicator();
         }
         
         // Actualizar estados de los botones
@@ -1061,68 +1238,95 @@
             return stopRequested;
         }
         
-        // Algoritmo Bubble Sort
-        async function bubbleSort() {
-            let swapped;
-            passes = 0;
+        // Algoritmo Shell Sort
+        async function shellSort() {
+            gapSequence = generateGapSequence();
+            gapsCompleted = 0;
             
-            for (let i = 0; i < array.length - 1 && !shouldStop(); i++) {
-                swapped = false;
+            for (let gapIndex = 0; gapIndex < gapSequence.length && !shouldStop(); gapIndex++) {
+                currentGap = gapSequence[gapIndex];
                 
-                for (let j = 0; j < array.length - i - 1 && !shouldStop(); j++) {
-                    // Resaltar elementos comparados y burbuja activa
-                    updateBubblesVisualization([j, j + 1], [], [], j);
-                    
-                    comparisons++;
-                    comparisonsElement.textContent = comparisons;
-                    
-                    await sleep(animationSpeed);
-                    if (shouldStop()) return;
-                    
-                    const shouldSwap = sortDirection === 'ascending' 
-                        ? array[j] > array[j + 1] 
-                        : array[j] < array[j + 1];
-                    
-                    if (shouldSwap) {
-                        // Mostrar animación de intercambio
-                        updateBubblesVisualization([], [], [j, j + 1], j);
-                        await sleep(animationSpeed * 0.7);
-                        if (shouldStop()) return;
-                        
-                        // Intercambiar elementos
-                        [array[j], array[j + 1]] = [array[j + 1], array[j]];
-                        swaps++;
-                        swapsElement.textContent = swaps;
-                        
-                        // Actualizar visualización después del intercambio
-                        updateBubblesVisualization([j, j + 1], [], [], j + 1);
-                        await sleep(animationSpeed * 0.3);
-                        if (shouldStop()) return;
-                        
-                        swapped = true;
-                    }
+                // Actualizar indicador de gap
+                updateGapIndicator(gapIndex);
+                
+                // Mostrar elementos con el gap actual
+                const gapIndices = [];
+                for (let i = 0; i < array.length; i += currentGap) {
+                    gapIndices.push(i);
                 }
-                
-                passes++;
-                passesElement.textContent = passes;
-                
-                // Marcar elementos ordenados
-                const sortedIndices = Array.from({length: i + 1}, (_, idx) => array.length - 1 - idx);
-                updateBubblesVisualization([], sortedIndices, [], null);
-                updatePassIndicator(i);
-                
+                updateBubblesVisualization([], [], [], null, gapIndices);
                 await sleep(animationSpeed);
                 if (shouldStop()) return;
                 
-                // Si no hubo intercambios, el array ya está ordenado
-                if (!swapped) break;
+                for (let i = currentGap; i < array.length && !shouldStop(); i++) {
+                    const temp = array[i];
+                    let j = i;
+                    
+                    // Resaltar elemento actual y elementos con gap
+                    const currentGapIndices = [j, j - currentGap];
+                    updateBubblesVisualization([], [], [], i, currentGapIndices);
+                    await sleep(animationSpeed);
+                    if (shouldStop()) return;
+                    
+                    while (j >= currentGap && !shouldStop()) {
+                        // Resaltar elementos comparados
+                        updateBubblesVisualization([j, j - currentGap], [], [], i, currentGapIndices);
+                        
+                        comparisons++;
+                        comparisonsElement.textContent = comparisons;
+                        
+                        await sleep(animationSpeed);
+                        if (shouldStop()) return;
+                        
+                        const shouldSwap = sortDirection === 'ascending' 
+                            ? array[j - currentGap] > temp 
+                            : array[j - currentGap] < temp;
+                        
+                        if (!shouldSwap) break;
+                        
+                        // Mostrar animación de intercambio
+                        updateBubblesVisualization([], [], [j, j - currentGap], i, currentGapIndices);
+                        await sleep(animationSpeed * 0.7);
+                        if (shouldStop()) return;
+                        
+                        // Mover elemento
+                        array[j] = array[j - currentGap];
+                        swaps++;
+                        swapsElement.textContent = swaps;
+                        
+                        j -= currentGap;
+                        
+                        // Actualizar visualización
+                        if (j >= currentGap) {
+                            updateBubblesVisualization([j, j - currentGap], [], [], i, [j, j - currentGap]);
+                            await sleep(animationSpeed * 0.3);
+                            if (shouldStop()) return;
+                        }
+                    }
+                    
+                    array[j] = temp;
+                    
+                    // Actualizar visualización
+                    updateBubblesVisualization([], [], [], null, [j, j + currentGap]);
+                    await sleep(animationSpeed);
+                    if (shouldStop()) return;
+                }
+                
+                gapsCompleted++;
+                gapsElement.textContent = gapsCompleted;
+                
+                // Mostrar progreso después de completar un gap
+                updateBubblesVisualization([], Array.from({length: array.length}, (_, idx) => idx));
+                await sleep(animationSpeed);
+                if (shouldStop()) return;
             }
             
             if (!shouldStop()) {
                 // Marcar todo como ordenado
                 const sortedIndices = Array.from({length: array.length}, (_, idx) => idx);
                 updateBubblesVisualization([], sortedIndices);
-                updatePassIndicator();
+                updateGapIndicator();
+                currentGapElement.textContent = 'Completado';
             }
         }
         
