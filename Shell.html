@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shell Sort - Sistema de Burbujas</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --accent: #fd79a8;
+            --dark: #2d3436;
+            --light: #dfe6e9;
+            --success: #00b894;
+            --comparing: #fdcb6e;
+            --stop: #e74c3c;
+            --shell: #74b9ff;
+            --gap: #a29bfe;
+            --current: #fdcb6e;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, var(--shell), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 20px;
+            min-height: 70vh;
+            width: 100%;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 350px 1fr;
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: var(--secondary);
+        }
+        
+        .btn {
+            background: var(--shell);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .btn:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-secondary {
+            background: var(--secondary);
+        }
+        
+        .btn-accent {
+            background: var(--accent);
+        }
+        
+        .btn-stop {
+            background: var(--stop);
+        }
+        
+        .btn-stop:hover {
+            background: #c0392b;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .slider-container {
+            margin-bottom: 15px;
+        }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--shell);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .slider::-webkit-slider-thumb:hover {
+            background: var(--accent);
+            transform: scale(1.2);
+        }
+        
+        .visualization {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            min-height: 70vh;
+            width: 100%;
+        }
+        
+        .bubbles-container {
+            flex: 1;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 8px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            min-height: 400px;
+            position: relative;
+            transition: all 0.5s ease;
+            width: 100%;
+        }
+        
+        .bubble {
+            background: var(--primary);
+            border-radius: 50%;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .bubble::after {
+            content: '';
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            width: 120%;
+            height: 120%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent 70%);
+            border-radius: 50%;
+        }
+        
+        .bubble.comparing {
+            background: var(--comparing);
+            transform: translateY(-40px) scale(1.2);
+            box-shadow: 0 0 30px var(--comparing), 0 10px 25px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            border-color: rgba(255, 255, 255, 0.5);
+            animation: float 1.5s ease-in-out infinite;
+        }
+        
+        .bubble.swapping {
+            background: var(--accent);
+            transform: translateY(-60px) scale(1.3);
+            box-shadow: 0 0 40px var(--accent), 0 15px 30px rgba(0, 0, 0, 0.6);
+            z-index: 200;
+            border-color: rgba(255, 255, 255, 0.7);
+            animation: swapFloat 0.8s ease-in-out infinite;
+        }
+        
+        .bubble.current {
+            background: var(--current);
+            transform: translateY(-70px) scale(1.35);
+            box-shadow: 0 0 45px var(--current), 0 18px 32px rgba(0, 0, 0, 0.65);
+            z-index: 250;
+            border-color: rgba(255, 255, 255, 0.8);
+            animation: currentFloat 1s ease-in-out infinite;
+        }
+        
+        .bubble.gap {
+            background: var(--gap);
+            border: 3px dashed rgba(255, 255, 255, 0.5);
+            opacity: 0.8;
+        }
+        
+        .bubble.sorted {
+            background: var(--success);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .bubble.moving {
+            position: absolute;
+            transition: all 0.5s ease;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(-40px) scale(1.2); }
+            50% { transform: translateY(-50px) scale(1.25); }
+        }
+        
+        @keyframes swapFloat {
+            0%, 100% { transform: translateY(-60px) scale(1.3); }
+            50% { transform: translateY(-70px) scale(1.35); }
+        }
+        
+        @keyframes currentFloat {
+            0%, 100% { transform: translateY(-70px) scale(1.35); }
+            50% { transform: translateY(-80px) scale(1.4); }
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--secondary);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .algorithm-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .highlight {
+            color: var(--accent);
+            font-weight: bold;
+        }
+        
+        .sorting {
+            pointer-events: none;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.85rem;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .complexity {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .complexity-item {
+            text-align: center;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        
+        .complexity-title {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        .complexity-value {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-top: 3px;
+        }
+        
+        .best {
+            color: var(--success);
+        }
+        
+        .average {
+            color: var(--comparing);
+        }
+        
+        .worst {
+            color: var(--accent);
+        }
+        
+        .gap-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .gap-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .gap-dot.active {
+            background: var(--shell);
+            transform: scale(1.3);
+        }
+        
+        .gap-dot.completed {
+            background: var(--success);
+        }
+        
+        .gap-dot::after {
+            content: attr(data-gap);
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: var(--light);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .gap-dot:hover::after {
+            opacity: 1;
+        }
+        
+        .current-operation {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--comparing);
+            border: 1px solid var(--comparing);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .gap-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(116, 185, 255, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid var(--shell);
+        }
+
+        .gap-connection {
+            position: absolute;
+            height: 3px;
+            background: var(--gap);
+            opacity: 0.6;
+            z-index: 1;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .code-preview {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            line-height: 1.3;
+            overflow-x: auto;
+        }
+        
+        .code-line {
+            margin-bottom: 4px;
+        }
+        
+        .code-comment {
+            color: #6c757d;
+        }
+        
+        .code-keyword {
+            color: #fd79a8;
+        }
+        
+        .code-function {
+            color: #74b9ff;
+        }
+        
+        .code-variable {
+            color: #55efc4;
+        }
+
+        /* Responsive para pantallas muy grandes */
+        @media (min-width: 1600px) {
+            .container {
+                max-width: 95%;
+            }
+            
+            .main-content {
+                grid-template-columns: 450px 1fr;
+            }
+            
+            .bubbles-container {
+                gap: 12px;
+            }
+        }
+
+        @media (min-width: 2000px) {
+            .container {
+                max-width: 90%;
+            }
+        }
+
+        /* Mejoras para móviles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            header {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .controls, .visualization {
+                padding: 15px;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+                min-width: 100px;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .legend {
+                gap: 10px;
+            }
+            
+            .legend-item {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                min-height: 60vh;
+            }
+            
+            .visualization {
+                min-height: 60vh;
+            }
+            
+            .bubbles-container {
+                min-height: 300px;
+                padding: 15px;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Shell Sort - Sistema de Burbujas</h1>
+            <p class="subtitle">Visualiza el algoritmo de ordenamiento Shell Sort con burbujas animadas</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="controls">
+                <div class="control-group">
+                    <h2>Configuración</h2>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Tamaño del Array:</span>
+                            <span id="size-value">20</span>
+                        </div>
+                        <input type="range" min="5" max="50" value="20" class="slider" id="array-size">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Velocidad de Animación:</span>
+                            <span id="speed-value">Normal</span>
+                        </div>
+                        <input type="range" min="1" max="5" value="3" class="slider" id="animation-speed">
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h2>Acciones</h2>
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" id="generate-array">Generar Nuevo Array</button>
+                        <button class="btn" id="start-sort">Iniciar Shell Sort</button>
+                        <button class="btn btn-stop" id="stop-sort">Detener</button>
+                        <button class="btn" id="reset">Reiniciar</button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h2>Dirección</h2>
+                    <div class="btn-group">
+                        <button class="btn btn-accent" id="ascending">Ascendente</button>
+                        <button class="btn" id="descending">Descendente</button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h2>Secuencia de Gaps</h2>
+                    <div class="gap-indicator" id="gap-indicator">
+                        <!-- Los puntos de gaps se generarán dinámicamente -->
+                    </div>
+                    <div class="gap-info">
+                        <strong>Gap Actual: <span id="current-gap">-</span></strong>
+                        <br>
+                        <small id="gap-description">Secuencia de Shell original (n/2, n/4, ...)</small>
+                    </div>
+                </div>
+                
+                <div class="algorithm-info">
+                    <p><span class="highlight">Shell Sort:</span> Una generalización del Insertion Sort que permite el intercambio de elementos que están lejos entre sí. Utiliza una secuencia de gaps para ordenar subarrays.</p>
+                    
+                    <div class="complexity">
+                        <div class="complexity-item">
+                            <div class="complexity-title">Mejor Caso</div>
+                            <div class="complexity-value best">O(n log n)</div>
+                        </div>
+                        <div class="complexity-item">
+                            <div class="complexity-title">Caso Promedio</div>
+                            <div class="complexity-value average">O(n log² n)</div>
+                        </div>
+                        <div class="complexity-item">
+                            <div class="complexity-title">Peor Caso</div>
+                            <div class="complexity-value worst">O(n²)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="code-preview">
+                        <div class="code-line"><span class="code-comment">// Secuencia de gaps (Shell original)</span></div>
+                        <div class="code-line"><span class="code-keyword">for</span> (<span class="code-keyword">let</span> gap = <span class="code-variable">Math</span>.<span class="code-function">floor</span>(n/<span class="code-variable">2</span>); gap > <span class="code-variable">0</span>; gap = <span class="code-variable">Math</span>.<span class="code-function">floor</span>(gap/<span class="code-variable">2</span>)) {</div>
+                        <div class="code-line">&nbsp;&nbsp;<span class="code-keyword">for</span> (<span class="code-keyword">let</span> i = gap; i < n; i++) {</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">let</span> temp = <span class="code-variable">array</span>[i];</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">let</span> j;</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">for</span> (j = i; j >= gap && <span class="code-variable">array</span>[j - gap] > temp; j -= gap) {</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-variable">array</span>[j] = <span class="code-variable">array</span>[j - gap];</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-variable">array</span>[j] = temp;</div>
+                        <div class="code-line">&nbsp;&nbsp;}</div>
+                        <div class="code-line">}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="visualization">
+                <div class="bubbles-container" id="bubbles-container">
+                    <!-- Las burbujas se generarán dinámicamente con JavaScript -->
+                </div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #6c5ce7;"></div>
+                        <span>Elemento normal</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #fdcb6e;"></div>
+                        <span>Elementos comparados</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #fdcb6e;"></div>
+                        <span>Elemento actual</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #a29bfe;"></div>
+                        <span>Elementos con gap</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #fd79a8;"></div>
+                        <span>Elementos intercambiándose</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #00b894;"></div>
+                        <span>Elementos ordenados</span>
+                    </div>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="comparisons">0</div>
+                        <div class="stat-label">Comparaciones</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="swaps">0</div>
+                        <div class="stat-label">Intercambios</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="gaps">0</div>
+                        <div class="stat-label">Gaps Completados</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="time">0 ms</div>
+                        <div class="stat-label">Tiempo</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let array = [];
+        let arraySize = 20;
+        let animationSpeed = 150;
+        let isSorting = false;
+        let sortDirection = 'ascending';
+        let stopRequested = false;
+        let comparisons = 0;
+        let swaps = 0;
+        let gapsCompleted = 0;
+        let startTime = 0;
+        let bubbleInterval = null;
+        let bubblePositions = [];
+        let currentGap = 0;
+        let gapSequence = [];
+        
+        // Elementos del DOM
+        const bubblesContainer = document.getElementById('bubbles-container');
+        const arraySizeSlider = document.getElementById('array-size');
+        const sizeValue = document.getElementById('size-value');
+        const animationSpeedSlider = document.getElementById('animation-speed');
+        const speedValue = document.getElementById('speed-value');
+        const generateArrayBtn = document.getElementById('generate-array');
+        const startSortBtn = document.getElementById('start-sort');
+        const stopSortBtn = document.getElementById('stop-sort');
+        const resetBtn = document.getElementById('reset');
+        const ascendingBtn = document.getElementById('ascending');
+        const descendingBtn = document.getElementById('descending');
+        const comparisonsElement = document.getElementById('comparisons');
+        const swapsElement = document.getElementById('swaps');
+        const gapsElement = document.getElementById('gaps');
+        const timeElement = document.getElementById('time');
+        const gapIndicator = document.getElementById('gap-indicator');
+        const currentGapElement = document.getElementById('current-gap');
+        const gapDescriptionElement = document.getElementById('gap-description');
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            generateNewArray();
+            setupEventListeners();
+            updateGapIndicator();
+        });
+        
+        // Configurar event listeners
+        function setupEventListeners() {
+            arraySizeSlider.addEventListener('input', () => {
+                arraySize = parseInt(arraySizeSlider.value);
+                sizeValue.textContent = arraySize;
+                generateNewArray();
+                updateGapIndicator();
+            });
+            
+            animationSpeedSlider.addEventListener('input', () => {
+                const speed = parseInt(animationSpeedSlider.value);
+                animationSpeed = 300 - (speed * 50); // Rango: 50ms a 250ms
+                
+                const speedLabels = ['Muy Lento', 'Lento', 'Normal', 'Rápido', 'Muy Rápido'];
+                speedValue.textContent = speedLabels[speed - 1];
+            });
+            
+            generateArrayBtn.addEventListener('click', generateNewArray);
+            startSortBtn.addEventListener('click', startSorting);
+            stopSortBtn.addEventListener('click', stopSorting);
+            resetBtn.addEventListener('click', resetVisualization);
+            
+            ascendingBtn.addEventListener('click', () => {
+                sortDirection = 'ascending';
+                updateDirectionButtons();
+            });
+            
+            descendingBtn.addEventListener('click', () => {
+                sortDirection = 'descending';
+                updateDirectionButtons();
+            });
+        }
+        
+        // Generar nuevo array aleatorio
+        function generateNewArray() {
+            if (isSorting) return;
+            
+            array = [];
+            for (let i = 0; i < arraySize; i++) {
+                array.push(Math.floor(Math.random() * 90) + 10); // Valores entre 10 y 100
+            }
+            
+            renderBubbles();
+            resetStats();
+            startBubbleMovement();
+        }
+        
+        // Renderizar el array como burbujas
+        function renderBubbles() {
+            bubblesContainer.innerHTML = '';
+            bubblePositions = [];
+            
+            const containerWidth = bubblesContainer.clientWidth;
+            const containerHeight = bubblesContainer.clientHeight;
+            const maxValue = Math.max(...array);
+            const minSize = 25;
+            const maxSize = 120;
+            
+            array.forEach((value, index) => {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble', 'moving');
+                
+                // Calcular tamaño proporcional al valor
+                const normalizedValue = (value - 10) / 90;
+                const size = minSize + (normalizedValue * (maxSize - minSize));
+                
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                
+                // Ajustar tamaño de fuente
+                const fontSize = Math.max(12, Math.min(20, size * 0.3));
+                bubble.style.fontSize = `${fontSize}px`;
+                
+                bubble.textContent = value;
+                
+                // Posición inicial aleatoria
+                const x = Math.random() * (containerWidth - size);
+                const y = Math.random() * (containerHeight - size);
+                
+                bubble.style.left = `${x}px`;
+                bubble.style.top = `${y}px`;
+                
+                // Guardar posición y velocidad
+                bubblePositions.push({
+                    x: x,
+                    y: y,
+                    dx: (Math.random() - 0.5) * 2,
+                    dy: (Math.random() - 0.5) * 2,
+                    element: bubble
+                });
+                
+                bubblesContainer.appendChild(bubble);
+            });
+        }
+        
+        // Iniciar movimiento de burbujas
+        function startBubbleMovement() {
+            if (bubbleInterval) {
+                clearInterval(bubbleInterval);
+            }
+            
+            bubbleInterval = setInterval(moveBubbles, 50);
+        }
+        
+        // Detener movimiento de burbujas
+        function stopBubbleMovement() {
+            if (bubbleInterval) {
+                clearInterval(bubbleInterval);
+                bubbleInterval = null;
+            }
+        }
+        
+        // Mover burbujas
+        function moveBubbles() {
+            if (isSorting) return;
+            
+            const containerWidth = bubblesContainer.clientWidth;
+            const containerHeight = bubblesContainer.clientHeight;
+            
+            bubblePositions.forEach((bubble, index) => {
+                bubble.x += bubble.dx;
+                bubble.y += bubble.dy;
+                
+                const bubbleSize = parseInt(bubble.element.style.width);
+                
+                if (bubble.x <= 0 || bubble.x >= containerWidth - bubbleSize) {
+                    bubble.dx *= -1;
+                    bubble.x = Math.max(0, Math.min(containerWidth - bubbleSize, bubble.x));
+                }
+                
+                if (bubble.y <= 0 || bubble.y >= containerHeight - bubbleSize) {
+                    bubble.dy *= -1;
+                    bubble.y = Math.max(0, Math.min(containerHeight - bubbleSize, bubble.y));
+                }
+                
+                bubble.element.style.left = `${bubble.x}px`;
+                bubble.element.style.top = `${bubble.y}px`;
+            });
+        }
+        
+        // Alinear burbujas para el ordenamiento
+        function alignBubblesForSorting() {
+            stopBubbleMovement();
+            
+            const bubbles = bubblesContainer.querySelectorAll('.bubble');
+            const containerWidth = bubblesContainer.clientWidth;
+            const containerHeight = bubblesContainer.clientHeight;
+            
+            // Usar 2 filas si hay más de 20 elementos
+            const rows = arraySize > 20 ? 2 : 1;
+            const bubblesPerRow = Math.ceil(array.length / rows);
+            
+            const horizontalMargin = 20;
+            const verticalMargin = 20;
+            const availableWidth = containerWidth - (2 * horizontalMargin);
+            const availableHeight = containerHeight - (2 * verticalMargin);
+            
+            const gapX = availableWidth / bubblesPerRow;
+            const gapY = availableHeight / rows;
+            
+            bubbles.forEach((bubble, index) => {
+                bubble.classList.remove('moving');
+                
+                const bubbleSize = parseInt(bubble.style.width);
+                const row = Math.floor(index / bubblesPerRow);
+                const col = index % bubblesPerRow;
+                
+                const x = horizontalMargin + (col * gapX) + (gapX - bubbleSize) / 2;
+                const y = verticalMargin + (row * gapY) + (gapY - bubbleSize) / 2;
+                
+                bubble.style.transition = 'all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                bubble.style.position = 'absolute';
+                bubble.style.left = `${x}px`;
+                bubble.style.top = `${y}px`;
+                bubble.style.transform = 'none';
+            });
+            
+            return new Promise(resolve => {
+                setTimeout(resolve, 1000);
+            });
+        }
+        
+        // Actualizar la visualización del array
+        function updateBubblesVisualization(highlightIndices = [], sortedIndices = [], swappingIndices = [], currentIndex = null, gapIndices = []) {
+            if (stopRequested) return;
+            
+            const bubbles = bubblesContainer.querySelectorAll('.bubble');
+            const maxValue = Math.max(...array);
+            const minSize = 25;
+            const maxSize = 120;
+            
+            // Limpiar conexiones de gap anteriores
+            document.querySelectorAll('.gap-connection').forEach(el => el.remove());
+            
+            // Remover indicador de operación actual si existe
+            const existingOperation = bubblesContainer.querySelector('.current-operation');
+            if (existingOperation) {
+                existingOperation.remove();
+            }
+            
+            // Mostrar indicador de operación actual
+            if (highlightIndices.length > 0 || currentIndex !== null || gapIndices.length > 0) {
+                const operationIndicator = document.createElement('div');
+                operationIndicator.classList.add('current-operation');
+                
+                if (gapIndices.length > 0) {
+                    operationIndicator.textContent = `Gap: ${currentGap} | Comparando elementos separados`;
+                    operationIndicator.style.color = 'var(--shell)';
+                    operationIndicator.style.borderColor = 'var(--shell)';
+                } else if (highlightIndices.length === 2) {
+                    operationIndicator.textContent = `Comparando: ${array[highlightIndices[0]]} vs ${array[highlightIndices[1]]}`;
+                    operationIndicator.style.color = 'var(--comparing)';
+                    operationIndicator.style.borderColor = 'var(--comparing)';
+                } else if (currentIndex !== null) {
+                    operationIndicator.textContent = `Elemento actual: ${array[currentIndex]}`;
+                    operationIndicator.style.color = 'var(--current)';
+                    operationIndicator.style.borderColor = 'var(--current)';
+                }
+                
+                bubblesContainer.appendChild(operationIndicator);
+            }
+            
+            // Dibujar conexiones para elementos en el mismo gap
+            if (currentGap > 0 && gapIndices.length > 1) {
+                drawGapConnections(gapIndices);
+            }
+            
+            bubbles.forEach((bubble, index) => {
+                // Actualizar tamaño
+                const normalizedValue = (array[index] - 10) / 90;
+                const size = minSize + (normalizedValue * (maxSize - minSize));
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                
+                // Ajustar tamaño de fuente
+                const fontSize = Math.max(12, Math.min(20, size * 0.3));
+                bubble.style.fontSize = `${fontSize}px`;
+                
+                // Actualizar valor
+                bubble.textContent = array[index];
+                
+                // Quitar clases anteriores
+                bubble.classList.remove('comparing', 'sorted', 'swapping', 'current', 'gap');
+                
+                // Aplicar clases según el estado
+                if (swappingIndices.includes(index)) {
+                    bubble.classList.add('swapping');
+                } else if (highlightIndices.includes(index)) {
+                    bubble.classList.add('comparing');
+                } else if (index === currentIndex) {
+                    bubble.classList.add('current');
+                } else if (gapIndices.includes(index)) {
+                    bubble.classList.add('gap');
+                }
+                
+                if (sortedIndices.includes(index)) {
+                    bubble.classList.add('sorted');
+                }
+            });
+        }
+        
+        // Dibujar conexiones entre elementos en el mismo gap
+        function drawGapConnections(gapIndices) {
+            const bubbles = bubblesContainer.querySelectorAll('.bubble');
+            
+            for (let i = 0; i < gapIndices.length - 1; i++) {
+                const currentIndex = gapIndices[i];
+                const nextIndex = gapIndices[i + 1];
+                
+                const currentBubble = bubbles[currentIndex];
+                const nextBubble = bubbles[nextIndex];
+                
+                if (currentBubble && nextBubble) {
+                    const currentRect = currentBubble.getBoundingClientRect();
+                    const nextRect = nextBubble.getBoundingClientRect();
+                    const containerRect = bubblesContainer.getBoundingClientRect();
+                    
+                    const connection = document.createElement('div');
+                    connection.classList.add('gap-connection');
+                    
+                    const startX = currentRect.left - containerRect.left + currentRect.width / 2;
+                    const startY = currentRect.top - containerRect.top + currentRect.height / 2;
+                    const endX = nextRect.left - containerRect.left + nextRect.width / 2;
+                    const endY = nextRect.top - containerRect.top + nextRect.height / 2;
+                    
+                    const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+                    const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+                    
+                    connection.style.width = `${length}px`;
+                    connection.style.left = `${startX}px`;
+                    connection.style.top = `${startY}px`;
+                    connection.style.transform = `rotate(${angle}deg)`;
+                    connection.style.transformOrigin = '0 0';
+                    
+                    bubblesContainer.appendChild(connection);
+                }
+            }
+        }
+        
+        // Actualizar indicador de gaps
+        function updateGapIndicator(currentGapIndex = -1) {
+            gapIndicator.innerHTML = '';
+            gapSequence = generateGapSequence();
+            
+            gapSequence.forEach((gap, index) => {
+                const dot = document.createElement('div');
+                dot.classList.add('gap-dot');
+                dot.dataset.gap = gap;
+                
+                if (index < gapsCompleted) {
+                    dot.classList.add('completed');
+                } else if (index === currentGapIndex) {
+                    dot.classList.add('active');
+                }
+                
+                gapIndicator.appendChild(dot);
+            });
+            
+            // Actualizar información del gap actual
+            if (currentGapIndex >= 0 && currentGapIndex < gapSequence.length) {
+                currentGap = gapSequence[currentGapIndex];
+                currentGapElement.textContent = currentGap;
+                gapDescriptionElement.textContent = `Comparando elementos separados por ${currentGap} posiciones`;
+            } else {
+                currentGapElement.textContent = '-';
+                gapDescriptionElement.textContent = 'Secuencia de Shell original (n/2, n/4, ...)';
+            }
+        }
+        
+        // Generar secuencia de gaps (secuencia de Shell original)
+        function generateGapSequence() {
+            const sequence = [];
+            let gap = Math.floor(arraySize / 2);
+            
+            while (gap > 0) {
+                sequence.push(gap);
+                gap = Math.floor(gap / 2);
+            }
+            
+            return sequence;
+        }
+        
+        // Iniciar el ordenamiento
+        async function startSorting() {
+            if (isSorting) return;
+            
+            isSorting = true;
+            stopRequested = false;
+            updateButtonStates();
+            
+            document.body.classList.add('sorting');
+            
+            // Alinear burbujas antes de comenzar
+            await alignBubblesForSorting();
+            
+            // Reiniciar estadísticas
+            resetStats();
+            startTime = performance.now();
+            
+            // Ejecutar Shell Sort
+            try {
+                await shellSort();
+            } catch (e) {
+                console.log('Ordenamiento detenido:', e);
+            }
+            
+            finishSorting();
+        }
+        
+        // Detener el ordenamiento
+        function stopSorting() {
+            if (!isSorting) return;
+            
+            stopRequested = true;
+            finishSorting();
+        }
+        
+        // Finalizar el ordenamiento
+        function finishSorting() {
+            isSorting = false;
+            stopRequested = false;
+            updateButtonStates();
+            
+            document.body.classList.remove('sorting');
+            
+            if (startTime) {
+                const endTime = performance.now();
+                timeElement.textContent = `${Math.round(endTime - startTime)} ms`;
+            }
+            
+            startTime = 0;
+        }
+        
+        // Reiniciar visualización
+        function resetVisualization() {
+            if (isSorting) return;
+            
+            generateNewArray();
+            resetStats();
+        }
+        
+        // Reiniciar estadísticas
+        function resetStats() {
+            comparisons = 0;
+            swaps = 0;
+            gapsCompleted = 0;
+            comparisonsElement.textContent = '0';
+            swapsElement.textContent = '0';
+            gapsElement.textContent = '0';
+            timeElement.textContent = '0 ms';
+            updateGapIndicator();
+        }
+        
+        // Actualizar estados de los botones
+        function updateButtonStates() {
+            startSortBtn.disabled = isSorting;
+            stopSortBtn.disabled = !isSorting;
+            generateArrayBtn.disabled = isSorting;
+            arraySizeSlider.disabled = isSorting;
+            resetBtn.disabled = isSorting;
+        }
+        
+        // Actualizar botones de dirección
+        function updateDirectionButtons() {
+            ascendingBtn.classList.toggle('btn-accent', sortDirection === 'ascending');
+            descendingBtn.classList.toggle('btn-accent', sortDirection === 'descending');
+        }
+        
+        // Función de utilidad para pausar la animación
+        function sleep(ms) {
+            return new Promise(resolve => {
+                if (stopRequested) {
+                    resolve();
+                } else {
+                    setTimeout(resolve, ms);
+                }
+            });
+        }
+        
+        // Verificar si se solicitó detener
+        function shouldStop() {
+            return stopRequested;
+        }
+        
+        // Algoritmo Shell Sort
+        async function shellSort() {
+            gapSequence = generateGapSequence();
+            gapsCompleted = 0;
+            
+            for (let gapIndex = 0; gapIndex < gapSequence.length && !shouldStop(); gapIndex++) {
+                currentGap = gapSequence[gapIndex];
+                
+                // Actualizar indicador de gap
+                updateGapIndicator(gapIndex);
+                
+                // Mostrar elementos con el gap actual
+                const gapIndices = [];
+                for (let i = 0; i < array.length; i += currentGap) {
+                    gapIndices.push(i);
+                }
+                updateBubblesVisualization([], [], [], null, gapIndices);
+                await sleep(animationSpeed);
+                if (shouldStop()) return;
+                
+                for (let i = currentGap; i < array.length && !shouldStop(); i++) {
+                    const temp = array[i];
+                    let j = i;
+                    
+                    // Resaltar elemento actual y elementos con gap
+                    const currentGapIndices = [j, j - currentGap];
+                    updateBubblesVisualization([], [], [], i, currentGapIndices);
+                    await sleep(animationSpeed);
+                    if (shouldStop()) return;
+                    
+                    while (j >= currentGap && !shouldStop()) {
+                        // Resaltar elementos comparados
+                        updateBubblesVisualization([j, j - currentGap], [], [], i, currentGapIndices);
+                        
+                        comparisons++;
+                        comparisonsElement.textContent = comparisons;
+                        
+                        await sleep(animationSpeed);
+                        if (shouldStop()) return;
+                        
+                        const shouldSwap = sortDirection === 'ascending' 
+                            ? array[j - currentGap] > temp 
+                            : array[j - currentGap] < temp;
+                        
+                        if (!shouldSwap) break;
+                        
+                        // Mostrar animación de intercambio
+                        updateBubblesVisualization([], [], [j, j - currentGap], i, currentGapIndices);
+                        await sleep(animationSpeed * 0.7);
+                        if (shouldStop()) return;
+                        
+                        // Mover elemento
+                        array[j] = array[j - currentGap];
+                        swaps++;
+                        swapsElement.textContent = swaps;
+                        
+                        j -= currentGap;
+                        
+                        // Actualizar visualización
+                        if (j >= currentGap) {
+                            updateBubblesVisualization([j, j - currentGap], [], [], i, [j, j - currentGap]);
+                            await sleep(animationSpeed * 0.3);
+                            if (shouldStop()) return;
+                        }
+                    }
+                    
+                    array[j] = temp;
+                    
+                    // Actualizar visualización
+                    updateBubblesVisualization([], [], [], null, [j, j + currentGap]);
+                    await sleep(animationSpeed);
+                    if (shouldStop()) return;
+                }
+                
+                gapsCompleted++;
+                gapsElement.textContent = gapsCompleted;
+                
+                // Mostrar progreso después de completar un gap
+                updateBubblesVisualization([], Array.from({length: array.length}, (_, idx) => idx));
+                await sleep(animationSpeed);
+                if (shouldStop()) return;
+            }
+            
+            if (!shouldStop()) {
+                // Marcar todo como ordenado
+                const sortedIndices = Array.from({length: array.length}, (_, idx) => idx);
+                updateBubblesVisualization([], sortedIndices);
+                updateGapIndicator();
+                currentGapElement.textContent = 'Completado';
+            }
+        }
+        
+        // Inicializar con dirección ascendente
+        updateDirectionButtons();
+    </script>
+</body>
+</html>

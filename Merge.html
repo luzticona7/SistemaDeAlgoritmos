@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merge Sort - Sistema de Burbujas</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --accent: #fd79a8;
+            --dark: #2d3436;
+            --light: #dfe6e9;
+            --success: #00b894;
+            --comparing: #fdcb6e;
+            --stop: #e74c3c;
+            --merge: #a29bfe;
+            --left-array: #0984e3;
+            --right-array: #e17055;
+            --current: #fdcb6e;
+            --gap: #a29bfe;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, var(--merge), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 20px;
+            min-height: 70vh;
+            width: 100%;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 350px 1fr;
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: var(--secondary);
+        }
+        
+        .btn {
+            background: var(--merge);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .btn:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-secondary {
+            background: var(--secondary);
+        }
+        
+        .btn-accent {
+            background: var(--accent);
+        }
+        
+        .btn-stop {
+            background: var(--stop);
+        }
+        
+        .btn-stop:hover {
+            background: #c0392b;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .slider-container {
+            margin-bottom: 15px;
+        }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--merge);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .slider::-webkit-slider-thumb:hover {
+            background: var(--accent);
+            transform: scale(1.2);
+        }
+        
+        .visualization {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            min-height: 70vh;
+            width: 100%;
+        }
+        
+        .bubbles-container {
+            flex: 1;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 8px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            min-height: 400px;
+            position: relative;
+            transition: all 0.5s ease;
+            width: 100%;
+        }
+        
+        .bubble {
+            background: var(--primary);
+            border-radius: 50%;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .bubble::after {
+            content: '';
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            width: 120%;
+            height: 120%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent 70%);
+            border-radius: 50%;
+        }
+        
+        .bubble.comparing {
+            background: var(--comparing);
+            transform: translateY(-40px) scale(1.2);
+            box-shadow: 0 0 30px var(--comparing), 0 10px 25px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            border-color: rgba(255, 255, 255, 0.5);
+            animation: float 1.5s ease-in-out infinite;
+        }
+        
+        .bubble.merging {
+            background: var(--accent);
+            transform: translateY(-60px) scale(1.3);
+            box-shadow: 0 0 40px var(--accent), 0 15px 30px rgba(0, 0, 0, 0.6);
+            z-index: 200;
+            border-color: rgba(255, 255, 255, 0.7);
+            animation: swapFloat 0.8s ease-in-out infinite;
+        }
+        
+        .bubble.current {
+            background: var(--current);
+            transform: translateY(-70px) scale(1.35);
+            box-shadow: 0 0 45px var(--current), 0 18px 32px rgba(0, 0, 0, 0.65);
+            z-index: 250;
+            border-color: rgba(255, 255, 255, 0.8);
+            animation: currentFloat 1s ease-in-out infinite;
+        }
+        
+        .bubble.left {
+            background: var(--left-array);
+            border: 3px solid var(--left-array);
+        }
+        
+        .bubble.right {
+            background: var(--right-array);
+            border: 3px solid var(--right-array);
+        }
+        
+        .bubble.sorted {
+            background: var(--success);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .bubble.moving {
+            position: absolute;
+            transition: all 0.5s ease;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(-40px) scale(1.2); }
+            50% { transform: translateY(-50px) scale(1.25); }
+        }
+        
+        @keyframes swapFloat {
+            0%, 100% { transform: translateY(-60px) scale(1.3); }
+            50% { transform: translateY(-70px) scale(1.35); }
+        }
+        
+        @keyframes currentFloat {
+            0%, 100% { transform: translateY(-70px) scale(1.35); }
+            50% { transform: translateY(-80px) scale(1.4); }
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--secondary);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .algorithm-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .highlight {
+            color: var(--accent);
+            font-weight: bold;
+        }
+        
+        .sorting {
+            pointer-events: none;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.85rem;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .complexity {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .complexity-item {
+            text-align: center;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        
+        .complexity-title {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        .complexity-value {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-top: 3px;
+        }
+        
+        .best {
+            color: var(--success);
+        }
+        
+        .average {
+            color: var(--comparing);
+        }
+        
+        .worst {
+            color: var(--accent);
+        }
+        
+        .recursion-indicator {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .recursion-level {
+            padding: 6px 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+        
+        .recursion-level.active {
+            background: rgba(107, 70, 193, 0.3);
+            border-left: 3px solid var(--merge);
+        }
+        
+        .current-operation {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--comparing);
+            border: 1px solid var(--comparing);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .code-preview {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            line-height: 1.3;
+            overflow-x: auto;
+        }
+        
+        .code-line {
+            margin-bottom: 4px;
+        }
+        
+        .code-comment {
+            color: #6c757d;
+        }
+        
+        .code-keyword {
+            color: #fd79a8;
+        }
+        
+        .code-function {
+            color: #74b9ff;
+        }
+        
+        .code-variable {
+            color: #55efc4;
+        }
+
+        /* Responsive para pantallas muy grandes */
+        @media (min-width: 1600px) {
+            .container {
+                max-width: 95%;
+            }
+            
+            .main-content {
+                grid-template-columns: 450px 1fr;
+            }
+            
+            .bubbles-container {
+                gap: 12px;
+            }
+        }
+
+        @media (min-width: 2000px) {
+            .container {
+                max-width: 90%;
+            }
+        }
+
+        /* Mejoras para móviles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            header {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .controls, .visualization {
+                padding: 15px;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+                min-width: 100px;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .legend {
+                gap: 10px;
+            }
+            
+            .legend-item {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                min-height: 60vh;
+            }
+            
+            .visualization {
+                min-height: 60vh;
+            }
+            
+            .bubbles-container {
+                min-height: 300px;
+                padding: 15px;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Estilos específicos para la visualización de subarrays */
+        .subarray-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 2px solid transparent;
+        }
+        
+        .subarray-container.left {
+            border-color: var(--left-array);
+        }
+        
+        .subarray-container.right {
+            border-color: var(--right-array);
+        }
+        
+        .subarray-label {
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+            color: var(--light);
+            opacity: 0.8;
+        }
+        
+        .subarray-content {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Merge Sort - Sistema de Burbujas</h1>
+            <p class="subtitle">Visualiza el algoritmo de ordenamiento Merge Sort con burbujas animadas</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="controls">
+                <div class="control-group">
+                    <h2>Configuración</h2>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Tamaño del Array:</span>
+                            <span id="size-value">20</span>
+                        </div>
+                        <input type="range" min="5" max="50" value="20" class="slider" id="array-size">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Velocidad de Animación:</span>
+                            <span id="speed-value">Normal</span>
+                        </div>
+                        <input type="range" min="1" max="5" value="3" class="slider" id="animation-speed">
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h2>Acciones</h2>
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" id="generate-array">Generar Nuevo Array</button>
+                        <button class="btn" id="start-sort">Iniciar Merge Sort</button>
+                        <button class="btn btn-stop" id="stop-sort">Detener</button>
+                        <button class="btn" id="reset">Reiniciar</button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h2>Dirección</h2>
+                    <div class="btn-group">
+                        <button class="btn btn-accent" id="ascending">Ascendente</button>
+                        <button class="btn" id="descending">Descendente</button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h2>Niveles de Recursión</h2>
+                    <div class="recursion-indicator" id="recursion-indicator">
+                        <!-- Los niveles de recursión se generarán dinámicamente -->
+                    </div>
+                </div>
+                
+                <div class="algorithm-info">
+                    <p><span class="highlight">Merge Sort:</span> Es un algoritmo de ordenamiento eficiente que utiliza el enfoque "divide y vencerás". Divide el array en mitades, ordena cada mitad recursivamente y luego las combina.</p>
+                    
+                    <div class="complexity">
+                        <div class="complexity-item">
+                            <div class="complexity-title">Mejor Caso</div>
+                            <div class="complexity-value best">O(n log n)</div>
+                        </div>
+                        <div class="complexity-item">
+                            <div class="complexity-title">Caso Promedio</div>
+                            <div class="complexity-value average">O(n log n)</div>
+                        </div>
+                        <div class="complexity-item">
+                            <div class="complexity-title">Peor Caso</div>
+                            <div class="complexity-value worst">O(n log n)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="code-preview">
+                        <div class="code-line"><span class="code-comment">// Función principal de Merge Sort</span></div>
+                        <div class="code-line"><span class="code-keyword">function</span> <span class="code-function">mergeSort</span>(arr, left, right) {</div>
+                        <div class="code-line">&nbsp;&nbsp;<span class="code-keyword">if</span> (left < right) {</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">const</span> mid = <span class="code-variable">Math</span>.<span class="code-function">floor</span>((left + right) / <span class="code-variable">2</span>);</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-function">mergeSort</span>(arr, left, mid);</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-function">mergeSort</span>(arr, mid + <span class="code-variable">1</span>, right);</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-function">merge</span>(arr, left, mid, right);</div>
+                        <div class="code-line">&nbsp;&nbsp;}</div>
+                        <div class="code-line">}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="visualization">
+                <div class="bubbles-container" id="bubbles-container">
+                    <!-- Las burbujas se generarán dinámicamente con JavaScript -->
+                </div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #6c5ce7;"></div>
+                        <span>Elemento normal</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #fdcb6e;"></div>
+                        <span>Elementos comparados</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #0984e3;"></div>
+                        <span>Subarray izquierdo</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #e17055;"></div>
+                        <span>Subarray derecho</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #fd79a8;"></div>
+                        <span>Elementos fusionándose</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #00b894;"></div>
+                        <span>Elementos ordenados</span>
+                    </div>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="comparisons">0</div>
+                        <div class="stat-label">Comparaciones</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="merges">0</div>
+                        <div class="stat-label">Fusiones</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="recursions">0</div>
+                        <div class="stat-label">Llamadas Recursivas</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="time">0 ms</div>
+                        <div class="stat-label">Tiempo</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let array = [];
+        let arraySize = 20;
+        let animationSpeed = 150;
+        let isSorting = false;
+        let sortDirection = 'ascending';
+        let stopRequested = false;
+        let comparisons = 0;
+        let merges = 0;
+        let recursions = 0;
+        let startTime = 0;
+        let bubbleInterval = null;
+        let bubblePositions = [];
+        let recursionStack = [];
+        
+        // Elementos del DOM
+        const bubblesContainer = document.getElementById('bubbles-container');
+        const arraySizeSlider = document.getElementById('array-size');
+        const sizeValue = document.getElementById('size-value');
+        const animationSpeedSlider = document.getElementById('animation-speed');
+        const speedValue = document.getElementById('speed-value');
+        const generateArrayBtn = document.getElementById('generate-array');
+        const startSortBtn = document.getElementById('start-sort');
+        const stopSortBtn = document.getElementById('stop-sort');
+        const resetBtn = document.getElementById('reset');
+        const ascendingBtn = document.getElementById('ascending');
+        const descendingBtn = document.getElementById('descending');
+        const comparisonsElement = document.getElementById('comparisons');
+        const mergesElement = document.getElementById('merges');
+        const recursionsElement = document.getElementById('recursions');
+        const timeElement = document.getElementById('time');
+        const recursionIndicator = document.getElementById('recursion-indicator');
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            generateNewArray();
+            setupEventListeners();
+            updateRecursionIndicator();
+        });
+        
+        // Configurar event listeners
+        function setupEventListeners() {
+            arraySizeSlider.addEventListener('input', () => {
+                arraySize = parseInt(arraySizeSlider.value);
+                sizeValue.textContent = arraySize;
+                generateNewArray();
+                updateRecursionIndicator();
+            });
+            
+            animationSpeedSlider.addEventListener('input', () => {
+                const speed = parseInt(animationSpeedSlider.value);
+                animationSpeed = 300 - (speed * 50); // Rango: 50ms a 250ms
+                
+                const speedLabels = ['Muy Lento', 'Lento', 'Normal', 'Rápido', 'Muy Rápido'];
+                speedValue.textContent = speedLabels[speed - 1];
+            });
+            
+            generateArrayBtn.addEventListener('click', generateNewArray);
+            startSortBtn.addEventListener('click', startSorting);
+            stopSortBtn.addEventListener('click', stopSorting);
+            resetBtn.addEventListener('click', resetVisualization);
+            
+            ascendingBtn.addEventListener('click', () => {
+                sortDirection = 'ascending';
+                updateDirectionButtons();
+            });
+            
+            descendingBtn.addEventListener('click', () => {
+                sortDirection = 'descending';
+                updateDirectionButtons();
+            });
+        }
+        
+        // Generar nuevo array aleatorio
+        function generateNewArray() {
+            if (isSorting) return;
+            
+            array = [];
+            for (let i = 0; i < arraySize; i++) {
+                array.push(Math.floor(Math.random() * 90) + 10); // Valores entre 10 y 100
+            }
+            
+            renderBubbles();
+            resetStats();
+            startBubbleMovement();
+        }
+        
+        // Renderizar el array como burbujas
+        function renderBubbles() {
+            bubblesContainer.innerHTML = '';
+            bubblePositions = [];
+            
+            const containerWidth = bubblesContainer.clientWidth;
+            const containerHeight = bubblesContainer.clientHeight;
+            const maxValue = Math.max(...array);
+            const minSize = 25;
+            const maxSize = 120;
+            
+            array.forEach((value, index) => {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble', 'moving');
+                
+                // Calcular tamaño proporcional al valor
+                const normalizedValue = (value - 10) / 90;
+                const size = minSize + (normalizedValue * (maxSize - minSize));
+                
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                
+                // Ajustar tamaño de fuente
+                const fontSize = Math.max(12, Math.min(20, size * 0.3));
+                bubble.style.fontSize = `${fontSize}px`;
+                
+                bubble.textContent = value;
+                
+                // Posición inicial aleatoria
+                const x = Math.random() * (containerWidth - size);
+                const y = Math.random() * (containerHeight - size);
+                
+                bubble.style.left = `${x}px`;
+                bubble.style.top = `${y}px`;
+                
+                // Guardar posición y velocidad
+                bubblePositions.push({
+                    x: x,
+                    y: y,
+                    dx: (Math.random() - 0.5) * 2,
+                    dy: (Math.random() - 0.5) * 2,
+                    element: bubble
+                });
+                
+                bubblesContainer.appendChild(bubble);
+            });
+        }
+        
+        // Iniciar movimiento de burbujas
+        function startBubbleMovement() {
+            if (bubbleInterval) {
+                clearInterval(bubbleInterval);
+            }
+            
+            bubbleInterval = setInterval(moveBubbles, 50);
+        }
+        
+        // Detener movimiento de burbujas
+        function stopBubbleMovement() {
+            if (bubbleInterval) {
+                clearInterval(bubbleInterval);
+                bubbleInterval = null;
+            }
+        }
+        
+        // Mover burbujas
+        function moveBubbles() {
+            if (isSorting) return;
+            
+            const containerWidth = bubblesContainer.clientWidth;
+            const containerHeight = bubblesContainer.clientHeight;
+            
+            bubblePositions.forEach((bubble, index) => {
+                bubble.x += bubble.dx;
+                bubble.y += bubble.dy;
+                
+                const bubbleSize = parseInt(bubble.element.style.width);
+                
+                if (bubble.x <= 0 || bubble.x >= containerWidth - bubbleSize) {
+                    bubble.dx *= -1;
+                    bubble.x = Math.max(0, Math.min(containerWidth - bubbleSize, bubble.x));
+                }
+                
+                if (bubble.y <= 0 || bubble.y >= containerHeight - bubbleSize) {
+                    bubble.dy *= -1;
+                    bubble.y = Math.max(0, Math.min(containerHeight - bubbleSize, bubble.y));
+                }
+                
+                bubble.element.style.left = `${bubble.x}px`;
+                bubble.element.style.top = `${bubble.y}px`;
+            });
+        }
+        
+        // Alinear burbujas para el ordenamiento
+        function alignBubblesForSorting() {
+            stopBubbleMovement();
+            
+            const bubbles = bubblesContainer.querySelectorAll('.bubble');
+            const containerWidth = bubblesContainer.clientWidth;
+            const containerHeight = bubblesContainer.clientHeight;
+            
+            // Usar 2 filas si hay más de 20 elementos
+            const rows = arraySize > 20 ? 2 : 1;
+            const bubblesPerRow = Math.ceil(array.length / rows);
+            
+            const horizontalMargin = 20;
+            const verticalMargin = 20;
+            const availableWidth = containerWidth - (2 * horizontalMargin);
+            const availableHeight = containerHeight - (2 * verticalMargin);
+            
+            const gapX = availableWidth / bubblesPerRow;
+            const gapY = availableHeight / rows;
+            
+            bubbles.forEach((bubble, index) => {
+                bubble.classList.remove('moving');
+                
+                const bubbleSize = parseInt(bubble.style.width);
+                const row = Math.floor(index / bubblesPerRow);
+                const col = index % bubblesPerRow;
+                
+                const x = horizontalMargin + (col * gapX) + (gapX - bubbleSize) / 2;
+                const y = verticalMargin + (row * gapY) + (gapY - bubbleSize) / 2;
+                
+                bubble.style.transition = 'all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                bubble.style.position = 'absolute';
+                bubble.style.left = `${x}px`;
+                bubble.style.top = `${y}px`;
+                bubble.style.transform = 'none';
+            });
+            
+            return new Promise(resolve => {
+                setTimeout(resolve, 1000);
+            });
+        }
+        
+        // Actualizar la visualización del array
+        function updateBubblesVisualization(leftIndices = [], rightIndices = [], comparingIndices = [], mergingIndices = [], sortedIndices = []) {
+            if (stopRequested) return;
+            
+            const bubbles = bubblesContainer.querySelectorAll('.bubble');
+            const maxValue = Math.max(...array);
+            const minSize = 25;
+            const maxSize = 120;
+            
+            // Remover indicador de operación actual si existe
+            const existingOperation = bubblesContainer.querySelector('.current-operation');
+            if (existingOperation) {
+                existingOperation.remove();
+            }
+            
+            // Mostrar indicador de operación actual
+            if (leftIndices.length > 0 || rightIndices.length > 0 || comparingIndices.length > 0 || mergingIndices.length > 0) {
+                const operationIndicator = document.createElement('div');
+                operationIndicator.classList.add('current-operation');
+                
+                if (mergingIndices.length > 0) {
+                    operationIndicator.textContent = `Fusionando elementos`;
+                    operationIndicator.style.color = 'var(--accent)';
+                    operationIndicator.style.borderColor = 'var(--accent)';
+                } else if (comparingIndices.length === 2) {
+                    operationIndicator.textContent = `Comparando: ${array[comparingIndices[0]]} vs ${array[comparingIndices[1]]}`;
+                    operationIndicator.style.color = 'var(--comparing)';
+                    operationIndicator.style.borderColor = 'var(--comparing)';
+                } else if (leftIndices.length > 0 || rightIndices.length > 0) {
+                    operationIndicator.textContent = `Dividiendo array en subarrays`;
+                    operationIndicator.style.color = 'var(--merge)';
+                    operationIndicator.style.borderColor = 'var(--merge)';
+                }
+                
+                bubblesContainer.appendChild(operationIndicator);
+            }
+            
+            bubbles.forEach((bubble, index) => {
+                // Actualizar tamaño
+                const normalizedValue = (array[index] - 10) / 90;
+                const size = minSize + (normalizedValue * (maxSize - minSize));
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                
+                // Ajustar tamaño de fuente
+                const fontSize = Math.max(12, Math.min(20, size * 0.3));
+                bubble.style.fontSize = `${fontSize}px`;
+                
+                // Actualizar valor
+                bubble.textContent = array[index];
+                
+                // Quitar clases anteriores
+                bubble.classList.remove('comparing', 'sorted', 'merging', 'current', 'left', 'right');
+                
+                // Aplicar clases según el estado
+                if (mergingIndices.includes(index)) {
+                    bubble.classList.add('merging');
+                } else if (comparingIndices.includes(index)) {
+                    bubble.classList.add('comparing');
+                } else if (leftIndices.includes(index)) {
+                    bubble.classList.add('left');
+                } else if (rightIndices.includes(index)) {
+                    bubble.classList.add('right');
+                }
+                
+                if (sortedIndices.includes(index)) {
+                    bubble.classList.add('sorted');
+                }
+            });
+        }
+        
+        // Visualizar subarrays durante la recursión
+        function visualizeSubarrays(leftArray, rightArray, leftStart, rightStart) {
+            bubblesContainer.innerHTML = '';
+            
+            // Crear contenedor para subarray izquierdo
+            const leftContainer = document.createElement('div');
+            leftContainer.classList.add('subarray-container', 'left');
+            
+            const leftLabel = document.createElement('div');
+            leftLabel.classList.add('subarray-label');
+            leftLabel.textContent = 'Subarray Izquierdo';
+            leftContainer.appendChild(leftLabel);
+            
+            const leftContent = document.createElement('div');
+            leftContent.classList.add('subarray-content');
+            
+            leftArray.forEach((value, index) => {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble', 'left');
+                
+                // Calcular tamaño proporcional al valor
+                const normalizedValue = (value - 10) / 90;
+                const size = 25 + (normalizedValue * (120 - 25));
+                
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                
+                // Ajustar tamaño de fuente
+                const fontSize = Math.max(12, Math.min(20, size * 0.3));
+                bubble.style.fontSize = `${fontSize}px`;
+                
+                bubble.textContent = value;
+                leftContent.appendChild(bubble);
+            });
+            
+            leftContainer.appendChild(leftContent);
+            bubblesContainer.appendChild(leftContainer);
+            
+            // Crear contenedor para subarray derecho
+            const rightContainer = document.createElement('div');
+            rightContainer.classList.add('subarray-container', 'right');
+            
+            const rightLabel = document.createElement('div');
+            rightLabel.classList.add('subarray-label');
+            rightLabel.textContent = 'Subarray Derecho';
+            rightContainer.appendChild(rightLabel);
+            
+            const rightContent = document.createElement('div');
+            rightContent.classList.add('subarray-content');
+            
+            rightArray.forEach((value, index) => {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble', 'right');
+                
+                // Calcular tamaño proporcional al valor
+                const normalizedValue = (value - 10) / 90;
+                const size = 25 + (normalizedValue * (120 - 25));
+                
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                
+                // Ajustar tamaño de fuente
+                const fontSize = Math.max(12, Math.min(20, size * 0.3));
+                bubble.style.fontSize = `${fontSize}px`;
+                
+                bubble.textContent = value;
+                rightContent.appendChild(bubble);
+            });
+            
+            rightContainer.appendChild(rightContent);
+            bubblesContainer.appendChild(rightContainer);
+        }
+        
+        // Actualizar indicador de recursión
+        function updateRecursionIndicator() {
+            recursionIndicator.innerHTML = '';
+            
+            recursionStack.forEach((level, index) => {
+                const levelDiv = document.createElement('div');
+                levelDiv.classList.add('recursion-level');
+                
+                if (index === recursionStack.length - 1) {
+                    levelDiv.classList.add('active');
+                }
+                
+                levelDiv.textContent = `Nivel ${index + 1}: [${level.left}, ${level.right}]`;
+                recursionIndicator.appendChild(levelDiv);
+            });
+            
+            // Auto-scroll al final
+            recursionIndicator.scrollTop = recursionIndicator.scrollHeight;
+        }
+        
+        // Iniciar el ordenamiento
+        async function startSorting() {
+            if (isSorting) return;
+            
+            isSorting = true;
+            stopRequested = false;
+            updateButtonStates();
+            
+            document.body.classList.add('sorting');
+            
+            // Alinear burbujas antes de comenzar
+            await alignBubblesForSorting();
+            
+            // Reiniciar estadísticas
+            resetStats();
+            startTime = performance.now();
+            
+            // Ejecutar Merge Sort
+            try {
+                await mergeSort(0, array.length - 1);
+            } catch (e) {
+                console.log('Ordenamiento detenido:', e);
+            }
+            
+            finishSorting();
+        }
+        
+        // Detener el ordenamiento
+        function stopSorting() {
+            if (!isSorting) return;
+            
+            stopRequested = true;
+            finishSorting();
+        }
+        
+        // Finalizar el ordenamiento
+        function finishSorting() {
+            isSorting = false;
+            stopRequested = false;
+            updateButtonStates();
+            
+            document.body.classList.remove('sorting');
+            
+            if (startTime) {
+                const endTime = performance.now();
+                timeElement.textContent = `${Math.round(endTime - startTime)} ms`;
+            }
+            
+            startTime = 0;
+        }
+        
+        // Reiniciar visualización
+        function resetVisualization() {
+            if (isSorting) return;
+            
+            generateNewArray();
+            resetStats();
+        }
+        
+        // Reiniciar estadísticas
+        function resetStats() {
+            comparisons = 0;
+            merges = 0;
+            recursions = 0;
+            comparisonsElement.textContent = '0';
+            mergesElement.textContent = '0';
+            recursionsElement.textContent = '0';
+            timeElement.textContent = '0 ms';
+            recursionStack = [];
+            updateRecursionIndicator();
+        }
+        
+        // Actualizar estados de los botones
+        function updateButtonStates() {
+            startSortBtn.disabled = isSorting;
+            stopSortBtn.disabled = !isSorting;
+            generateArrayBtn.disabled = isSorting;
+            arraySizeSlider.disabled = isSorting;
+            resetBtn.disabled = isSorting;
+        }
+        
+        // Actualizar botones de dirección
+        function updateDirectionButtons() {
+            ascendingBtn.classList.toggle('btn-accent', sortDirection === 'ascending');
+            descendingBtn.classList.toggle('btn-accent', sortDirection === 'descending');
+        }
+        
+        // Función de utilidad para pausar la animación
+        function sleep(ms) {
+            return new Promise(resolve => {
+                if (stopRequested) {
+                    resolve();
+                } else {
+                    setTimeout(resolve, ms);
+                }
+            });
+        }
+        
+        // Verificar si se solicitó detener
+        function shouldStop() {
+            return stopRequested;
+        }
+        
+        // Algoritmo Merge Sort
+        async function mergeSort(left, right) {
+            if (left >= right) return;
+            
+            // Actualizar pila de recursión
+            recursionStack.push({ left, right });
+            recursions++;
+            recursionsElement.textContent = recursions;
+            updateRecursionIndicator();
+            
+            await sleep(animationSpeed / 2);
+            
+            const mid = Math.floor((left + right) / 2);
+            
+            // Resaltar subarrays
+            const leftIndices = Array.from({length: mid - left + 1}, (_, i) => left + i);
+            const rightIndices = Array.from({length: right - mid}, (_, i) => mid + 1 + i);
+            updateBubblesVisualization(leftIndices, rightIndices);
+            
+            await sleep(animationSpeed);
+            
+            // Llamadas recursivas
+            await mergeSort(left, mid);
+            if (shouldStop()) return;
+            
+            await mergeSort(mid + 1, right);
+            if (shouldStop()) return;
+            
+            // Fusionar
+            await merge(left, mid, right);
+            
+            // Remover de la pila de recursión
+            recursionStack.pop();
+            updateRecursionIndicator();
+        }
+        
+        // Función de fusión
+        async function merge(left, mid, right) {
+            const leftArray = array.slice(left, mid + 1);
+            const rightArray = array.slice(mid + 1, right + 1);
+            
+            // Visualizar subarrays antes de fusionar
+            visualizeSubarrays(leftArray, rightArray, left, mid + 1);
+            await sleep(animationSpeed);
+            if (shouldStop()) return;
+            
+            let i = 0, j = 0, k = left;
+            
+            while (i < leftArray.length && j < rightArray.length) {
+                // Resaltar elementos comparados
+                const leftIndex = left + i;
+                const rightIndex = mid + 1 + j;
+                
+                comparisons++;
+                comparisonsElement.textContent = comparisons;
+                
+                updateBubblesVisualization([], [], [leftIndex, rightIndex]);
+                await sleep(animationSpeed);
+                if (shouldStop()) return;
+                
+                const shouldTakeLeft = sortDirection === 'ascending' 
+                    ? leftArray[i] <= rightArray[j] 
+                    : leftArray[i] >= rightArray[j];
+                
+                if (shouldTakeLeft) {
+                    array[k] = leftArray[i];
+                    i++;
+                } else {
+                    array[k] = rightArray[j];
+                    j++;
+                }
+                
+                // Resaltar elemento siendo fusionado
+                updateBubblesVisualization([], [], [], [k]);
+                
+                await sleep(animationSpeed);
+                if (shouldStop()) return;
+                
+                k++;
+            }
+            
+            // Copiar elementos restantes
+            while (i < leftArray.length) {
+                array[k] = leftArray[i];
+                updateBubblesVisualization([], [], [], [k]);
+                await sleep(animationSpeed);
+                if (shouldStop()) return;
+                i++;
+                k++;
+            }
+            
+            while (j < rightArray.length) {
+                array[k] = rightArray[j];
+                updateBubblesVisualization([], [], [], [k]);
+                await sleep(animationSpeed);
+                if (shouldStop()) return;
+                j++;
+                k++;
+            }
+            
+            merges++;
+            mergesElement.textContent = merges;
+            
+            // Restaurar visualización normal
+            renderBubbles();
+            await alignBubblesForSorting();
+            
+            // Resaltar subarray fusionado como ordenado
+            const sortedIndices = Array.from({length: right - left + 1}, (_, i) => left + i);
+            updateBubblesVisualization([], [], [], [], sortedIndices);
+            
+            await sleep(animationSpeed);
+            if (shouldStop()) return;
+        }
+        
+        // Inicializar con dirección ascendente
+        updateDirectionButtons();
+    </script>
+</body>
+</html>
