@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Algoritmo Northwest</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root{
       --bg:#a2185b;
@@ -427,136 +426,31 @@
       width: 80px;
     }
     
-    /* Estilos para modales */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
+    /* Estilos para el selector de objetivo */
+    .objective-selector {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      backdrop-filter: blur(4px);
+      gap: 10px;
+      margin: 10px 0;
     }
-    
-    .modal {
-      background: var(--panel);
-      border: 1px solid var(--panel-border);
-      border-radius: 14px;
-      padding: 24px;
-      max-width: 600px;
-      width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    }
-    
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    
-    .modal-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--pastel-orange);
-      margin: 0;
-    }
-    
-    .close-btn {
-      background: none;
-      border: none;
-      color: var(--ink);
-      font-size: 24px;
-      cursor: pointer;
-      padding: 0;
-      width: 30px;
-      height: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .close-btn:hover {
-      color: var(--pastel-orange);
-    }
-    
-    .help-content {
-      line-height: 1.6;
-    }
-    
-    .help-section {
-      margin-bottom: 20px;
-    }
-    
-    .help-section h3 {
-      color: var(--pastel-orange);
-      margin-bottom: 8px;
-      font-size: 16px;
-    }
-    
-    .help-section ul {
-      padding-left: 20px;
-      margin: 8px 0;
-    }
-    
-    .help-section li {
-      margin-bottom: 4px;
-    }
-    
-    .file-input {
-      display: none;
-    }
-    
-    .file-label {
-      display: inline-block;
-      padding: 10px 16px;
-      background: rgba(15, 23, 36, 0.8);
-      border: 1px solid var(--panel-border);
+    .objective-btn {
+      flex: 1;
+      padding: 8px 12px;
       border-radius: 8px;
+      border: 1px solid var(--panel-border);
+      background: rgba(15, 23, 36, 0.8);
+      color: var(--ink);
       cursor: pointer;
       transition: all 0.2s;
+      text-align: center;
     }
-    
-    .file-label:hover {
+    .objective-btn.active {
+      background: linear-gradient(180deg, var(--pastel-orange), var(--carrot-orange));
+      color: #05121a;
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(251, 189, 64, 0.2);
+    }
+    .objective-btn:hover:not(.active) {
       background: rgba(25, 35, 55, 0.9);
-    }
-    
-    /* Estilos para el modal de nombre de archivo */
-    .filename-input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: rgba(11, 19, 38, 0.7);
-      color: var(--ink);
-      font-size: 14px;
-      margin-bottom: 16px;
-    }
-    
-    .filename-input:focus {
-      outline: none;
-      border-color: var(--pastel-orange);
-      box-shadow: 0 0 0 3px rgba(251, 189, 64, 0.1);
-    }
-    
-    .filename-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 20px;
-    }
-    
-    .filename-error {
-      color: var(--error);
-      font-size: 12px;
-      margin-top: 8px;
-      display: none;
     }
     
     @media (max-width: 1200px) {
@@ -570,32 +464,6 @@
   <div class="app-header">
     <div class="title-wrap">
       <h1 class="app-title">Algoritmo Northwest</h1>
-      <div class="controls">
-        <button id="btnHelp" class="secondary">
-          <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Ayuda
-        </button>
-        <button id="btnExport" class="secondary">
-          <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-          </svg>
-          Exportar
-        </button>
-        <button id="btnImport" class="secondary">
-          <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-          </svg>
-          Importar
-        </button>
-        <button id="btnScreenshot" class="secondary">
-          <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          Captura
-        </button>
-      </div>
     </div>
   </div>
 
@@ -708,6 +576,18 @@
       <div id="svgBox"></div>
       
       <div style="margin-top:16px">
+        <label>Objetivo del algoritmo</label>
+        <div class="objective-selector">
+          <div id="btnMinimize" class="objective-btn active">
+            Minimizar Costo
+          </div>
+          <div id="btnMaximize" class="objective-btn">
+            Maximizar Beneficio
+          </div>
+        </div>
+      </div>
+      
+      <div style="margin-top:16px">
         <label>Matriz de asignación X (flujos)</label>
         <div id="assignOutput" class="output">—</div>
       </div>
@@ -724,7 +604,7 @@
       
       <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
         <div style="flex:1">
-          <label>Costo total</label>
+          <label id="costLabel">Costo total</label>
           <div id="totalCost" class="small">—</div>
         </div>
         <div style="width:140px">
@@ -737,100 +617,17 @@
         <p><strong>Instrucciones:</strong></p>
         <ul style="margin: 8px 0; padding-left: 20px;">
           <li>Verifica que el problema esté balanceado antes de ejecutar</li>
+          <li>Selecciona si quieres minimizar costos o maximizar beneficios</li>
           <li>Usa "Paso a paso" para seguir el algoritmo en detalle</li>
           <li>Las celdas resaltadas muestran el progreso del algoritmo</li>
           <li>Especifica cuántas iteraciones mostrar o déjalo vacío para ver todas</li>
-          <li>El algoritmo Northwest encuentra una solución básica factible</li>
         </ul>
       </footer>
     </div>
   </div>
 
-  <!-- Modal de Ayuda -->
-  <div id="helpModal" class="modal-overlay" style="display: none;">
-    <div class="modal">
-      <div class="modal-header">
-        <h2 class="modal-title">Ayuda - Algoritmo Northwest</h2>
-        <button class="close-btn" id="closeHelp">&times;</button>
-      </div>
-      <div class="help-content">
-        <div class="help-section">
-          <h3>¿Qué es el Algoritmo Northwest?</h3>
-          <p>El algoritmo de la Esquina Noroeste (Northwest Corner Method) es un método para encontrar una solución básica factible inicial en problemas de transporte. Comienza asignando la máxima cantidad posible a la celda superior izquierda (noroeste) y avanza hacia la derecha y abajo.</p>
-        </div>
-        
-        <div class="help-section">
-          <h3>Cómo usar esta herramienta</h3>
-          <ul>
-            <li><strong>Configurar el problema:</strong> Define el número de orígenes y destinos</li>
-            <li><strong>Ingresar datos:</strong> Completa la matriz de costos, ofertas y demandas</li>
-            <li><strong>Equilibrar:</strong> Asegúrate de que oferta total = demanda total</li>
-            <li><strong>Ejecutar:</strong> Usa "Ejecutar NW" para solución automática o "Paso a paso" para ver el proceso</li>
-            <li><strong>Ver resultados:</strong> Revisa las iteraciones y la solución final</li>
-          </ul>
-        </div>
-        
-        <div class="help-section">
-          <h3>Funcionalidades de Importar/Exportar</h3>
-          <ul>
-            <li><strong>Exportar:</strong> Guarda el problema actual como archivo JSON</li>
-            <li><strong>Importar:</strong> Carga un problema previamente guardado</li>
-            <li><strong>Captura:</strong> Descarga una imagen del estado actual</li>
-          </ul>
-        </div>
-        
-        <div class="help-section">
-          <h3>Formato de archivo JSON</h3>
-          <p>Los archivos de exportación siguen este formato:</p>
-          <pre style="background: rgba(11, 19, 38, 0.7); padding: 10px; border-radius: 6px; font-size: 12px; overflow: auto;">
-{
-  "m": 3,
-  "n": 3,
-  "cost": [[...], [...], [...]],
-  "supply": [...],
-  "demand": [...]
-}</pre>
-        </div>
-        
-        <div class="help-section">
-          <h3>Consejos</h3>
-          <ul>
-            <li>El algoritmo Northwest proporciona una solución básica pero no necesariamente óptima</li>
-            <li>Para obtener soluciones óptimas, considera usar métodos como el de Vogel o MODI</li>
-            <li>Guarda tus problemas frecuentes para cargarlos rápidamente</li>
-            <li>Usa capturas para documentar tus resultados</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal para personalizar nombre de archivo -->
-  <div id="filenameModal" class="modal-overlay" style="display: none;">
-    <div class="modal">
-      <div class="modal-header">
-        <h2 class="modal-title" id="filenameModalTitle">Personalizar nombre de archivo</h2>
-        <button class="close-btn" id="closeFilename">&times;</button>
-      </div>
-      <div class="help-content">
-        <div class="help-section">
-          <p id="filenameModalDescription">Ingresa el nombre para el archivo (sin extensión):</p>
-          <input type="text" id="filenameInput" class="filename-input" placeholder="Ej: mi_problema_transporte">
-          <div id="filenameError" class="filename-error">El nombre de archivo no puede estar vacío ni contener caracteres especiales.</div>
-        </div>
-        <div class="filename-actions">
-          <button id="cancelFilename" class="secondary">Cancelar</button>
-          <button id="confirmFilename" class="success">Confirmar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Input oculto para importar archivos -->
-  <input type="file" id="fileInput" class="file-input" accept=".json">
-
   <script>
-    // Estado del algoritmo
+    // Estado mejorado
     let state = {
       m: 3, n: 3,
       cost: [], supply: [], demand: [], X: [],
@@ -841,12 +638,12 @@
       currentStep: 0,
       iterations: [], // Almacena las iteraciones
       iterationsToShow: null, // Número de iteraciones a mostrar
-      pendingAction: null // Para almacenar la acción pendiente (export/import)
+      objective: 'minimize' // 'minimize' o 'maximize'
     }
 
     const el = id => document.getElementById(id)
 
-    // Inicialización
+    // Inicialización mejorada
     function createGrid(m, n) {
       state.m = m;
       state.n = n;
@@ -864,6 +661,10 @@
       state.currentStep = 0;
       state.iterations = [];
       state.iterationsToShow = null;
+      state.objective = 'minimize';
+      
+      // Actualizar UI del objetivo
+      updateObjectiveUI();
       
       renderMatrixEditor();
       renderTotals();
@@ -873,7 +674,23 @@
       renderIterations();
     }
 
-    // Renderizado de matriz
+    // Actualizar UI del objetivo
+    function updateObjectiveUI() {
+      const minimizeBtn = el('btnMinimize');
+      const maximizeBtn = el('btnMaximize');
+      const costLabel = el('costLabel');
+      
+      minimizeBtn.classList.toggle('active', state.objective === 'minimize');
+      maximizeBtn.classList.toggle('active', state.objective === 'maximize');
+      
+      if (state.objective === 'minimize') {
+        costLabel.textContent = 'Costo total';
+      } else {
+        costLabel.textContent = 'Beneficio total';
+      }
+    }
+
+    // Renderizado de matriz mejorado
     function renderMatrixEditor() {
       const container = el('matrixArea');
       container.innerHTML = '';
@@ -992,7 +809,7 @@
       container.appendChild(tbl);
     }
 
-    // Verificación de balance
+    // Verificación de balance mejorada
     function checkBalance() {
       const s = state.supply.reduce((a, b) => a + b, 0);
       const d = state.demand.reduce((a, b) => a + b, 0);
@@ -1028,7 +845,7 @@
       el('totals').textContent = `Oferta total = ${s}    |    Demanda total = ${d}`;
     }
 
-    // Llenado aleatorio
+    // Llenado aleatorio mejorado
     function randomFill() {
       // Asegurar que los valores sean razonables y el problema esté balanceado
       const totalSupply = Math.floor(Math.random() * 100 + 50);
@@ -1069,7 +886,7 @@
       updateStatus("Matriz generada aleatoriamente. El problema está balanceado.", "success");
     }
 
-    // Balanceo
+    // Balanceo mejorado
     function balanceProblem() {
       const s = state.supply.reduce((a, b) => a + b, 0);
       const d = state.demand.reduce((a, b) => a + b, 0);
@@ -1106,7 +923,7 @@
       checkBalance();
     }
 
-    // Algoritmo Northwest
+    // Algoritmo NW mejorado con opción de minimizar/maximizar
     function runNorthwest(fullAuto = true) {
       if (!checkBalance()) {
         updateStatus("No se puede ejecutar el algoritmo: el problema no está balanceado.", "error");
@@ -1127,7 +944,17 @@
       
       el('modeLabel').textContent = fullAuto ? 'Automático' : 'Paso a paso';
       
-      updateStatus("Ejecutando algoritmo Northwest...", "info");
+      // Mostrar información del objetivo
+      const objectiveText = state.objective === 'minimize' ? 'minimizar costos' : 'maximizar beneficios';
+      updateStatus(`Ejecutando algoritmo Northwest para ${objectiveText}...`, "info");
+      
+      // Para maximización, invertir los costos para que el algoritmo funcione correctamente
+      let workingCosts = state.cost;
+      if (state.objective === 'maximize') {
+        // Encontrar el valor máximo para invertir la matriz
+        const maxVal = Math.max(...state.cost.flat());
+        workingCosts = state.cost.map(row => row.map(val => maxVal - val));
+      }
       
       while (i < state.m && j < state.n) {
         const asign = Math.min(S[i], D[j]);
@@ -1164,7 +991,7 @@
       finalizeResult();
     }
 
-    // Paso a paso
+    // Paso a paso mejorado
     function stepNorthwest() {
       // Si es la primera vez, inicializar copias
       if (!state._S) {
@@ -1226,7 +1053,7 @@
       renderIterations();
     }
 
-    // Finalización
+    // Finalización mejorada
     function finalizeResult() {
       renderMatrixEditor();
       renderSVG();
@@ -1237,10 +1064,12 @@
       // Verificar que la solución es factible
       const isFeasible = verifySolution();
       
+      const objectiveText = state.objective === 'minimize' ? 'Costo total' : 'Beneficio total';
+      
       if (isFeasible) {
-        updateStatus(`Solución completada. Costo total: ${total}. La solución es factible.`, "success");
+        updateStatus(`Solución completada. ${objectiveText}: ${total}. La solución es factible.`, "success");
       } else {
-        updateStatus(`Solución completada. Costo total: ${total}. ADVERTENCIA: La solución podría no ser factible.`, "warning");
+        updateStatus(`Solución completada. ${objectiveText}: ${total}. ADVERTENCIA: La solución podría no ser factible.`, "warning");
       }
       
       // Limpiar variables de paso
@@ -1274,7 +1103,7 @@
       return true;
     }
 
-    // Cálculo de costo total
+    // Cálculo de costo/beneficio total
     function computeTotalCost() {
       let total = 0;
       for (let i = 0; i < state.m; i++) {
@@ -1301,7 +1130,7 @@
       }
     }
 
-    // SVG drawing
+    // SVG drawing mejorado
     function renderSVG() {
       const box = el('svgBox');
       box.innerHTML = '';
@@ -1417,7 +1246,7 @@
           path.setAttribute('fill', 'none');
           svg.appendChild(path);
           
-          // Etiqueta de costo
+          // Etiqueta de costo/beneficio
           const midx = (x1 + x2) / 2;
           const midy = (y1 + y2) / 2;
           
@@ -1575,187 +1404,14 @@
       renderIterations();
     }
 
-    // Funciones de Importar/Exportar
-    function exportProblem() {
-      showFilenameModal('export');
-    }
-
-    function importProblem() {
-      showFilenameModal('import');
-    }
-
-    function showFilenameModal(action) {
-      state.pendingAction = action;
+    // Cambiar objetivo (minimizar/maximizar)
+    function setObjective(objective) {
+      state.objective = objective;
+      updateObjectiveUI();
       
-      const modal = el('filenameModal');
-      const title = el('filenameModalTitle');
-      const description = el('filenameModalDescription');
-      const input = el('filenameInput');
-      const error = el('filenameError');
-      
-      if (action === 'export') {
-        title.textContent = 'Personalizar nombre de archivo de exportación';
-        description.textContent = 'Ingresa el nombre para el archivo de exportación (sin extensión):';
-        input.value = `northwest_problem_${new Date().toISOString().slice(0, 10)}`;
-      } else if (action === 'import') {
-        title.textContent = 'Personalizar nombre de archivo de importación';
-        description.textContent = 'Selecciona el archivo a importar:';
-        input.style.display = 'none';
-        error.style.display = 'none';
-      }
-      
-      modal.style.display = 'flex';
-      input.focus();
-      input.select();
-    }
-
-    function hideFilenameModal() {
-      el('filenameModal').style.display = 'none';
-      el('filenameInput').style.display = 'block';
-      el('filenameError').style.display = 'none';
-      state.pendingAction = null;
-    }
-
-    function validateFilename(filename) {
-      // Validar que el nombre no esté vacío
-      if (!filename || filename.trim() === '') {
-        return false;
-      }
-      
-      // Validar caracteres no permitidos en nombres de archivo
-      const invalidChars = /[<>:"/\\|?*\x00-\x1F]/;
-      if (invalidChars.test(filename)) {
-        return false;
-      }
-      
-      return true;
-    }
-
-    function confirmFilename() {
-      const action = state.pendingAction;
-      const input = el('filenameInput');
-      const error = el('filenameError');
-      
-      if (action === 'export') {
-        const filename = input.value.trim();
-        
-        if (!validateFilename(filename)) {
-          error.style.display = 'block';
-          return;
-        }
-        
-        error.style.display = 'none';
-        hideFilenameModal();
-        performExport(filename);
-      } else if (action === 'import') {
-        hideFilenameModal();
-        performImport();
-      }
-    }
-
-    function performExport(filename) {
-      const data = {
-        m: state.m,
-        n: state.n,
-        cost: state.cost,
-        supply: state.supply,
-        demand: state.demand,
-        X: state.X,
-        iterations: state.iterations,
-        totalCost: computeTotalCost()
-      };
-      
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${filename}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      updateStatus(`Problema exportado como "${filename}.json"`, "success");
-    }
-
-    function performImport() {
-      const fileInput = el('fileInput');
-      fileInput.click();
-    }
-
-    function handleFileImport(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const data = JSON.parse(e.target.result);
-          
-          // Validar estructura básica
-          if (!data.m || !data.n || !data.cost || !data.supply || !data.demand) {
-            throw new Error("Formato de archivo inválido");
-          }
-          
-          // Actualizar estado
-          state.m = data.m;
-          state.n = data.n;
-          state.cost = data.cost;
-          state.supply = data.supply;
-          state.demand = data.demand;
-          state.X = data.X || Array.from({length: state.m}, () => Array(state.n).fill(0));
-          state.iterations = data.iterations || [];
-          
-          // Actualizar UI
-          el('nSources').value = state.m;
-          el('nTargets').value = state.n;
-          
-          renderMatrixEditor();
-          renderTotals();
-          renderSVG();
-          renderIterations();
-          
-          if (data.totalCost) {
-            el('totalCost').textContent = data.totalCost;
-          }
-          
-          updateStatus(`Problema importado desde "${file.name}"`, "success");
-        } catch (error) {
-          updateStatus("Error al importar el archivo: " + error.message, "error");
-        }
-      };
-      reader.readAsText(file);
-      
-      // Limpiar input
-      event.target.value = '';
-    }
-
-    function takeScreenshot() {
-      const element = document.body;
-      
-      html2canvas(element, {
-        backgroundColor: null,
-        scale: 2,
-        useCORS: true,
-        logging: false
-      }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = `northwest_solution_${new Date().toISOString().slice(0, 10)}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        
-        updateStatus("Captura guardada correctamente.", "success");
-      }).catch(error => {
-        updateStatus("Error al generar la captura: " + error.message, "error");
-      });
-    }
-
-    function showHelp() {
-      el('helpModal').style.display = 'flex';
-    }
-
-    function hideHelp() {
-      el('helpModal').style.display = 'none';
+      // Actualizar mensaje de estado
+      const objectiveText = state.objective === 'minimize' ? 'minimizar costos' : 'maximizar beneficios';
+      updateStatus(`Objetivo cambiado a: ${objectiveText}.`, "info");
     }
 
     // UI hooks
@@ -1812,36 +1468,9 @@
     
     el('btnUpdateIterations').onclick = () => updateIterationsToShow();
     
-    // Nuevos botones
-    el('btnExport').onclick = exportProblem;
-    el('btnImport').onclick = importProblem;
-    el('btnScreenshot').onclick = takeScreenshot;
-    el('btnHelp').onclick = showHelp;
-    el('closeHelp').onclick = hideHelp;
-    el('closeFilename').onclick = hideFilenameModal;
-    el('cancelFilename').onclick = hideFilenameModal;
-    el('confirmFilename').onclick = confirmFilename;
-    el('fileInput').addEventListener('change', handleFileImport);
-
-    // Cerrar modales al hacer clic fuera
-    el('helpModal').addEventListener('click', (e) => {
-      if (e.target === el('helpModal')) {
-        hideHelp();
-      }
-    });
-    
-    el('filenameModal').addEventListener('click', (e) => {
-      if (e.target === el('filenameModal')) {
-        hideFilenameModal();
-      }
-    });
-
-    // Permitir Enter para confirmar nombre de archivo
-    el('filenameInput').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        confirmFilename();
-      }
-    });
+    // Botones de objetivo
+    el('btnMinimize').onclick = () => setObjective('minimize');
+    el('btnMaximize').onclick = () => setObjective('maximize');
 
     // Inicialización
     createGrid(3, 3);
