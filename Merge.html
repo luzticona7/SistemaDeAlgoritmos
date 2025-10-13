@@ -5,69 +5,101 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Merge Sort - Sistema de Burbujas</title>
     <style>
+        /* Tus estilos CSS existentes permanecen iguales */
         :root {
-            --primary: #6c5ce7;
-            --secondary: #a29bfe;
-            --accent: #fd79a8;
-            --dark: #2d3436;
-            --light: #dfe6e9;
+            --bg: #a2185b;
+            --bg2: #0a192e; /* fondo 2 degrade*/
+            --panel: #070b11cc; /* conteedores */
+            --panel-border: #ffffff14;
+            /* paletita */
+            --pastel-orange: #FBBD40;
+            --carrot-orange: #EE9029;
+            --hot-pink: #E75CB4;
+            --violet-red: #8C144E;
+            --dark-purple: #2F0C33;
+            /* losss fallbackes*/
+            --accent: var(--pastel-orange, #FBBD40);
+            --accent-2: var(--carrot-orange, #EE9029);
+            --ink: #eaf6ff;
+            
+            /* Colores para las burbujas */
+            --primary: var(--hot-pink);
+            --secondary: var(--violet-red);
             --success: #00b894;
-            --comparing: #fdcb6e;
+            --comparing: var(--pastel-orange);
             --stop: #e74c3c;
-            --merge: #a29bfe;
+            --merge: var(--violet-red);
             --left-array: #0984e3;
-            --right-array: #e17055;
-            --current: #fdcb6e;
-            --gap: #a29bfe;
+            --right-array: var(--carrot-orange);
+            --current: var(--pastel-orange);
+        }
+        
+        html, body {
+            height: 100%;
+            margin: 0;
+            min-height: 100%; /* cubree altura del nuestra web */
+            height: auto; /* Permite que crezca con el contenido */
+            background:
+                radial-gradient(1200px 600px at 10% -10%, #1a2a6c22, transparent 60%),
+                radial-gradient(1000px 700px at 110% 10%, #00d4ff22, transparent 60%),
+                linear-gradient(180deg, var(--bg), var(--bg2));
+            color: var(--ink);
+            font-family: Poppins, Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            overflow-x: hidden;
+        }
+        
+        .container-fluid {
+            padding: 16px;
+            max-width: 100%;
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        body {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            color: var(--light);
-            min-height: 100vh;
-            padding: 20px;
-            overflow-x: hidden;
-        }
-        
-        .container {
-            max-width: 100%;
-            margin: 0 auto;
-            width: 100%;
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        }
-        
-        h1 {
-            font-size: 2.5rem;
+        .app-header {
+            position: sticky; 
+            top: 0; 
+            z-index: 3; 
             margin-bottom: 10px;
-            background: linear-gradient(to right, var(--merge), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            padding: 20px; 
+            border-radius: 20px;
+            background: linear-gradient(135deg, #233164cc, #4b6077cc); /* cajita del tituo*/
+            border: 1px solid var(--panel-border);
+            backdrop-filter: blur(6px);
         }
         
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.8;
+        .title-wrap {
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            flex-wrap: wrap;
+        }
+        
+        .app-title {
+            margin: 0;
+            font-size: clamp(1.3rem, 2vw + 1rem, 2.2rem);
+            font-weight: 800;
+            letter-spacing: .3px;
+            background: linear-gradient(90deg, #ffffff, var(--accent-2, #EE9029), #ffffff);/* TITULOO */
+            -webkit-background-clip: text; 
+            background-clip: text; 
+            color: transparent;
+            text-shadow: 0 0 18px rgba(238,144,41,.06); /* sombre*/
+        }
+        
+        .app-sub {
+            margin: 0; 
+            opacity: .85; 
+            font-weight: 600; 
+            font-size: .98rem;
         }
         
         .main-content {
             display: grid;
-            grid-template-columns: 400px 1fr;
+            grid-template-columns: 320px 1fr;
             gap: 20px;
             min-height: 70vh;
             width: 100%;
@@ -75,7 +107,7 @@
         
         @media (max-width: 1200px) {
             .main-content {
-                grid-template-columns: 350px 1fr;
+                grid-template-columns: 300px 1fr;
             }
         }
         
@@ -87,11 +119,12 @@
         }
         
         .controls {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            background: var(--panel);
+            border-radius: 14px; 
+            padding: 10px 12px;
+            border: 1px solid var(--panel-border);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 10px 30px rgba(0,0,0,.35);
             overflow-y: auto;
             max-height: 70vh;
         }
@@ -101,19 +134,20 @@
         }
         
         h2 {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             margin-bottom: 15px;
-            color: var(--secondary);
+            color: var(--accent);
+            letter-spacing: .3px;
         }
         
         .btn {
-            background: var(--merge);
+            background: var(--secondary);
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
+            padding: 10px 15px;
+            border-radius: 12px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 600;
             transition: all 0.3s ease;
             display: inline-flex;
@@ -121,7 +155,10 @@
             justify-content: center;
             gap: 8px;
             flex: 1;
-            min-width: 120px;
+            min-width: 0;
+            border: 1px solid var(--panel-border);
+            background: #0f1724;
+            position: relative;
         }
         
         .btn:hover {
@@ -146,6 +183,7 @@
         
         .btn-accent {
             background: var(--accent);
+            color: #05121a;
         }
         
         .btn-stop {
@@ -175,6 +213,7 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 8px;
+            font-size: 0.9rem;
         }
         
         .slider {
@@ -191,26 +230,28 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: var(--merge);
+            background: var(--accent);
             cursor: pointer;
             transition: all 0.2s;
         }
         
         .slider::-webkit-slider-thumb:hover {
-            background: var(--accent);
+            background: var(--accent-2);
             transform: scale(1.2);
         }
         
         .visualization {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
+            background: var(--panel);
+            border-radius: 14px;
             padding: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--panel-border);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 10px 30px rgba(0,0,0,.35);
             display: flex;
             flex-direction: column;
             min-height: 70vh;
             width: 100%;
+            position: relative;
         }
         
         .bubbles-container {
@@ -228,8 +269,12 @@
             position: relative;
             transition: all 0.5s ease;
             width: 100%;
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 30px rgba(0,0,0,0.5);
         }
         
+        /* ANIMACIONES MEJORADAS PARA LAS BURBUJAS */
         .bubble {
             background: var(--primary);
             border-radius: 50%;
@@ -263,7 +308,7 @@
             box-shadow: 0 0 30px var(--comparing), 0 10px 25px rgba(0, 0, 0, 0.5);
             z-index: 100;
             border-color: rgba(255, 255, 255, 0.5);
-            animation: float 1.5s ease-in-out infinite;
+            animation: pulseCompare 1s ease-in-out infinite;
         }
         
         .bubble.merging {
@@ -272,7 +317,7 @@
             box-shadow: 0 0 40px var(--accent), 0 15px 30px rgba(0, 0, 0, 0.6);
             z-index: 200;
             border-color: rgba(255, 255, 255, 0.7);
-            animation: swapFloat 0.8s ease-in-out infinite;
+            animation: pulseMerge 0.8s ease-in-out infinite;
         }
         
         .bubble.current {
@@ -287,21 +332,114 @@
         .bubble.left {
             background: var(--left-array);
             border: 3px solid var(--left-array);
+            animation: glowLeft 2s ease-in-out infinite alternate;
         }
         
         .bubble.right {
             background: var(--right-array);
             border: 3px solid var(--right-array);
+            animation: glowRight 2s ease-in-out infinite alternate;
         }
         
         .bubble.sorted {
             background: var(--success);
             border-color: rgba(255, 255, 255, 0.2);
+            animation: pulseSuccess 2s ease-in-out infinite;
         }
         
         .bubble.moving {
             position: absolute;
             transition: all 0.5s ease;
+        }
+        
+        .bubble.dividing {
+            animation: shakeDivide 0.5s ease-in-out;
+        }
+        
+        .bubble.swapping {
+            animation: swapBubble 0.6s ease-in-out;
+            z-index: 150;
+        }
+        
+        /* NUEVAS ANIMACIONES MEJORADAS */
+        @keyframes pulseCompare {
+            0%, 100% { 
+                transform: translateY(-40px) scale(1.2);
+                box-shadow: 0 0 30px var(--comparing), 0 10px 25px rgba(0, 0, 0, 0.5);
+            }
+            50% { 
+                transform: translateY(-50px) scale(1.25);
+                box-shadow: 0 0 40px var(--comparing), 0 15px 30px rgba(0, 0, 0, 0.6);
+            }
+        }
+        
+        @keyframes pulseMerge {
+            0%, 100% { 
+                transform: translateY(-60px) scale(1.3);
+                box-shadow: 0 0 40px var(--accent), 0 15px 30px rgba(0, 0, 0, 0.6);
+            }
+            50% { 
+                transform: translateY(-70px) scale(1.35);
+                box-shadow: 0 0 50px var(--accent), 0 20px 35px rgba(0, 0, 0, 0.7);
+            }
+        }
+        
+        @keyframes currentFloat {
+            0%, 100% { 
+                transform: translateY(-70px) scale(1.35);
+                box-shadow: 0 0 45px var(--current), 0 18px 32px rgba(0, 0, 0, 0.65);
+            }
+            50% { 
+                transform: translateY(-80px) scale(1.4);
+                box-shadow: 0 0 55px var(--current), 0 22px 38px rgba(0, 0, 0, 0.75);
+            }
+        }
+        
+        @keyframes glowLeft {
+            0% { 
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), 0 0 10px var(--left-array);
+            }
+            100% { 
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), 0 0 20px var(--left-array);
+            }
+        }
+        
+        @keyframes glowRight {
+            0% { 
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), 0 0 10px var(--right-array);
+            }
+            100% { 
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), 0 0 20px var(--right-array);
+            }
+        }
+        
+        @keyframes pulseSuccess {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 20px var(--success), 0 5px 15px rgba(0, 0, 0, 0.5);
+            }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 0 0 30px var(--success), 0 8px 20px rgba(0, 0, 0, 0.6);
+            }
+        }
+        
+        @keyframes shakeDivide {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        @keyframes swapBubble {
+            0% { 
+                transform: translateX(0) scale(1);
+            }
+            50% { 
+                transform: translateX(20px) scale(1.1);
+            }
+            100% { 
+                transform: translateX(0) scale(1);
+            }
         }
         
         @keyframes float {
@@ -314,9 +452,29 @@
             50% { transform: translateY(-70px) scale(1.35); }
         }
         
-        @keyframes currentFloat {
-            0%, 100% { transform: translateY(-70px) scale(1.35); }
-            50% { transform: translateY(-80px) scale(1.4); }
+        /* Efectos de partículas para las burbujas */
+        .bubble::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .bubble.comparing::before,
+        .bubble.merging::before,
+        .bubble.current::before {
+            opacity: 1;
+            animation: rotateGlow 2s linear infinite;
+        }
+        
+        @keyframes rotateGlow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         .stats {
@@ -336,7 +494,7 @@
         .stat-value {
             font-size: 1.5rem;
             font-weight: bold;
-            color: var(--secondary);
+            color: var(--accent);
         }
         
         .stat-label {
@@ -477,7 +635,7 @@
         }
         
         .code-keyword {
-            color: #fd79a8;
+            color: var(--hot-pink);
         }
         
         .code-function {
@@ -488,14 +646,333 @@
             color: #55efc4;
         }
 
+        /* Botones encima de la pizarra */
+        .visualization-controls {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .visualization-btn {
+            background: #0f1724;
+            color: #e8f6ff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            border: 1px solid var(--panel-border);
+            position: relative;
+        }
+        
+        .visualization-btn:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .visualization-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .visualization-btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Tooltips para botones */
+        .btn-tooltip, .visualization-btn-tooltip {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+        
+        .btn:hover .btn-tooltip, .visualization-btn:hover .visualization-btn-tooltip {
+            opacity: 1;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, var(--bg2), var(--dark-purple));
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--panel-border);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--ink);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close-modal:hover {
+            color: var(--accent);
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--panel-border);
+            background: #0b1326;
+            color: var(--ink);
+            font-size: 1rem;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 .15rem var(--accent);
+        }
+        
+        .help-content {
+            line-height: 1.6;
+        }
+        
+        .help-section {
+            margin-bottom: 20px;
+        }
+        
+        .help-section h3 {
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        
+        .help-section p {
+            margin-bottom: 8px;
+        }
+        
+        .help-list {
+            padding-left: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .help-list li {
+            margin-bottom: 5px;
+        }
+        
+        .json-area {
+            width: 100%;
+            height: 150px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--panel-border);
+            background: #0b1326;
+            color: var(--ink);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+        }
+        
+        .json-area:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .json-error {
+            color: var(--stop);
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* Estilos para entrada manual mejorada */
+        .array-input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .array-values-input {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .array-values-input input {
+            flex: 1;
+        }
+        
+        .array-values-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+            max-height: 120px;
+            overflow-y: auto;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        
+        .array-value-item {
+            background: var(--primary);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .remove-value {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .remove-value:hover {
+            background: var(--stop);
+        }
+
+        /* Estilos para la sección de subarrays finales */
+        .final-subarrays {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        
+        .final-subarrays-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--accent);
+            text-align: center;
+        }
+        
+        .final-subarrays-content {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        /* Indicador de estado del array */
+        .array-status {
+            margin-top: 10px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .array-status.complete {
+            background: rgba(0, 184, 148, 0.2);
+            color: #00b894;
+        }
+        
+        .array-status.incomplete {
+            background: rgba(253, 203, 110, 0.2);
+            color: var(--pastel-orange);
+        }
+
+        /* Estilos para nombres personalizados */
+        .filename-input {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .filename-input input {
+            flex: 1;
+        }
+        
+        .filename-hint {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 5px;
+        }
+        
+        .filename-error {
+            color: #ff6b6b;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
+        }
+
         /* Responsive para pantallas muy grandes */
         @media (min-width: 1600px) {
-            .container {
+            .container-fluid {
                 max-width: 95%;
+                margin: 0 auto;
             }
             
             .main-content {
-                grid-template-columns: 450px 1fr;
+                grid-template-columns: 350px 1fr;
             }
             
             .bubbles-container {
@@ -504,7 +981,7 @@
         }
 
         @media (min-width: 2000px) {
-            .container {
+            .container-fluid {
                 max-width: 90%;
             }
         }
@@ -515,16 +992,16 @@
                 padding: 10px;
             }
             
-            header {
+            .app-header {
                 padding: 15px;
                 margin-bottom: 15px;
             }
             
-            h1 {
+            .app-title {
                 font-size: 2rem;
             }
             
-            .subtitle {
+            .app-sub {
                 font-size: 1rem;
             }
             
@@ -533,9 +1010,13 @@
             }
             
             .btn {
-                padding: 10px 15px;
-                font-size: 0.9rem;
-                min-width: 100px;
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+            
+            .visualization-btn {
+                padding: 6px 10px;
+                font-size: 0.8rem;
             }
             
             .stats {
@@ -549,6 +1030,15 @@
             
             .legend-item {
                 font-size: 0.8rem;
+            }
+            
+            .modal-content {
+                padding: 20px;
+                width: 95%;
+            }
+            
+            .array-values-input {
+                flex-direction: column;
             }
         }
 
@@ -568,6 +1058,15 @@
             
             .stats {
                 grid-template-columns: 1fr;
+            }
+            
+            .visualization-controls {
+                gap: 5px;
+            }
+            
+            .visualization-btn {
+                padding: 5px 8px;
+                font-size: 0.75rem;
             }
         }
         
@@ -594,7 +1093,7 @@
         .subarray-label {
             font-size: 0.8rem;
             margin-bottom: 8px;
-            color: var(--light);
+            color: var(--ink);
             opacity: 0.8;
         }
         
@@ -607,10 +1106,12 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Merge Sort - Sistema de Burbujas</h1>
-            <p class="subtitle">Visualiza el algoritmo de ordenamiento Merge Sort con burbujas animadas</p>
+    <div class="container-fluid">
+        <header class="app-header">
+            <div class="title-wrap">
+                <h1 class="app-title">Merge Sort - Sistema de Burbujas</h1>
+                <p class="app-sub">Visualiza el algoritmo de ordenamiento Merge Sort con burbujas animadas</p>
+            </div>
         </header>
         
         <div class="main-content">
@@ -632,23 +1133,44 @@
                         </div>
                         <input type="range" min="1" max="5" value="3" class="slider" id="animation-speed">
                     </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn" id="manual-input">
+                            ✏️
+                            <span class="btn-tooltip">Entrada Manual</span>
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="control-group">
                     <h2>Acciones</h2>
                     <div class="btn-group">
-                        <button class="btn btn-secondary" id="generate-array">Generar Nuevo Array</button>
-                        <button class="btn" id="start-sort">Iniciar Merge Sort</button>
-                        <button class="btn btn-stop" id="stop-sort">Detener</button>
-                        <button class="btn" id="reset">Reiniciar</button>
+                        <button class="btn btn-secondary" id="generate-array">
+                            🎲
+                            <span class="btn-tooltip">Generar Aleatorio</span>
+                        </button>
+                        <button class="btn" id="start-sort">
+                            ▶️
+                            <span class="btn-tooltip">Iniciar Merge Sort</span>
+                        </button>
+                        <button class="btn btn-stop" id="stop-sort">
+                            ⏹️
+                            <span class="btn-tooltip">Detener</span>
+                        </button>
                     </div>
                 </div>
                 
                 <div class="control-group">
                     <h2>Dirección</h2>
                     <div class="btn-group">
-                        <button class="btn btn-accent" id="ascending">Ascendente</button>
-                        <button class="btn" id="descending">Descendente</button>
+                        <button class="btn btn-accent" id="ascending">
+                            ↗️
+                            <span class="btn-tooltip">Ascendente</span>
+                        </button>
+                        <button class="btn" id="descending">
+                            ↘️
+                            <span class="btn-tooltip">Descendente</span>
+                        </button>
                     </div>
                 </div>
                 
@@ -676,33 +1198,53 @@
                             <div class="complexity-value worst">O(n log n)</div>
                         </div>
                     </div>
-                    
-                    <div class="code-preview">
-                        <div class="code-line"><span class="code-comment">// Función principal de Merge Sort</span></div>
-                        <div class="code-line"><span class="code-keyword">function</span> <span class="code-function">mergeSort</span>(arr, left, right) {</div>
-                        <div class="code-line">&nbsp;&nbsp;<span class="code-keyword">if</span> (left < right) {</div>
-                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">const</span> mid = <span class="code-variable">Math</span>.<span class="code-function">floor</span>((left + right) / <span class="code-variable">2</span>);</div>
-                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-function">mergeSort</span>(arr, left, mid);</div>
-                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-function">mergeSort</span>(arr, mid + <span class="code-variable">1</span>, right);</div>
-                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-function">merge</span>(arr, left, mid, right);</div>
-                        <div class="code-line">&nbsp;&nbsp;}</div>
-                        <div class="code-line">}</div>
-                    </div>
                 </div>
             </div>
             
             <div class="visualization">
+                <!-- Botones encima de la pizarra -->
+                <div class="visualization-controls">
+                    <button class="visualization-btn" id="import-json">
+                        📥
+                        <span class="visualization-btn-tooltip">Importar JSON</span>
+                    </button>
+                    <button class="visualization-btn" id="export-json">
+                        📤
+                        <span class="visualization-btn-tooltip">Exportar JSON</span>
+                    </button>
+                    <button class="visualization-btn" id="download-json">
+                        💾
+                        <span class="visualization-btn-tooltip">Descargar JSON</span>
+                    </button>
+                    <button class="visualization-btn" id="download-image">
+                        🖼️
+                        <span class="visualization-btn-tooltip">Capturar Imagen</span>
+                    </button>
+                    <button class="visualization-btn" id="help-button">
+                        ❓
+                        <span class="visualization-btn-tooltip">Ayuda</span>
+                    </button>
+                </div>
+                
                 <div class="bubbles-container" id="bubbles-container">
                     <!-- Las burbujas se generarán dinámicamente con JavaScript -->
                 </div>
                 
+                <!-- Sección para mostrar subarrays finales -->
+                <div class="final-subarrays" id="final-subarrays">
+                    <h3 class="final-subarrays-title">Subarrays Finales del Proceso</h3>
+                    <div class="final-subarrays-content" id="final-subarrays-content">
+                        <!-- Contenido generado dinámicamente -->
+                    </div>
+                </div>
+                
                 <div class="legend">
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #6c5ce7;"></div>
+                        <div class="legend-color" style="background-color: var(--hot-pink);"></div>
                         <span>Elemento normal</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #fdcb6e;"></div>
+                        <div class="legend-color" style="background-color: var(--pastel-orange);"></div>
                         <span>Elementos comparados</span>
                     </div>
                     <div class="legend-item">
@@ -710,11 +1252,11 @@
                         <span>Subarray izquierdo</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #e17055;"></div>
+                        <div class="legend-color" style="background-color: var(--carrot-orange);"></div>
                         <span>Subarray derecho</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #fd79a8;"></div>
+                        <div class="legend-color" style="background-color: var(--accent);"></div>
                         <span>Elementos fusionándose</span>
                     </div>
                     <div class="legend-item">
@@ -745,6 +1287,184 @@
         </div>
     </div>
 
+    <!-- Modal para entrada manual -->
+    <div class="modal" id="manual-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Entrada Manual de Datos</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="array-input-container">
+                <div class="input-group">
+                    <label class="input-label">Tamaño del Array:</label>
+                    <input type="number" id="manual-size" class="input-field" min="1" max="50" value="20">
+                    <button class="btn btn-secondary" id="generate-random" style="margin-top: 10px; width: 100%;">
+                        🎲 Generar Valores Aleatorios
+                    </button>
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">Agregar Valor (uno por uno):</label>
+                    <div class="array-values-input">
+                        <input type="number" id="manual-value" class="input-field" min="10" max="100" placeholder="Valor entre 10 y 100">
+                        <button class="btn" id="add-value" disabled>➕ Agregar</button>
+                    </div>
+                    <div class="array-values-list" id="values-list">
+                        <!-- Los valores se agregarán aquí dinámicamente -->
+                    </div>
+                    <div class="array-status incomplete" id="array-status">
+                        Array incompleto: 0/20 elementos
+                    </div>
+                    <button class="btn btn-stop" id="clear-array" style="margin-top: 10px; width: 100%;">
+                        🗑️ Limpiar Array
+                    </button>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" id="apply-manual" disabled>✅ Aplicar</button>
+                <button class="btn btn-secondary" id="cancel-manual">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para importar JSON -->
+    <div class="modal" id="import-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Importar desde JSON</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Seleccionar archivo JSON:</label>
+                <input type="file" id="json-file" class="input-field" accept=".json">
+                <div style="text-align: center; margin: 10px 0; color: var(--accent);">O</div>
+                <label class="input-label">Pegar JSON Data:</label>
+                <textarea id="json-input" class="json-area" placeholder='{"array": [10, 20, 30, 40, 50], "size": 5}'></textarea>
+                <div class="json-error" id="json-error">Error: JSON inválido</div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" id="apply-json">✅ Importar</button>
+                <button class="btn btn-secondary" id="cancel-json">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para exportar JSON -->
+    <div class="modal" id="export-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Exportar a JSON</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="input-group">
+                <label class="input-label">JSON Data:</label>
+                <textarea id="json-output" class="json-area" readonly></textarea>
+            </div>
+            <div class="btn-group">
+                <button class="btn" id="copy-json">📋 Copiar al Portapapeles</button>
+                <button class="btn btn-secondary" id="close-export">❌ Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para descargar JSON con nombre personalizado -->
+    <div class="modal" id="download-json-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Descargar JSON</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Nombre del archivo:</label>
+                <div class="filename-input">
+                    <input type="text" id="json-filename" class="input-field" value="merge-sort-array" placeholder="Ingrese nombre del archivo">
+                    <span>.json</span>
+                </div>
+                <div class="filename-hint">El archivo se descargará con extensión .json</div>
+                <div class="filename-error" id="json-filename-error">Nombre de archivo no válido</div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" id="confirm-download-json">💾 Descargar</button>
+                <button class="btn btn-secondary" id="cancel-download-json">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para descargar imagen con nombre personalizado -->
+    <div class="modal" id="download-image-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Capturar Imagen</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Nombre del archivo:</label>
+                <div class="filename-input">
+                    <input type="text" id="image-filename" class="input-field" value="merge-sort-visualization" placeholder="Ingrese nombre del archivo">
+                    <span>.png</span>
+                </div>
+                <div class="filename-hint">La imagen se descargará en formato PNG</div>
+                <div class="filename-error" id="image-filename-error">Nombre de archivo no válido</div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" id="confirm-download-image">🖼️ Capturar y Descargar</button>
+                <button class="btn btn-secondary" id="cancel-download-image">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de ayuda -->
+    <div class="modal" id="help-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Ayuda - Merge Sort Visualizer</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="help-content">
+                <div class="help-section">
+                    <h3>¿Qué es Merge Sort?</h3>
+                    <p>Merge Sort es un algoritmo de ordenamiento eficiente que utiliza el enfoque "divide y vencerás". Divide el array en mitades, ordena cada mitad recursivamente y luego las combina.</p>
+                </div>
+                
+                <div class="help-section">
+                    <h3>Cómo usar la aplicación</h3>
+                    <ul class="help-list">
+                        <li><strong>Generar Aleatorio:</strong> Crea un array con valores aleatorios</li>
+                        <li><strong>Entrada Manual:</strong> Permite ingresar el tamaño y valores específicos del array</li>
+                        <li><strong>Importar JSON:</strong> Carga un array desde un archivo JSON o texto</li>
+                        <li><strong>Exportar JSON:</strong> Muestra el array actual en formato JSON</li>
+                        <li><strong>Descargar JSON:</strong> Guarda el array actual en un archivo JSON</li>
+                        <li><strong>Capturar Imagen:</strong> Descarga una imagen del algoritmo ordenado con subarrays</li>
+                        <li><strong>Iniciar Merge Sort:</strong> Comienza la visualización del algoritmo</li>
+                        <li><strong>Detener:</strong> Pausa la visualización en curso</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>Leyenda de colores</h3>
+                    <ul class="help-list">
+                        <li><span style="color: var(--hot-pink);">●</span> Elemento normal</li>
+                        <li><span style="color: var(--pastel-orange);">●</span> Elementos comparados</li>
+                        <li><span style="color: #0984e3;">●</span> Subarray izquierdo</li>
+                        <li><span style="color: var(--carrot-orange);">●</span> Subarray derecho</li>
+                        <li><span style="color: var(--accent);">●</span> Elementos fusionándose</li>
+                        <li><span style="color: #00b894;">●</span> Elementos ordenados</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>Formatos de entrada</h3>
+                    <p><strong>Entrada Manual:</strong> Puede generar valores aleatorios o agregar valores uno por uno</p>
+                    <p><strong>Importar JSON:</strong> El formato debe ser: {"array": [valores], "size": tamaño}. El tamaño debe coincidir con la longitud del array.</p>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" id="close-help">❌ Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script>
         // Variables globales
         let array = [];
@@ -760,6 +1480,7 @@
         let bubbleInterval = null;
         let bubblePositions = [];
         let recursionStack = [];
+        let manualArray = [];
         
         // Elementos del DOM
         const bubblesContainer = document.getElementById('bubbles-container');
@@ -770,14 +1491,29 @@
         const generateArrayBtn = document.getElementById('generate-array');
         const startSortBtn = document.getElementById('start-sort');
         const stopSortBtn = document.getElementById('stop-sort');
-        const resetBtn = document.getElementById('reset');
         const ascendingBtn = document.getElementById('ascending');
         const descendingBtn = document.getElementById('descending');
+        const manualInputBtn = document.getElementById('manual-input');
+        const importJsonBtn = document.getElementById('import-json');
+        const exportJsonBtn = document.getElementById('export-json');
+        const downloadJsonBtn = document.getElementById('download-json');
+        const downloadImageBtn = document.getElementById('download-image');
+        const helpButton = document.getElementById('help-button');
         const comparisonsElement = document.getElementById('comparisons');
         const mergesElement = document.getElementById('merges');
         const recursionsElement = document.getElementById('recursions');
         const timeElement = document.getElementById('time');
         const recursionIndicator = document.getElementById('recursion-indicator');
+        const finalSubarrays = document.getElementById('final-subarrays');
+        const finalSubarraysContent = document.getElementById('final-subarrays-content');
+        
+        // Modales
+        const manualModal = document.getElementById('manual-modal');
+        const importModal = document.getElementById('import-modal');
+        const exportModal = document.getElementById('export-modal');
+        const helpModal = document.getElementById('help-modal');
+        const downloadJsonModal = document.getElementById('download-json-modal');
+        const downloadImageModal = document.getElementById('download-image-modal');
         
         // Inicialización
         document.addEventListener('DOMContentLoaded', () => {
@@ -806,7 +1542,6 @@
             generateArrayBtn.addEventListener('click', generateNewArray);
             startSortBtn.addEventListener('click', startSorting);
             stopSortBtn.addEventListener('click', stopSorting);
-            resetBtn.addEventListener('click', resetVisualization);
             
             ascendingBtn.addEventListener('click', () => {
                 sortDirection = 'ascending';
@@ -816,6 +1551,429 @@
             descendingBtn.addEventListener('click', () => {
                 sortDirection = 'descending';
                 updateDirectionButtons();
+            });
+            
+            // Nuevos botones
+            manualInputBtn.addEventListener('click', showManualInputModal);
+            importJsonBtn.addEventListener('click', showImportModal);
+            exportJsonBtn.addEventListener('click', showExportModal);
+            downloadJsonBtn.addEventListener('click', showDownloadJsonModal);
+            downloadImageBtn.addEventListener('click', showDownloadImageModal);
+            helpButton.addEventListener('click', showHelpModal);
+            
+            // Eventos para modales
+            document.querySelectorAll('.close-modal').forEach(button => {
+                button.addEventListener('click', closeAllModals);
+            });
+            
+            document.getElementById('apply-manual').addEventListener('click', applyManualInput);
+            document.getElementById('cancel-manual').addEventListener('click', closeAllModals);
+            document.getElementById('generate-random').addEventListener('click', generateRandomValues);
+            document.getElementById('add-value').addEventListener('click', addManualValue);
+            document.getElementById('clear-array').addEventListener('click', clearManualArray);
+            document.getElementById('manual-value').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addManualValue();
+                }
+            });
+            
+            // Actualizar estado cuando cambia el tamaño del array
+            document.getElementById('manual-size').addEventListener('input', updateManualArrayStatus);
+            
+            document.getElementById('apply-json').addEventListener('click', applyJsonImport);
+            document.getElementById('cancel-json').addEventListener('click', closeAllModals);
+            document.getElementById('json-file').addEventListener('change', handleFileSelect);
+            
+            document.getElementById('copy-json').addEventListener('click', copyJsonToClipboard);
+            document.getElementById('close-export').addEventListener('click', closeAllModals);
+            
+            // Eventos para nombres personalizados
+            document.getElementById('confirm-download-json').addEventListener('click', confirmDownloadJson);
+            document.getElementById('cancel-download-json').addEventListener('click', closeAllModals);
+            document.getElementById('confirm-download-image').addEventListener('click', confirmDownloadImage);
+            document.getElementById('cancel-download-image').addEventListener('click', closeAllModals);
+            
+            // Validación de nombres de archivo
+            document.getElementById('json-filename').addEventListener('input', validateFilename);
+            document.getElementById('image-filename').addEventListener('input', validateFilename);
+            
+            document.getElementById('close-help').addEventListener('click', closeAllModals);
+            
+            // Cerrar modales al hacer clic fuera
+            window.addEventListener('click', (event) => {
+                if (event.target.classList.contains('modal')) {
+                    closeAllModals();
+                }
+            });
+        }
+        
+        // Mostrar modal de entrada manual
+        function showManualInputModal() {
+            if (isSorting) return;
+            
+            document.getElementById('manual-size').value = arraySize;
+            document.getElementById('manual-value').value = '';
+            manualArray = [...array];
+            updateManualArrayDisplay();
+            updateManualArrayStatus();
+            manualModal.style.display = 'flex';
+        }
+        
+        // Generar valores aleatorios para entrada manual
+        function generateRandomValues() {
+            const size = parseInt(document.getElementById('manual-size').value);
+            manualArray = [];
+            for (let i = 0; i < size; i++) {
+                manualArray.push(Math.floor(Math.random() * 90) + 10);
+            }
+            updateManualArrayDisplay();
+            updateManualArrayStatus();
+        }
+        
+        // Agregar valor manual
+        function addManualValue() {
+            const valueInput = document.getElementById('manual-value');
+            const value = parseInt(valueInput.value);
+            const targetSize = parseInt(document.getElementById('manual-size').value);
+            
+            if (isNaN(value) || value < 10 || value > 100) {
+                alert('Por favor ingrese un valor válido entre 10 y 100');
+                return;
+            }
+            
+            // Verificar si el array ya está completo
+            if (manualArray.length >= targetSize) {
+                alert('El array ya está completo. No se pueden agregar más valores.');
+                return;
+            }
+            
+            manualArray.push(value);
+            valueInput.value = '';
+            updateManualArrayDisplay();
+            updateManualArrayStatus();
+        }
+        
+        // Limpiar array manual
+        function clearManualArray() {
+            manualArray = [];
+            updateManualArrayDisplay();
+            updateManualArrayStatus();
+        }
+        
+        // Actualizar visualización del array manual
+        function updateManualArrayDisplay() {
+            const valuesList = document.getElementById('values-list');
+            valuesList.innerHTML = '';
+            
+            manualArray.forEach((value, index) => {
+                const valueItem = document.createElement('div');
+                valueItem.classList.add('array-value-item');
+                valueItem.innerHTML = `
+                    ${value}
+                    <button class="remove-value" data-index="${index}">×</button>
+                `;
+                valuesList.appendChild(valueItem);
+            });
+            
+            // Agregar event listeners a los botones de eliminar
+            document.querySelectorAll('.remove-value').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.getAttribute('data-index'));
+                    manualArray.splice(index, 1);
+                    updateManualArrayDisplay();
+                    updateManualArrayStatus();
+                });
+            });
+        }
+        
+        // Actualizar estado del array manual
+        function updateManualArrayStatus() {
+            const targetSize = parseInt(document.getElementById('manual-size').value);
+            const currentSize = manualArray.length;
+            const arrayStatus = document.getElementById('array-status');
+            const addValueBtn = document.getElementById('add-value');
+            const applyBtn = document.getElementById('apply-manual');
+            
+            // Actualizar texto de estado
+            if (currentSize === targetSize) {
+                arrayStatus.textContent = `Array completo: ${currentSize}/${targetSize} elementos`;
+                arrayStatus.className = 'array-status complete';
+                // Deshabilitar agregar valores cuando está completo
+                addValueBtn.disabled = true;
+                // Habilitar aplicar cuando está completo
+                applyBtn.disabled = false;
+            } else {
+                arrayStatus.textContent = `Array incompleto: ${currentSize}/${targetSize} elementos`;
+                arrayStatus.className = 'array-status incomplete';
+                // Habilitar agregar valores cuando está incompleto
+                addValueBtn.disabled = false;
+                // Deshabilitar aplicar cuando está incompleto
+                applyBtn.disabled = true;
+            }
+        }
+        
+        // Aplicar entrada manual
+        function applyManualInput() {
+            const sizeInput = document.getElementById('manual-size');
+            const newSize = parseInt(sizeInput.value);
+            
+            if (newSize < 1 || newSize > 50) {
+                alert('El tamaño debe estar entre 1 y 50');
+                return;
+            }
+            
+            // Verificar que el array esté completo
+            if (manualArray.length !== newSize) {
+                alert(`El array debe tener exactamente ${newSize} elementos. Actualmente tiene ${manualArray.length}.`);
+                return;
+            }
+            
+            array = [...manualArray];
+            arraySize = newSize;
+            arraySizeSlider.value = arraySize;
+            sizeValue.textContent = arraySize;
+            
+            renderBubbles();
+            resetStats();
+            startBubbleMovement();
+            closeAllModals();
+        }
+        
+        // Mostrar modal de importación JSON
+        function showImportModal() {
+            if (isSorting) return;
+            
+            document.getElementById('json-input').value = '';
+            document.getElementById('json-file').value = '';
+            document.getElementById('json-error').style.display = 'none';
+            importModal.style.display = 'flex';
+        }
+        
+        // Manejar selección de archivo
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('json-input').value = e.target.result;
+            };
+            reader.readAsText(file);
+        }
+        
+        // Aplicar importación JSON
+        function applyJsonImport() {
+            const jsonInput = document.getElementById('json-input').value.trim();
+            const errorElement = document.getElementById('json-error');
+            
+            if (!jsonInput) {
+                errorElement.textContent = 'Error: El campo JSON está vacío';
+                errorElement.style.display = 'block';
+                return;
+            }
+            
+            try {
+                const data = JSON.parse(jsonInput);
+                
+                if (!data.array || !Array.isArray(data.array)) {
+                    errorElement.textContent = 'Error: El JSON debe contener un campo "array" con un array de números';
+                    errorElement.style.display = 'block';
+                    return;
+                }
+                
+                // Validar que todos los elementos sean números
+                const isValidArray = data.array.every(val => typeof val === 'number' && !isNaN(val));
+                if (!isValidArray) {
+                    errorElement.textContent = 'Error: Todos los elementos del array deben ser números válidos';
+                    errorElement.style.display = 'block';
+                    return;
+                }
+                
+                // Aplicar los datos
+                array = data.array;
+                arraySize = array.length;
+                
+                // Actualizar controles
+                arraySizeSlider.value = arraySize;
+                sizeValue.textContent = arraySize;
+                
+                renderBubbles();
+                resetStats();
+                startBubbleMovement();
+                closeAllModals();
+                
+            } catch (error) {
+                errorElement.textContent = 'Error: JSON inválido - ' + error.message;
+                errorElement.style.display = 'block';
+            }
+        }
+        
+        // Mostrar modal de exportación JSON
+        function showExportModal() {
+            const jsonData = {
+                array: array,
+                size: arraySize,
+                description: "Array para Merge Sort Visualizer",
+                timestamp: new Date().toISOString()
+            };
+            
+            document.getElementById('json-output').value = JSON.stringify(jsonData, null, 2);
+            exportModal.style.display = 'flex';
+        }
+        
+        // Mostrar modal para descargar JSON con nombre personalizado
+        function showDownloadJsonModal() {
+            if (isSorting) return;
+            
+            document.getElementById('json-filename').value = "merge-sort-array-" + new Date().getTime();
+            document.getElementById('json-filename-error').style.display = 'none';
+            downloadJsonModal.style.display = 'flex';
+        }
+        
+        // Mostrar modal para descargar imagen con nombre personalizado
+        function showDownloadImageModal() {
+            if (isSorting) return;
+            
+            document.getElementById('image-filename').value = "merge-sort-visualization-" + new Date().getTime();
+            document.getElementById('image-filename-error').style.display = 'none';
+            downloadImageModal.style.display = 'flex';
+        }
+        
+        // Confirmar descarga de JSON con nombre personalizado
+        function confirmDownloadJson() {
+            const filenameInput = document.getElementById('json-filename');
+            const filename = filenameInput.value.trim();
+            
+            if (!validateFilename()) {
+                return;
+            }
+            
+            const jsonData = {
+                array: array,
+                size: arraySize,
+                description: "Array para Merge Sort Visualizer",
+                timestamp: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(jsonData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `${filename}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            closeAllModals();
+        }
+        
+        // Confirmar descarga de imagen con nombre personalizado
+        function confirmDownloadImage() {
+            const filenameInput = document.getElementById('image-filename');
+            const filename = filenameInput.value.trim();
+            
+            if (!validateFilename()) {
+                return;
+            }
+            
+            // Mostrar subarrays finales si están ocultos
+            finalSubarrays.style.display = 'block';
+            
+            // Usar html2canvas para capturar la visualización
+            html2canvas(document.querySelector('.visualization'), {
+                backgroundColor: '#0a192e',
+                scale: 2,
+                logging: false,
+                useCORS: true
+            }).then(canvas => {
+                // Ocultar subarrays finales nuevamente
+                finalSubarrays.style.display = 'none';
+                
+                // Convertir canvas a imagen y descargar
+                const link = document.createElement('a');
+                link.download = `${filename}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+            
+            closeAllModals();
+        }
+        
+        // Validar nombre de archivo
+        function validateFilename() {
+            const activeModal = document.querySelector('.modal[style*="display: flex"]');
+            if (!activeModal) return true;
+            
+            let filenameInput, errorElement;
+            
+            if (activeModal.id === 'download-json-modal') {
+                filenameInput = document.getElementById('json-filename');
+                errorElement = document.getElementById('json-filename-error');
+            } else if (activeModal.id === 'download-image-modal') {
+                filenameInput = document.getElementById('image-filename');
+                errorElement = document.getElementById('image-filename-error');
+            } else {
+                return true;
+            }
+            
+            const filename = filenameInput.value.trim();
+            
+            // Validar que no esté vacío
+            if (filename === '') {
+                errorElement.textContent = 'El nombre del archivo no puede estar vacío';
+                errorElement.style.display = 'block';
+                return false;
+            }
+            
+            // Validar caracteres no permitidos
+            const invalidChars = /[<>:"/\\|?*]/;
+            if (invalidChars.test(filename)) {
+                errorElement.textContent = 'El nombre contiene caracteres no permitidos: < > : " / \\ | ? *';
+                errorElement.style.display = 'block';
+                return false;
+            }
+            
+            // Validar longitud
+            if (filename.length > 100) {
+                errorElement.textContent = 'El nombre es demasiado largo (máximo 100 caracteres)';
+                errorElement.style.display = 'block';
+                return false;
+            }
+            
+            // Si pasa todas las validaciones
+            errorElement.style.display = 'none';
+            return true;
+        }
+        
+        // Copiar JSON al portapapeles
+        function copyJsonToClipboard() {
+            const jsonOutput = document.getElementById('json-output');
+            jsonOutput.select();
+            jsonOutput.setSelectionRange(0, 99999); // Para dispositivos móviles
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    alert('JSON copiado al portapapeles');
+                } else {
+                    alert('Error al copiar al portapapeles');
+                }
+            } catch (err) {
+                console.error('Error al copiar: ', err);
+                alert('Error al copiar al portapapeles');
+            }
+        }
+        
+        // Mostrar modal de ayuda
+        function showHelpModal() {
+            helpModal.style.display = 'flex';
+        }
+        
+        // Cerrar todos los modales
+        function closeAllModals() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.style.display = 'none';
             });
         }
         
@@ -1020,7 +2178,7 @@
                 bubble.textContent = array[index];
                 
                 // Quitar clases anteriores
-                bubble.classList.remove('comparing', 'sorted', 'merging', 'current', 'left', 'right');
+                bubble.classList.remove('comparing', 'sorted', 'merging', 'current', 'left', 'right', 'dividing', 'swapping');
                 
                 // Aplicar clases según el estado
                 if (mergingIndices.includes(index)) {
@@ -1035,6 +2193,11 @@
                 
                 if (sortedIndices.includes(index)) {
                     bubble.classList.add('sorted');
+                }
+                
+                // Aplicar animaciones especiales
+                if (leftIndices.length > 0 || rightIndices.length > 0) {
+                    bubble.classList.add('dividing');
                 }
             });
         }
@@ -1152,11 +2315,56 @@
             // Ejecutar Merge Sort
             try {
                 await mergeSort(0, array.length - 1);
+                
+                // Al finalizar, mostrar subarrays finales
+                showFinalSubarrays();
             } catch (e) {
                 console.log('Ordenamiento detenido:', e);
             }
             
             finishSorting();
+        }
+        
+        // Mostrar subarrays finales
+        function showFinalSubarrays() {
+            finalSubarraysContent.innerHTML = '';
+            
+            // Crear visualización del array ordenado
+            const sortedContainer = document.createElement('div');
+            sortedContainer.classList.add('subarray-container');
+            
+            const sortedLabel = document.createElement('div');
+            sortedLabel.classList.add('subarray-label');
+            sortedLabel.textContent = 'Array Ordenado Final';
+            sortedContainer.appendChild(sortedLabel);
+            
+            const sortedContent = document.createElement('div');
+            sortedContent.classList.add('subarray-content');
+            
+            array.forEach((value, index) => {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble', 'sorted');
+                
+                // Calcular tamaño proporcional al valor
+                const normalizedValue = (value - 10) / 90;
+                const size = 25 + (normalizedValue * (120 - 25));
+                
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                
+                // Ajustar tamaño de fuente
+                const fontSize = Math.max(12, Math.min(20, size * 0.3));
+                bubble.style.fontSize = `${fontSize}px`;
+                
+                bubble.textContent = value;
+                sortedContent.appendChild(bubble);
+            });
+            
+            sortedContainer.appendChild(sortedContent);
+            finalSubarraysContent.appendChild(sortedContainer);
+            
+            // Mostrar la sección
+            finalSubarrays.style.display = 'block';
         }
         
         // Detener el ordenamiento
@@ -1189,6 +2397,7 @@
             
             generateNewArray();
             resetStats();
+            finalSubarrays.style.display = 'none';
         }
         
         // Reiniciar estadísticas
@@ -1209,8 +2418,12 @@
             startSortBtn.disabled = isSorting;
             stopSortBtn.disabled = !isSorting;
             generateArrayBtn.disabled = isSorting;
+            manualInputBtn.disabled = isSorting;
+            importJsonBtn.disabled = isSorting;
+            exportJsonBtn.disabled = isSorting;
+            downloadJsonBtn.disabled = isSorting;
+            downloadImageBtn.disabled = isSorting;
             arraySizeSlider.disabled = isSorting;
-            resetBtn.disabled = isSorting;
         }
         
         // Actualizar botones de dirección

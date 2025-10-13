@@ -1005,8 +1005,7 @@
       <div class="mt-2"><strong>Pares asignados:</strong> ${pairs.length ? pairs.join(', ') : '(ninguna)'}</div>
       <div class="mt-2"><strong>Costo total (según matriz usada):</strong> ${Number.isFinite(total) ? total.toFixed(2) : '∞'}</div>
       <hr style="border-color: rgba(255,255,255,0.08)" />
-      <div><strong>Matriz de costos (entrada):</strong>${costHtml}</div>
-      <div><strong>Matriz resultado (0 = no asignado, 1 = asignado):</strong>${resultHtml}</div>
+
       <small class="text-muted">Nota: celdas con "∞" significan que no existía arista y se usó coste grande para evitar asignación.</small>
     `;
 

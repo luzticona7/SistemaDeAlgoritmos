@@ -6,71 +6,102 @@
     <title>Sistema de Ordenamiento Interactivo con Burbujas</title>
     <style>
         :root {
-            --primary: #6c5ce7;
-            --secondary: #a29bfe;
-            --accent: #fd79a8;
-            --dark: #2d3436;
-            --light: #dfe6e9;
+            --bg: #a2185b;
+            --bg2: #0a192e;
+            --panel: #070b11cc;
+            --panel-border: #ffffff14;
+            --pastel-orange: #FBBD40;
+            --carrot-orange: #EE9029;
+            --hot-pink: #E75CB4;
+            --violet-red: #8C144E;
+            --dark-purple: #2F0C33;
+            --accent: var(--pastel-orange, #FBBD40);
+            --accent-2: var(--carrot-orange, #EE9029);
+            --ink: #eaf6ff;
+            
+            /* Colores para las burbujas */
+            --primary: var(--hot-pink);
+            --secondary: var(--violet-red);
             --success: #00b894;
-            --comparing: #fdcb6e;
-            --pivot: #e17055;
-            --partition: #74b9ff;
+            --comparing: var(--pastel-orange);
             --stop: #e74c3c;
-            --current: #0984e3;
-            --key: #00cec9;
+            --current: var(--pastel-orange);
+            --key: var(--carrot-orange);
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Poppins, Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
         }
         
-        body {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            color: var(--light);
-            min-height: 100vh;
-            padding: 15px;
-            /* QUITAMOS overflow: hidden y permitimos scroll */
+        html, body {
+            height: 100%;
+            margin: 0;
+            min-height: 100%;
+            height: auto;
+            background:
+                radial-gradient(1200px 600px at 10% -10%, #1a2a6c22, transparent 60%),
+                radial-gradient(1000px 700px at 110% 10%, #00d4ff22, transparent 60%),
+                linear-gradient(180deg, var(--bg), var(--bg2));
+            color: var(--ink);
             overflow-x: hidden;
         }
         
-        .container {
+        .container-fluid {
+            padding: 16px;
             max-width: 100%;
             margin: 0 auto;
-            padding: 0 10px;
         }
         
         header {
-            text-align: center;
-            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 3;
+            margin-bottom: 10px;
             padding: 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            background: linear-gradient(135deg, #233164cc, #4b6077cc);
+            border: 1px solid var(--panel-border);
+            backdrop-filter: blur(6px);
+            text-align: center;
+        }
+        
+        .title-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
         }
         
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            background: linear-gradient(to right, var(--primary), var(--accent));
+            margin: 0;
+            font-size: clamp(1.3rem, 2vw + 1rem, 2.2rem);
+            font-weight: 800;
+            letter-spacing: .3px;
+            background: linear-gradient(90deg, #ffffff, var(--accent-2, #EE9029), #ffffff);
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 18px rgba(238,144,41,.06);
         }
         
         .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.8;
+            margin: 0;
+            opacity: .85;
+            font-weight: 600;
+            font-size: .98rem;
         }
         
         .tabs {
             display: flex;
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--panel);
             border-radius: 15px 15px 0 0;
             overflow: hidden;
             margin-bottom: 0;
+            border: 1px solid var(--panel-border);
             backdrop-filter: blur(10px);
         }
         
@@ -97,13 +128,13 @@
         
         .tab-content {
             display: none;
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--panel);
             border-radius: 0 0 15px 15px;
             padding: 20px;
+            border: 1px solid var(--panel-border);
             backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,.35);
             margin-bottom: 20px;
-            /* Permitimos que el contenido crezca según sea necesario */
             min-height: auto;
         }
         
@@ -121,7 +152,6 @@
             display: grid;
             grid-template-columns: 350px 1fr;
             gap: 20px;
-            /* Cambiamos altura fija por min-height */
             min-height: 600px;
             height: auto;
         }
@@ -134,12 +164,12 @@
         }
         
         .controls {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--panel);
             border-radius: 15px;
             padding: 20px;
+            border: 1px solid var(--panel-border);
             backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            /* Permitimos scroll interno si es necesario */
+            box-shadow: 0 10px 30px rgba(0,0,0,.35);
             overflow-y: auto;
             max-height: 80vh;
         }
@@ -151,15 +181,15 @@
         h2 {
             font-size: 1.4rem;
             margin-bottom: 12px;
-            color: var(--secondary);
+            color: var(--accent);
         }
         
         .btn {
-            background: var(--primary);
+            background: var(--secondary);
             color: white;
             border: none;
             padding: 10px 15px;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             font-size: 0.9rem;
             font-weight: 600;
@@ -170,6 +200,9 @@
             gap: 6px;
             flex: 1;
             min-width: 110px;
+            border: 1px solid var(--panel-border);
+            background: #0f1724;
+            position: relative;
         }
         
         .btn:hover {
@@ -194,6 +227,7 @@
         
         .btn-accent {
             background: var(--accent);
+            color: #05121a;
         }
         
         .btn-stop {
@@ -241,28 +275,28 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: var(--primary);
+            background: var(--accent);
             cursor: pointer;
             transition: all 0.2s;
         }
         
         .slider::-webkit-slider-thumb:hover {
-            background: var(--accent);
+            background: var(--accent-2);
             transform: scale(1.2);
         }
         
         .visualization {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--panel);
             border-radius: 15px;
             padding: 20px;
+            border: 1px solid var(--panel-border);
             backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,.35);
             display: flex;
             flex-direction: column;
             min-height: 600px;
             height: auto;
             position: relative;
-            /* Permitimos que crezca según el contenido */
             overflow: visible;
         }
         
@@ -273,14 +307,15 @@
             justify-content: center;
             gap: 12px;
             padding: 20px;
-            background: rgba(0, 0, 0, 0.2);
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 30px rgba(0,0,0,0.5);
             border-radius: 10px;
             margin-bottom: 15px;
             flex-wrap: wrap;
             min-height: 400px;
             position: relative;
             transition: all 0.5s ease;
-            /* Permitimos que el contenedor crezca */
             height: auto;
             max-height: none;
         }
@@ -313,38 +348,38 @@
         
         .bubble.comparing {
             background: var(--comparing);
-            transform: translateY(-40px) scale(1.2);
-            box-shadow: 0 0 30px var(--comparing), 0 10px 25px rgba(0, 0, 0, 0.5);
+            transform: translateY(-80px) scale(1.3);
+            box-shadow: 0 0 40px var(--comparing), 0 15px 35px rgba(0, 0, 0, 0.6);
             z-index: 100;
-            border-color: rgba(255, 255, 255, 0.5);
-            animation: float 1.5s ease-in-out infinite;
+            border-color: rgba(255, 255, 255, 0.7);
+            animation: comparingFloat 1.2s ease-in-out infinite;
         }
         
         .bubble.swapping {
             background: var(--accent);
-            transform: translateY(-60px) scale(1.3);
-            box-shadow: 0 0 40px var(--accent), 0 15px 30px rgba(0, 0, 0, 0.6);
+            transform: translateY(-100px) scale(1.4);
+            box-shadow: 0 0 50px var(--accent), 0 20px 40px rgba(0, 0, 0, 0.7);
             z-index: 200;
-            border-color: rgba(255, 255, 255, 0.7);
-            animation: swapFloat 0.8s ease-in-out infinite;
+            border-color: rgba(255, 255, 255, 0.9);
+            animation: swapFloat 0.6s ease-in-out infinite;
         }
         
         .bubble.current {
             background: var(--current);
-            transform: translateY(-50px) scale(1.25);
-            box-shadow: 0 0 35px var(--current), 0 12px 28px rgba(0, 0, 0, 0.55);
-            z-index: 150;
-            border-color: rgba(255, 255, 255, 0.6);
-            animation: currentFloat 1.2s ease-in-out infinite;
+            transform: translateY(-120px) scale(1.5);
+            box-shadow: 0 0 60px var(--current), 0 25px 45px rgba(0, 0, 0, 0.8);
+            z-index: 250;
+            border-color: rgba(255, 255, 255, 1);
+            animation: currentFloat 0.8s ease-in-out infinite;
         }
         
         .bubble.key {
             background: var(--key);
-            transform: translateY(-70px) scale(1.35);
-            box-shadow: 0 0 45px var(--key), 0 18px 32px rgba(0, 0, 0, 0.65);
-            z-index: 250;
-            border-color: rgba(255, 255, 255, 0.8);
-            animation: keyFloat 1s ease-in-out infinite;
+            transform: translateY(-140px) scale(1.6);
+            box-shadow: 0 0 70px var(--key), 0 30px 50px rgba(0, 0, 0, 0.9);
+            z-index: 300;
+            border-color: rgba(255, 255, 255, 1);
+            animation: keyFloat 0.7s ease-in-out infinite;
         }
         
         .bubble.sorted {
@@ -357,24 +392,24 @@
             transition: all 0.5s ease;
         }
         
-        @keyframes float {
-            0%, 100% { transform: translateY(-40px) scale(1.2); }
-            50% { transform: translateY(-50px) scale(1.25); }
+        @keyframes comparingFloat {
+            0%, 100% { transform: translateY(-80px) scale(1.3); }
+            50% { transform: translateY(-95px) scale(1.35); }
         }
         
         @keyframes swapFloat {
-            0%, 100% { transform: translateY(-60px) scale(1.3); }
-            50% { transform: translateY(-70px) scale(1.35); }
+            0%, 100% { transform: translateY(-100px) scale(1.4); }
+            50% { transform: translateY(-120px) scale(1.5); }
         }
         
         @keyframes currentFloat {
-            0%, 100% { transform: translateY(-50px) scale(1.25); }
-            50% { transform: translateY(-60px) scale(1.3); }
+            0%, 100% { transform: translateY(-120px) scale(1.5); }
+            50% { transform: translateY(-140px) scale(1.6); }
         }
         
         @keyframes keyFloat {
-            0%, 100% { transform: translateY(-70px) scale(1.35); }
-            50% { transform: translateY(-80px) scale(1.4); }
+            0%, 100% { transform: translateY(-140px) scale(1.6); }
+            50% { transform: translateY(-160px) scale(1.7); }
         }
         
         .stats {
@@ -394,7 +429,7 @@
         .stat-value {
             font-size: 1.5rem;
             font-weight: bold;
-            color: var(--secondary);
+            color: var(--accent);
         }
         
         .stat-label {
@@ -493,6 +528,391 @@
             color: var(--accent);
         }
 
+        /* Botones encima de la pizarra */
+        .visualization-controls {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .visualization-btn {
+            background: #0f1724;
+            color: #e8f6ff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            border: 1px solid var(--panel-border);
+            position: relative;
+        }
+        
+        .visualization-btn:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .visualization-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .visualization-btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Tooltips para botones */
+        .btn-tooltip, .visualization-btn-tooltip {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+        
+        .btn:hover .btn-tooltip, .visualization-btn:hover .visualization-btn-tooltip {
+            opacity: 1;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, var(--bg2), var(--dark-purple));
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--panel-border);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--ink);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close-modal:hover {
+            color: var(--accent);
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--panel-border);
+            background: #0b1326;
+            color: var(--ink);
+            font-size: 1rem;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 .15rem var(--accent);
+        }
+        
+        .help-content {
+            line-height: 1.6;
+        }
+        
+        .help-section {
+            margin-bottom: 20px;
+        }
+        
+        .help-section h3 {
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        
+        .help-section p {
+            margin-bottom: 8px;
+        }
+        
+        .help-list {
+            padding-left: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .help-list li {
+            margin-bottom: 5px;
+        }
+        
+        .json-area {
+            width: 100%;
+            height: 150px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--panel-border);
+            background: #0b1326;
+            color: var(--ink);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+        }
+        
+        .json-area:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .json-error {
+            color: var(--stop);
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* Estilos para entrada manual mejorada */
+        .array-input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .array-values-input {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .array-values-input input {
+            flex: 1;
+        }
+        
+        .array-values-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+            max-height: 120px;
+            overflow-y: auto;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        
+        .array-value-item {
+            background: var(--primary);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .remove-value {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .remove-value:hover {
+            background: var(--stop);
+        }
+
+        /* Indicador de estado del array */
+        .array-status {
+            margin-top: 10px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .array-status.complete {
+            background: rgba(0, 184, 148, 0.2);
+            color: #00b894;
+        }
+        
+        .array-status.incomplete {
+            background: rgba(253, 203, 110, 0.2);
+            color: var(--pastel-orange);
+        }
+
+        /* Nuevas animaciones más pronunciadas */
+        .bubble.swap-animation {
+            animation: swapBubble 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+        
+        @keyframes swapBubble {
+            0% { transform: translateY(0) scale(1); }
+            30% { transform: translateY(-150px) scale(1.5); }
+            70% { transform: translateY(-150px) scale(1.5); }
+            100% { transform: translateY(0) scale(1); }
+        }
+        
+        .bubble.insertion-highlight {
+            animation: insertionHighlight 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes insertionHighlight {
+            0%, 100% { 
+                transform: translateY(0) scale(1); 
+                box-shadow: 0 0 20px var(--key);
+            }
+            50% { 
+                transform: translateY(-80px) scale(1.3); 
+                box-shadow: 0 0 40px var(--key);
+            }
+        }
+        
+        .step-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: var(--accent);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            z-index: 1000;
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 20px var(--accent);
+            animation: stepIndicator 1s ease-in-out;
+        }
+        
+        @keyframes stepIndicator {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            70% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        /* Efectos de trayectoria */
+        .bubble-path {
+            position: absolute;
+            stroke-dasharray: 5;
+            stroke: var(--accent);
+            stroke-width: 2;
+            fill: none;
+            z-index: 50;
+            pointer-events: none;
+        }
+        
+        .swap-trail {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0.5;
+            z-index: 150;
+            pointer-events: none;
+        }
+        
+        .bubble-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 3px solid;
+            border-color: var(--comparing);
+            box-shadow: 0 0 15px var(--comparing);
+            animation: ringPulse 1.5s infinite;
+            z-index: 5;
+        }
+        
+        @keyframes ringPulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.2); opacity: 0.4; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        /* Estilos para nombres personalizados */
+        .filename-input {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .filename-input input {
+            flex: 1;
+        }
+        
+        .filename-hint {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 5px;
+        }
+        
+        .filename-error {
+            color: #ff6b6b;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
+        }
+
         /* Aseguramos que el contenido sea responsive */
         @media (max-height: 800px) {
             .main-content {
@@ -525,13 +945,35 @@
                 min-height: 250px;
             }
         }
+
+        @media (max-width: 768px) {
+            .visualization-controls {
+                gap: 5px;
+            }
+            
+            .visualization-btn {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+            
+            .modal-content {
+                padding: 20px;
+                width: 95%;
+            }
+            
+            .array-values-input {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container-fluid">
         <header>
-            <h1>Sistema de Ordenamiento con Burbujas</h1>
-            <p class="subtitle">Insertion Sort y Selection Sort - Versión Burbujas</p>
+            <div class="title-wrap">
+                <h1>Sistema de Ordenamiento con Burbujas</h1>
+                <p class="subtitle">Insertion Sort y Selection Sort - Versión Burbujas</p>
+            </div>
         </header>
         
         <div class="tabs">
@@ -574,6 +1016,10 @@
                         <h2>Acciones</h2>
                         <div class="btn-group">
                             <button class="btn btn-secondary" id="insertion-generate-array">Generar Nuevo Array</button>
+                            <button class="btn" id="insertion-manual-input">
+                                ✏️
+                                <span class="btn-tooltip">Entrada Manual</span>
+                            </button>
                             <button class="btn btn-accent" id="insertion-start-sort">Iniciar Ordenamiento</button>
                             <button class="btn btn-stop" id="insertion-stop-sort">Detener</button>
                             <button class="btn" id="insertion-reset">Reiniciar</button>
@@ -601,29 +1047,53 @@
                 </div>
                 
                 <div class="visualization">
+                    <!-- Botones encima de la pizarra -->
+                    <div class="visualization-controls">
+                        <button class="visualization-btn" id="insertion-import-json">
+                            📥
+                            <span class="visualization-btn-tooltip">Importar JSON</span>
+                        </button>
+                        <button class="visualization-btn" id="insertion-export-json">
+                            📤
+                            <span class="visualization-btn-tooltip">Exportar JSON</span>
+                        </button>
+                        <button class="visualization-btn" id="insertion-download-json">
+                            💾
+                            <span class="visualization-btn-tooltip">Descargar JSON</span>
+                        </button>
+                        <button class="visualization-btn" id="insertion-download-image">
+                            🖼️
+                            <span class="visualization-btn-tooltip">Capturar Imagen</span>
+                        </button>
+                        <button class="visualization-btn" id="insertion-help-button">
+                            ❓
+                            <span class="visualization-btn-tooltip">Ayuda</span>
+                        </button>
+                    </div>
+                    
                     <div class="bubbles-container" id="insertion-bubbles-container">
                         <!-- Las burbujas se generarán dinámicamente con JavaScript -->
                     </div>
                     
                     <div class="legend">
                         <div class="legend-item">
-                            <div class="legend-color" style="background-color: #6c5ce7;"></div>
+                            <div class="legend-color" style="background-color: var(--hot-pink);"></div>
                             <span>Normal</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-color" style="background-color: #fdcb6e;"></div>
+                            <div class="legend-color" style="background-color: var(--pastel-orange);"></div>
                             <span>Comparando</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-color" style="background-color: #0984e3;"></div>
+                            <div class="legend-color" style="background-color: var(--pastel-orange);"></div>
                             <span>Elemento Actual</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-color" style="background-color: #00cec9;"></div>
+                            <div class="legend-color" style="background-color: var(--carrot-orange);"></div>
                             <span>Clave</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-color" style="background-color: #fd79a8;"></div>
+                            <div class="legend-color" style="background-color: var(--accent);"></div>
                             <span>Intercambiando</span>
                         </div>
                         <div class="legend-item">
@@ -685,6 +1155,10 @@
                         <h2>Acciones</h2>
                         <div class="btn-group">
                             <button class="btn btn-secondary" id="selection-generate-array">Generar Nuevo Array</button>
+                            <button class="btn" id="selection-manual-input">
+                                ✏️
+                                <span class="btn-tooltip">Entrada Manual</span>
+                            </button>
                             <button class="btn btn-accent" id="selection-start-sort">Iniciar Ordenamiento</button>
                             <button class="btn btn-stop" id="selection-stop-sort">Detener</button>
                             <button class="btn" id="selection-reset">Reiniciar</button>
@@ -712,29 +1186,53 @@
                 </div>
                 
                 <div class="visualization">
+                    <!-- Botones encima de la pizarra -->
+                    <div class="visualization-controls">
+                        <button class="visualization-btn" id="selection-import-json">
+                            📥
+                            <span class="visualization-btn-tooltip">Importar JSON</span>
+                        </button>
+                        <button class="visualization-btn" id="selection-export-json">
+                            📤
+                            <span class="visualization-btn-tooltip">Exportar JSON</span>
+                        </button>
+                        <button class="visualization-btn" id="selection-download-json">
+                            💾
+                            <span class="visualization-btn-tooltip">Descargar JSON</span>
+                        </button>
+                        <button class="visualization-btn" id="selection-download-image">
+                            🖼️
+                            <span class="visualization-btn-tooltip">Capturar Imagen</span>
+                        </button>
+                        <button class="visualization-btn" id="selection-help-button">
+                            ❓
+                            <span class="visualization-btn-tooltip">Ayuda</span>
+                        </button>
+                    </div>
+                    
                     <div class="bubbles-container" id="selection-bubbles-container">
                         <!-- Las burbujas se generarán dinámicamente con JavaScript -->
                     </div>
                     
                     <div class="legend">
                         <div class="legend-item">
-                            <div class="legend-color" style="background-color: #6c5ce7;"></div>
+                            <div class="legend-color" style="background-color: var(--hot-pink);"></div>
                             <span>Normal</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-color" style="background-color: #fdcb6e;"></div>
+                            <div class="legend-color" style="background-color: var(--pastel-orange);"></div>
                             <span>Comparando</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-color" style="background-color: #0984e3;"></div>
+                            <div class="legend-color" style="background-color: var(--pastel-orange);"></div>
                             <span>Mínimo Actual</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-color" style="background-color: #00cec9;"></div>
+                            <div class="legend-color" style="background-color: var(--carrot-orange);"></div>
                             <span>Seleccionado</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-color" style="background-color: #fd79a8;"></div>
+                            <div class="legend-color" style="background-color: var(--accent);"></div>
                             <span>Intercambiando</span>
                         </div>
                         <div class="legend-item">
@@ -762,6 +1260,184 @@
         </div>
     </div>
 
+    <!-- Modal para entrada manual -->
+    <div class="modal" id="manual-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Entrada Manual de Datos</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="array-input-container">
+                <div class="input-group">
+                    <label class="input-label">Tamaño del Array:</label>
+                    <input type="number" id="manual-size" class="input-field" min="1" max="50" value="20">
+                    <button class="btn btn-secondary" id="generate-random" style="margin-top: 10px; width: 100%;">
+                        🎲 Generar Valores Aleatorios
+                    </button>
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">Agregar Valor (uno por uno):</label>
+                    <div class="array-values-input">
+                        <input type="number" id="manual-value" class="input-field" min="10" max="100" placeholder="Valor entre 10 y 100">
+                        <button class="btn" id="add-value" disabled>➕ Agregar</button>
+                    </div>
+                    <div class="array-values-list" id="values-list">
+                        <!-- Los valores se agregarán aquí dinámicamente -->
+                    </div>
+                    <div class="array-status incomplete" id="array-status">
+                        Array incompleto: 0/20 elementos
+                    </div>
+                    <button class="btn btn-stop" id="clear-array" style="margin-top: 10px; width: 100%;">
+                        🗑️ Limpiar Array
+                    </button>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" id="apply-manual" disabled>✅ Aplicar</button>
+                <button class="btn btn-secondary" id="cancel-manual">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para importar JSON -->
+    <div class="modal" id="import-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Importar desde JSON</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Seleccionar archivo JSON:</label>
+                <input type="file" id="json-file" class="input-field" accept=".json">
+                <div style="text-align: center; margin: 10px 0; color: var(--accent);">O</div>
+                <label class="input-label">Pegar JSON Data:</label>
+                <textarea id="json-input" class="json-area" placeholder='{"array": [10, 20, 30, 40, 50], "size": 5}'></textarea>
+                <div class="json-error" id="json-error">Error: JSON inválido</div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" id="apply-json">✅ Importar</button>
+                <button class="btn btn-secondary" id="cancel-json">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para exportar JSON -->
+    <div class="modal" id="export-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Exportar a JSON</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="input-group">
+                <label class="input-label">JSON Data:</label>
+                <textarea id="json-output" class="json-area" readonly></textarea>
+            </div>
+            <div class="btn-group">
+                <button class="btn" id="copy-json">📋 Copiar al Portapapeles</button>
+                <button class="btn btn-secondary" id="close-export">❌ Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para descargar JSON con nombre personalizado -->
+    <div class="modal" id="download-json-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Descargar JSON</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Nombre del archivo:</label>
+                <div class="filename-input">
+                    <input type="text" id="json-filename" class="input-field" value="sorting-array" placeholder="Ingrese nombre del archivo">
+                    <span>.json</span>
+                </div>
+                <div class="filename-hint">El archivo se descargará con extensión .json</div>
+                <div class="filename-error" id="json-filename-error">Nombre de archivo no válido</div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" id="confirm-download-json">💾 Descargar</button>
+                <button class="btn btn-secondary" id="cancel-download-json">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para descargar imagen con nombre personalizado -->
+    <div class="modal" id="download-image-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Capturar Imagen</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Nombre del archivo:</label>
+                <div class="filename-input">
+                    <input type="text" id="image-filename" class="input-field" value="sorting-visualization" placeholder="Ingrese nombre del archivo">
+                    <span>.png</span>
+                </div>
+                <div class="filename-hint">La imagen se descargará en formato PNG</div>
+                <div class="filename-error" id="image-filename-error">Nombre de archivo no válido</div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" id="confirm-download-image">🖼️ Capturar y Descargar</button>
+                <button class="btn btn-secondary" id="cancel-download-image">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de ayuda -->
+    <div class="modal" id="help-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Ayuda - Sistema de Ordenamiento</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="help-content">
+                <div class="help-section">
+                    <h3>¿Qué es este sistema?</h3>
+                    <p>Este sistema permite visualizar dos algoritmos de ordenamiento: Insertion Sort y Selection Sort, utilizando burbujas animadas para representar los elementos del array.</p>
+                </div>
+                
+                <div class="help-section">
+                    <h3>Cómo usar la aplicación</h3>
+                    <ul class="help-list">
+                        <li><strong>Generar Aleatorio:</strong> Crea un array con valores aleatorios</li>
+                        <li><strong>Entrada Manual:</strong> Permite ingresar el tamaño y valores específicos del array</li>
+                        <li><strong>Importar JSON:</strong> Carga un array desde un archivo JSON o texto</li>
+                        <li><strong>Exportar JSON:</strong> Muestra el array actual en formato JSON</li>
+                        <li><strong>Descargar JSON:</strong> Guarda el array actual en un archivo JSON</li>
+                        <li><strong>Capturar Imagen:</strong> Descarga una imagen del algoritmo ordenado</li>
+                        <li><strong>Iniciar Ordenamiento:</strong> Comienza la visualización del algoritmo</li>
+                        <li><strong>Detener:</strong> Pausa la visualización en curso</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>Leyenda de colores</h3>
+                    <ul class="help-list">
+                        <li><span style="color: var(--hot-pink);">●</span> Elemento normal</li>
+                        <li><span style="color: var(--pastel-orange);">●</span> Elementos comparados</li>
+                        <li><span style="color: var(--pastel-orange);">●</span> Elemento actual</li>
+                        <li><span style="color: var(--carrot-orange);">●</span> Elemento clave (Insertion) / Seleccionado (Selection)</li>
+                        <li><span style="color: var(--accent);">●</span> Elementos intercambiándose</li>
+                        <li><span style="color: #00b894;">●</span> Elementos ordenados</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>Formatos de entrada</h3>
+                    <p><strong>Entrada Manual:</strong> Puede generar valores aleatorios o agregar valores uno por uno</p>
+                    <p><strong>Importar JSON:</strong> El formato debe ser: {"array": [valores], "size": tamaño}. El tamaño debe coincidir con la longitud del array.</p>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" id="close-help">❌ Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script>
         // Clase base para algoritmos de ordenamiento con burbujas
         class BubbleSortingAlgorithm {
@@ -778,7 +1454,8 @@
                 this.startTime = 0;
                 this.bubbleInterval = null;
                 this.bubblePositions = [];
-                this.isInitialized = false; // Nueva bandera para controlar inicialización
+                this.isInitialized = false;
+                this.manualArray = [];
                 
                 // Elementos del DOM
                 this.bubblesContainer = document.getElementById(`${prefix}-bubbles-container`);
@@ -795,6 +1472,12 @@
                 this.comparisonsElement = document.getElementById(`${prefix}-comparisons`);
                 this.swapsElement = document.getElementById(`${prefix}-swaps`);
                 this.timeElement = document.getElementById(`${prefix}-time`);
+                this.manualInputBtn = document.getElementById(`${prefix}-manual-input`);
+                this.importJsonBtn = document.getElementById(`${prefix}-import-json`);
+                this.exportJsonBtn = document.getElementById(`${prefix}-export-json`);
+                this.downloadJsonBtn = document.getElementById(`${prefix}-download-json`);
+                this.downloadImageBtn = document.getElementById(`${prefix}-download-image`);
+                this.helpButton = document.getElementById(`${prefix}-help-button`);
                 
                 this.setupEventListeners();
                 this.updateDirectionButtons();
@@ -837,6 +1520,14 @@
                     this.sortDirection = 'descending';
                     this.updateDirectionButtons();
                 });
+                
+                // Nuevos botones
+                this.manualInputBtn.addEventListener('click', () => this.showManualInputModal());
+                this.importJsonBtn.addEventListener('click', () => this.showImportModal());
+                this.exportJsonBtn.addEventListener('click', () => this.showExportModal());
+                this.downloadJsonBtn.addEventListener('click', () => this.showDownloadJsonModal());
+                this.downloadImageBtn.addEventListener('click', () => this.showDownloadImageModal());
+                this.helpButton.addEventListener('click', () => this.showHelpModal());
             }
             
             generateNewArray() {
@@ -990,6 +1681,9 @@
                 const minSize = 25;
                 const maxSize = 120;
                 
+                // Limpiar efectos anteriores
+                document.querySelectorAll('.bubble-path, .swap-trail, .bubble-ring').forEach(el => el.remove());
+                
                 // Remover indicador de operación actual si existe
                 const existingOperation = this.bubblesContainer.querySelector('.current-operation');
                 if (existingOperation) {
@@ -1018,6 +1712,16 @@
                     this.bubblesContainer.appendChild(operationIndicator);
                 }
                 
+                // Añadir efectos visuales para comparación
+                if (highlightIndices.length > 0) {
+                    this.addComparisonEffects(highlightIndices);
+                }
+                
+                // Añadir efectos visuales para intercambio
+                if (swappingIndices.length > 0) {
+                    this.performSwapAnimation(swappingIndices[0], swappingIndices[1]);
+                }
+                
                 bubbles.forEach((bubble, index) => {
                     // Actualizar tamaño
                     const normalizedValue = (this.array[index] - 10) / 90;
@@ -1033,23 +1737,145 @@
                     bubble.textContent = this.array[index];
                     
                     // Quitar clases anteriores
-                    bubble.classList.remove('comparing', 'sorted', 'current', 'key', 'swapping');
+                    bubble.classList.remove('comparing', 'sorted', 'current', 'key', 'swapping', 'swap-animation', 'insertion-highlight');
                     
                     // Aplicar clases según el estado
                     if (swappingIndices.includes(index)) {
-                        bubble.classList.add('swapping');
+                        bubble.classList.add('swapping', 'swap-animation');
                     } else if (highlightIndices.includes(index)) {
                         bubble.classList.add('comparing');
                     } else if (index === currentIndex) {
                         bubble.classList.add('current');
                     } else if (index === keyIndex) {
-                        bubble.classList.add('key');
+                        bubble.classList.add('key', 'insertion-highlight');
                     }
                     
                     if (sortedIndices.includes(index)) {
                         bubble.classList.add('sorted');
                     }
                 });
+            }
+            
+            // Añadir efectos visuales para comparación
+            addComparisonEffects(indices) {
+                const bubbles = this.bubblesContainer.querySelectorAll('.bubble');
+                
+                indices.forEach(index => {
+                    const bubble = bubbles[index];
+                    
+                    // Crear anillo de comparación
+                    const ring = document.createElement('div');
+                    ring.classList.add('bubble-ring');
+                    bubble.appendChild(ring);
+                    
+                    // Remover efectos después de un tiempo
+                    setTimeout(() => {
+                        if (ring.parentNode) ring.remove();
+                    }, this.animationSpeed);
+                });
+            }
+            
+            // Realizar animación de intercambio mejorada
+            performSwapAnimation(index1, index2) {
+                const bubbles = this.bubblesContainer.querySelectorAll('.bubble');
+                const bubble1 = bubbles[index1];
+                const bubble2 = bubbles[index2];
+                
+                // Guardar posiciones originales
+                const rect1 = bubble1.getBoundingClientRect();
+                const rect2 = bubble2.getBoundingClientRect();
+                const containerRect = this.bubblesContainer.getBoundingClientRect();
+                
+                const pos1 = {
+                    x: rect1.left - containerRect.left + rect1.width / 2,
+                    y: rect1.top - containerRect.top + rect1.height / 2
+                };
+                
+                const pos2 = {
+                    x: rect2.left - containerRect.left + rect2.width / 2,
+                    y: rect2.top - containerRect.top + rect2.height / 2
+                };
+                
+                // Crear trayectoria de intercambio
+                this.createSwapPath(pos1, pos2);
+                
+                // Crear partículas de intercambio
+                this.createSwapParticles(pos1, pos2);
+            }
+            
+            // Crear trayectoria de intercambio
+            createSwapPath(pos1, pos2) {
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                path.classList.add('bubble-path');
+                path.style.position = 'absolute';
+                path.style.left = '0';
+                path.style.top = '0';
+                path.style.width = '100%';
+                path.style.height = '100%';
+                path.style.pointerEvents = 'none';
+                
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                const midX = (pos1.x + pos2.x) / 2;
+                const midY = (pos1.y + pos2.y) / 2 - 50; // Curva hacia arriba
+                
+                line.setAttribute('d', `M ${pos1.x} ${pos1.y} Q ${midX} ${midY} ${pos2.x} ${pos2.y}`);
+                line.setAttribute('stroke', 'var(--accent)');
+                line.setAttribute('stroke-width', '2');
+                line.setAttribute('fill', 'none');
+                line.setAttribute('stroke-dasharray', '5');
+                
+                path.appendChild(line);
+                this.bubblesContainer.appendChild(path);
+                
+                // Remover después de la animación
+                setTimeout(() => {
+                    if (path.parentNode) path.remove();
+                }, this.animationSpeed * 2);
+            }
+            
+            // Crear partículas de intercambio
+            createSwapParticles(pos1, pos2) {
+                const particleCount = 8;
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('swap-trail');
+                    
+                    // Posición aleatoria a lo largo de la trayectoria
+                    const t = i / particleCount;
+                    const x = pos1.x + (pos2.x - pos1.x) * t;
+                    const y = pos1.y + (pos2.y - pos1.y) * t - Math.sin(t * Math.PI) * 50;
+                    
+                    particle.style.left = `${x}px`;
+                    particle.style.top = `${y}px`;
+                    
+                    this.bubblesContainer.appendChild(particle);
+                    
+                    // Animación de partícula
+                    setTimeout(() => {
+                        particle.style.transition = 'all 0.3s ease';
+                        particle.style.opacity = '0';
+                        particle.style.transform = 'scale(0)';
+                        
+                        setTimeout(() => {
+                            if (particle.parentNode) particle.remove();
+                        }, 300);
+                    }, i * 50);
+                }
+            }
+            
+            // Mostrar indicador de paso del algoritmo
+            showStepIndicator(text) {
+                const indicator = document.createElement('div');
+                indicator.classList.add('step-indicator');
+                indicator.textContent = text;
+                this.bubblesContainer.appendChild(indicator);
+                
+                setTimeout(() => {
+                    if (indicator.parentNode) {
+                        indicator.remove();
+                    }
+                }, 1000);
             }
             
             startSorting() {
@@ -1112,6 +1938,11 @@
                 this.generateArrayBtn.disabled = this.isSorting;
                 this.arraySizeSlider.disabled = this.isSorting;
                 this.resetBtn.disabled = this.isSorting;
+                this.manualInputBtn.disabled = this.isSorting;
+                this.importJsonBtn.disabled = this.isSorting;
+                this.exportJsonBtn.disabled = this.isSorting;
+                this.downloadJsonBtn.disabled = this.isSorting;
+                this.downloadImageBtn.disabled = this.isSorting;
             }
             
             updateDirectionButtons() {
@@ -1133,139 +1964,445 @@
                 return this.stopRequested;
             }
             
+            // Métodos para entrada manual, importación y exportación
+            showManualInputModal() {
+                if (this.isSorting) return;
+                
+                document.getElementById('manual-size').value = this.arraySize;
+                document.getElementById('manual-value').value = '';
+                this.manualArray = [...this.array];
+                this.updateManualArrayDisplay();
+                this.updateManualArrayStatus();
+                document.getElementById('manual-modal').style.display = 'flex';
+            }
+            
+            updateManualArrayDisplay() {
+                const valuesList = document.getElementById('values-list');
+                valuesList.innerHTML = '';
+                
+                this.manualArray.forEach((value, index) => {
+                    const valueItem = document.createElement('div');
+                    valueItem.classList.add('array-value-item');
+                    valueItem.innerHTML = `
+                        ${value}
+                        <button class="remove-value" data-index="${index}">×</button>
+                    `;
+                    valuesList.appendChild(valueItem);
+                });
+                
+                // Agregar event listeners a los botones de eliminar
+                document.querySelectorAll('.remove-value').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const index = parseInt(e.target.getAttribute('data-index'));
+                        this.manualArray.splice(index, 1);
+                        this.updateManualArrayDisplay();
+                        this.updateManualArrayStatus();
+                    });
+                });
+            }
+            
+            updateManualArrayStatus() {
+                const targetSize = parseInt(document.getElementById('manual-size').value);
+                const currentSize = this.manualArray.length;
+                const arrayStatus = document.getElementById('array-status');
+                const addValueBtn = document.getElementById('add-value');
+                const applyBtn = document.getElementById('apply-manual');
+                
+                // Actualizar texto de estado
+                if (currentSize === targetSize) {
+                    arrayStatus.textContent = `Array completo: ${currentSize}/${targetSize} elementos`;
+                    arrayStatus.className = 'array-status complete';
+                    // Deshabilitar agregar valores cuando está completo
+                    addValueBtn.disabled = true;
+                    // Habilitar aplicar cuando está completo
+                    applyBtn.disabled = false;
+                } else {
+                    arrayStatus.textContent = `Array incompleto: ${currentSize}/${targetSize} elementos`;
+                    arrayStatus.className = 'array-status incomplete';
+                    // Habilitar agregar valores cuando está incompleto
+                    addValueBtn.disabled = false;
+                    // Deshabilitar aplicar cuando está incompleto
+                    applyBtn.disabled = true;
+                }
+            }
+            
+            applyManualInput() {
+                const sizeInput = document.getElementById('manual-size');
+                const newSize = parseInt(sizeInput.value);
+                
+                if (newSize < 1 || newSize > 50) {
+                    alert('El tamaño debe estar entre 1 y 50');
+                    return;
+                }
+                
+                // Verificar que el array esté completo
+                if (this.manualArray.length !== newSize) {
+                    alert(`El array debe tener exactamente ${newSize} elementos. Actualmente tiene ${this.manualArray.length}.`);
+                    return;
+                }
+                
+                this.array = [...this.manualArray];
+                this.arraySize = newSize;
+                this.arraySizeSlider.value = this.arraySize;
+                this.sizeValue.textContent = this.arraySize;
+                
+                this.renderBubbles();
+                this.resetStats();
+                this.startBubbleMovement();
+                this.closeAllModals();
+            }
+            
+            showImportModal() {
+                if (this.isSorting) return;
+                
+                document.getElementById('json-input').value = '';
+                document.getElementById('json-file').value = '';
+                document.getElementById('json-error').style.display = 'none';
+                document.getElementById('import-modal').style.display = 'flex';
+            }
+            
+            applyJsonImport() {
+                const jsonInput = document.getElementById('json-input').value.trim();
+                const errorElement = document.getElementById('json-error');
+                
+                if (!jsonInput) {
+                    errorElement.textContent = 'Error: El campo JSON está vacío';
+                    errorElement.style.display = 'block';
+                    return;
+                }
+                
+                try {
+                    const data = JSON.parse(jsonInput);
+                    
+                    if (!data.array || !Array.isArray(data.array)) {
+                        errorElement.textContent = 'Error: El JSON debe contener un campo "array" con un array de números';
+                        errorElement.style.display = 'block';
+                        return;
+                    }
+                    
+                    // Validar que todos los elementos sean números
+                    const isValidArray = data.array.every(val => typeof val === 'number' && !isNaN(val));
+                    if (!isValidArray) {
+                        errorElement.textContent = 'Error: Todos los elementos del array deben ser números válidos';
+                        errorElement.style.display = 'block';
+                        return;
+                    }
+                    
+                    // Aplicar los datos
+                    this.array = data.array;
+                    this.arraySize = this.array.length;
+                    
+                    // Actualizar controles
+                    this.arraySizeSlider.value = this.arraySize;
+                    this.sizeValue.textContent = this.arraySize;
+                    
+                    this.renderBubbles();
+                    this.resetStats();
+                    this.startBubbleMovement();
+                    this.closeAllModals();
+                    
+                } catch (error) {
+                    errorElement.textContent = 'Error: JSON inválido - ' + error.message;
+                    errorElement.style.display = 'block';
+                }
+            }
+            
+            showExportModal() {
+                const jsonData = {
+                    array: this.array,
+                    size: this.arraySize,
+                    description: `Array para ${this.prefix === 'insertion' ? 'Insertion Sort' : 'Selection Sort'}`,
+                    timestamp: new Date().toISOString()
+                };
+                
+                document.getElementById('json-output').value = JSON.stringify(jsonData, null, 2);
+                document.getElementById('export-modal').style.display = 'flex';
+            }
+            
+            // Mostrar modal para descargar JSON con nombre personalizado
+            showDownloadJsonModal() {
+                if (this.isSorting) return;
+                
+                document.getElementById('json-filename').value = `${this.prefix}-sort-array-${new Date().getTime()}`;
+                document.getElementById('json-filename-error').style.display = 'none';
+                document.getElementById('download-json-modal').style.display = 'flex';
+            }
+            
+            // Mostrar modal para descargar imagen con nombre personalizado
+            showDownloadImageModal() {
+                if (this.isSorting) return;
+                
+                document.getElementById('image-filename').value = `${this.prefix}-sort-visualization-${new Date().getTime()}`;
+                document.getElementById('image-filename-error').style.display = 'none';
+                document.getElementById('download-image-modal').style.display = 'flex';
+            }
+            
+            // Confirmar descarga de JSON con nombre personalizado
+            confirmDownloadJson() {
+                const filenameInput = document.getElementById('json-filename');
+                const filename = filenameInput.value.trim();
+                
+                if (!this.validateFilename()) {
+                    return;
+                }
+                
+                const jsonData = {
+                    array: this.array,
+                    size: this.arraySize,
+                    description: `Array para ${this.prefix === 'insertion' ? 'Insertion Sort' : 'Selection Sort'}`,
+                    timestamp: new Date().toISOString()
+                };
+                
+                const dataStr = JSON.stringify(jsonData, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(dataBlob);
+                link.download = `${filename}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                this.closeAllModals();
+            }
+            
+            // Confirmar descarga de imagen con nombre personalizado
+            confirmDownloadImage() {
+                const filenameInput = document.getElementById('image-filename');
+                const filename = filenameInput.value.trim();
+                
+                if (!this.validateFilename()) {
+                    return;
+                }
+                
+                // Usar html2canvas para capturar la visualización
+                html2canvas(document.querySelector(`#${this.prefix}-content .visualization`), {
+                    backgroundColor: '#0a192e',
+                    scale: 2,
+                    logging: false,
+                    useCORS: true
+                }).then(canvas => {
+                    // Convertir canvas a imagen y descargar
+                    const link = document.createElement('a');
+                    link.download = `${filename}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                });
+                
+                this.closeAllModals();
+            }
+            
+            // Validar nombre de archivo
+            validateFilename() {
+                const activeModal = document.querySelector('.modal[style*="display: flex"]');
+                if (!activeModal) return true;
+                
+                let filenameInput, errorElement;
+                
+                if (activeModal.id === 'download-json-modal') {
+                    filenameInput = document.getElementById('json-filename');
+                    errorElement = document.getElementById('json-filename-error');
+                } else if (activeModal.id === 'download-image-modal') {
+                    filenameInput = document.getElementById('image-filename');
+                    errorElement = document.getElementById('image-filename-error');
+                } else {
+                    return true;
+                }
+                
+                const filename = filenameInput.value.trim();
+                
+                // Validar que no esté vacío
+                if (filename === '') {
+                    errorElement.textContent = 'El nombre del archivo no puede estar vacío';
+                    errorElement.style.display = 'block';
+                    return false;
+                }
+                
+                // Validar caracteres no permitidos
+                const invalidChars = /[<>:"/\\|?*]/;
+                if (invalidChars.test(filename)) {
+                    errorElement.textContent = 'El nombre contiene caracteres no permitidos: < > : " / \\ | ? *';
+                    errorElement.style.display = 'block';
+                    return false;
+                }
+                
+                // Validar longitud
+                if (filename.length > 100) {
+                    errorElement.textContent = 'El nombre es demasiado largo (máximo 100 caracteres)';
+                    errorElement.style.display = 'block';
+                    return false;
+                }
+                
+                // Si pasa todas las validaciones
+                errorElement.style.display = 'none';
+                return true;
+            }
+            
+            showHelpModal() {
+                document.getElementById('help-modal').style.display = 'flex';
+            }
+            
+            closeAllModals() {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.style.display = 'none';
+                });
+            }
+            
             // Método abstracto
             async sort() {
                 throw new Error('Método sort debe ser implementado por la subclase');
             }
         }
 
-        // Insertion Sort con burbujas
+        // Insertion Sort con burbujas - CORREGIDO
         class InsertionSortBubble extends BubbleSortingAlgorithm {
             constructor() {
                 super('insertion');
             }
             
             async sort() {
+                this.showStepIndicator("Iniciando Insertion Sort");
+                await this.sleep(this.animationSpeed * 2);
+                
+                // El primer elemento ya está "ordenado"
+                const sortedIndices = [0];
+                this.updateBubblesVisualization([], sortedIndices);
+                await this.sleep(this.animationSpeed);
+                
                 for (let i = 1; i < this.array.length && !this.shouldStop(); i++) {
-                    let j = i;
                     const key = this.array[i];
+                    let j = i - 1;
                     
-                    // Resaltar el elemento clave
-                    this.updateBubblesVisualization([], [], null, i);
+                    // Resaltar el elemento clave (el que vamos a insertar)
+                    this.updateBubblesVisualization([], sortedIndices, null, i);
                     await this.sleep(this.animationSpeed);
                     
-                    while (j > 0 && !this.shouldStop()) {
+                    // Mover elementos mayores que la clave una posición adelante
+                    while (j >= 0 && !this.shouldStop()) {
                         // Resaltar elementos comparados
-                        this.updateBubblesVisualization([j, j-1], [], null, i);
+                        this.updateBubblesVisualization([j, i], sortedIndices, null, i);
                         
                         this.comparisons++;
                         this.comparisonsElement.textContent = this.comparisons;
                         
                         await this.sleep(this.animationSpeed);
                         
-                        const shouldSwap = this.sortDirection === 'ascending' 
-                            ? this.array[j-1] > key 
-                            : this.array[j-1] < key;
+                        // Verificar si necesitamos mover el elemento
+                        const shouldMove = this.sortDirection === 'ascending' 
+                            ? this.array[j] > key 
+                            : this.array[j] < key;
                         
-                        if (!shouldSwap) break;
+                        if (!shouldMove) break;
                         
-                        // Mostrar animación de intercambio
-                        this.updateBubblesVisualization([], [], null, i, [j, j-1]);
+                        // Mostrar animación de desplazamiento
+                        this.updateBubblesVisualization([], sortedIndices, null, i, [j, j+1]);
                         await this.sleep(this.animationSpeed * 0.7);
                         if (this.shouldStop()) return;
                         
                         // Mover elemento
-                        this.array[j] = this.array[j-1];
+                        this.array[j + 1] = this.array[j];
                         this.swaps++;
                         this.swapsElement.textContent = this.swaps;
                         
                         j--;
                         
                         // Actualizar visualización
-                        this.updateBubblesVisualization([j, j-1], [], null, i);
-                        await this.sleep(this.animationSpeed * 0.3);
-                        if (this.shouldStop()) return;
+                        if (j >= 0) {
+                            this.updateBubblesVisualization([j, i], sortedIndices, null, i);
+                            await this.sleep(this.animationSpeed * 0.3);
+                            if (this.shouldStop()) return;
+                        }
                     }
                     
-                    // Colocar el elemento clave en su posición correcta
-                    this.array[j] = key;
+                    // Insertar la clave en la posición correcta
+                    this.array[j + 1] = key;
                     
-                    // Marcar elementos ordenados
-                    const sortedIndices = Array.from({length: i + 1}, (_, idx) => idx);
+                    // Actualizar la lista de elementos ordenados
+                    sortedIndices.push(i);
                     this.updateBubblesVisualization([], sortedIndices);
                     await this.sleep(this.animationSpeed);
                 }
                 
                 if (!this.shouldStop()) {
                     // Marcar todo como ordenado
-                    const sortedIndices = Array.from({length: this.array.length}, (_, idx) => idx);
-                    this.updateBubblesVisualization([], sortedIndices);
+                    const allSortedIndices = Array.from({length: this.array.length}, (_, idx) => idx);
+                    this.updateBubblesVisualization([], allSortedIndices);
+                    this.showStepIndicator("¡Array completamente ordenado!");
                 }
             }
         }
 
-        // Selection Sort con burbujas
+        // Selection Sort con burbujas - CORREGIDO
         class SelectionSortBubble extends BubbleSortingAlgorithm {
             constructor() {
                 super('selection');
             }
             
             async sort() {
+                this.showStepIndicator("Iniciando Selection Sort");
+                await this.sleep(this.animationSpeed * 2);
+                
+                const sortedIndices = [];
+                
                 for (let i = 0; i < this.array.length - 1 && !this.shouldStop(); i++) {
-                    let targetIndex = i;
+                    let minIndex = i;
                     
-                    // Resaltar el elemento actual
-                    this.updateBubblesVisualization([], [], targetIndex, null);
+                    // Resaltar el elemento actual como candidato a mínimo
+                    this.updateBubblesVisualization([], sortedIndices, minIndex, null);
                     await this.sleep(this.animationSpeed);
                     
+                    // Buscar el elemento mínimo en el resto del array
                     for (let j = i + 1; j < this.array.length && !this.shouldStop(); j++) {
                         // Resaltar elementos comparados
-                        this.updateBubblesVisualization([targetIndex, j], [], targetIndex, null);
+                        this.updateBubblesVisualization([minIndex, j], sortedIndices, minIndex, null);
                         
                         this.comparisons++;
                         this.comparisonsElement.textContent = this.comparisons;
                         
                         await this.sleep(this.animationSpeed);
                         
-                        const shouldUpdateTarget = this.sortDirection === 'ascending' 
-                            ? this.array[j] < this.array[targetIndex] 
-                            : this.array[j] > this.array[targetIndex];
+                        // Verificar si encontramos un nuevo mínimo
+                        const isNewMin = this.sortDirection === 'ascending' 
+                            ? this.array[j] < this.array[minIndex] 
+                            : this.array[j] > this.array[minIndex];
                         
-                        if (shouldUpdateTarget) {
-                            targetIndex = j;
+                        if (isNewMin) {
+                            minIndex = j;
                             // Actualizar visualización con nuevo elemento mínimo
-                            this.updateBubblesVisualization([targetIndex, j], [], targetIndex, null);
+                            this.updateBubblesVisualization([minIndex, j], sortedIndices, minIndex, null);
                             await this.sleep(this.animationSpeed);
                         }
                     }
                     
-                    if (targetIndex !== i && !this.shouldStop()) {
+                    // Si encontramos un elemento menor/mayor, intercambiar
+                    if (minIndex !== i && !this.shouldStop()) {
                         // Mostrar animación de intercambio
-                        this.updateBubblesVisualization([], [], targetIndex, null, [i, targetIndex]);
+                        this.updateBubblesVisualization([], sortedIndices, minIndex, null, [i, minIndex]);
                         await this.sleep(this.animationSpeed * 0.7);
                         if (this.shouldStop()) return;
                         
                         // Intercambiar elementos
-                        [this.array[i], this.array[targetIndex]] = [this.array[targetIndex], this.array[i]];
+                        [this.array[i], this.array[minIndex]] = [this.array[minIndex], this.array[i]];
                         this.swaps++;
                         this.swapsElement.textContent = this.swaps;
                         
-                        // Actualizar visualización
-                        this.updateBubblesVisualization([i, targetIndex], [], targetIndex, null);
+                        // Actualizar visualización después del intercambio
+                        this.updateBubblesVisualization([i, minIndex], sortedIndices, minIndex, null);
                         await this.sleep(this.animationSpeed * 0.3);
                         if (this.shouldStop()) return;
                     }
                     
                     // Marcar el elemento actual como ordenado
-                    const sortedIndices = Array.from({length: i + 1}, (_, idx) => idx);
+                    sortedIndices.push(i);
                     this.updateBubblesVisualization([], sortedIndices);
                     await this.sleep(this.animationSpeed);
                 }
                 
                 if (!this.shouldStop()) {
                     // Marcar el último elemento como ordenado
-                    const sortedIndices = Array.from({length: this.array.length}, (_, idx) => idx);
+                    sortedIndices.push(this.array.length - 1);
                     this.updateBubblesVisualization([], sortedIndices);
+                    this.showStepIndicator("¡Array completamente ordenado!");
                 }
             }
         }
@@ -1281,6 +2418,9 @@
             
             // Inicializar Insertion Sort (pestaña activa por defecto)
             insertionSort.initialize();
+            
+            // Configurar eventos para modales globales
+            setupGlobalModalEvents();
             
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
@@ -1300,6 +2440,212 @@
                     }
                 });
             });
+            
+            // Función para configurar eventos globales de modales
+            function setupGlobalModalEvents() {
+                // Eventos para modales
+                document.querySelectorAll('.close-modal').forEach(button => {
+                    button.addEventListener('click', closeAllModals);
+                });
+                
+                document.getElementById('apply-manual').addEventListener('click', () => {
+                    const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
+                    if (activeTab === 'insertion') {
+                        insertionSort.applyManualInput();
+                    } else if (activeTab === 'selection') {
+                        selectionSort.applyManualInput();
+                    }
+                });
+                
+                document.getElementById('cancel-manual').addEventListener('click', closeAllModals);
+                document.getElementById('generate-random').addEventListener('click', generateRandomValues);
+                document.getElementById('add-value').addEventListener('click', addManualValue);
+                document.getElementById('clear-array').addEventListener('click', clearManualArray);
+                document.getElementById('manual-value').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        addManualValue();
+                    }
+                });
+                
+                // Actualizar estado cuando cambia el tamaño del array
+                document.getElementById('manual-size').addEventListener('input', updateManualArrayStatus);
+                
+                document.getElementById('apply-json').addEventListener('click', () => {
+                    const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
+                    if (activeTab === 'insertion') {
+                        insertionSort.applyJsonImport();
+                    } else if (activeTab === 'selection') {
+                        selectionSort.applyJsonImport();
+                    }
+                });
+                
+                document.getElementById('cancel-json').addEventListener('click', closeAllModals);
+                document.getElementById('json-file').addEventListener('change', handleFileSelect);
+                
+                document.getElementById('copy-json').addEventListener('click', copyJsonToClipboard);
+                document.getElementById('close-export').addEventListener('click', closeAllModals);
+                
+                // Eventos para nombres personalizados
+                document.getElementById('confirm-download-json').addEventListener('click', () => {
+                    const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
+                    if (activeTab === 'insertion') {
+                        insertionSort.confirmDownloadJson();
+                    } else if (activeTab === 'selection') {
+                        selectionSort.confirmDownloadJson();
+                    }
+                });
+                
+                document.getElementById('cancel-download-json').addEventListener('click', closeAllModals);
+                document.getElementById('confirm-download-image').addEventListener('click', () => {
+                    const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
+                    if (activeTab === 'insertion') {
+                        insertionSort.confirmDownloadImage();
+                    } else if (activeTab === 'selection') {
+                        selectionSort.confirmDownloadImage();
+                    }
+                });
+                
+                document.getElementById('cancel-download-image').addEventListener('click', closeAllModals);
+                
+                // Validación de nombres de archivo
+                document.getElementById('json-filename').addEventListener('input', validateFilename);
+                document.getElementById('image-filename').addEventListener('input', validateFilename);
+                
+                document.getElementById('close-help').addEventListener('click', closeAllModals);
+                
+                // Cerrar modales al hacer clic fuera
+                window.addEventListener('click', (event) => {
+                    if (event.target.classList.contains('modal')) {
+                        closeAllModals();
+                    }
+                });
+                
+                // Funciones auxiliares para modales
+                function generateRandomValues() {
+                    const size = parseInt(document.getElementById('manual-size').value);
+                    const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
+                    let algorithm;
+                    
+                    if (activeTab === 'insertion') {
+                        algorithm = insertionSort;
+                    } else if (activeTab === 'selection') {
+                        algorithm = selectionSort;
+                    }
+                    
+                    algorithm.manualArray = [];
+                    for (let i = 0; i < size; i++) {
+                        algorithm.manualArray.push(Math.floor(Math.random() * 90) + 10);
+                    }
+                    algorithm.updateManualArrayDisplay();
+                    algorithm.updateManualArrayStatus();
+                }
+                
+                function addManualValue() {
+                    const valueInput = document.getElementById('manual-value');
+                    const value = parseInt(valueInput.value);
+                    const targetSize = parseInt(document.getElementById('manual-size').value);
+                    const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
+                    let algorithm;
+                    
+                    if (activeTab === 'insertion') {
+                        algorithm = insertionSort;
+                    } else if (activeTab === 'selection') {
+                        algorithm = selectionSort;
+                    }
+                    
+                    if (isNaN(value) || value < 10 || value > 100) {
+                        alert('Por favor ingrese un valor válido entre 10 y 100');
+                        return;
+                    }
+                    
+                    // Verificar si el array ya está completo
+                    if (algorithm.manualArray.length >= targetSize) {
+                        alert('El array ya está completo. No se pueden agregar más valores.');
+                        return;
+                    }
+                    
+                    algorithm.manualArray.push(value);
+                    valueInput.value = '';
+                    algorithm.updateManualArrayDisplay();
+                    algorithm.updateManualArrayStatus();
+                }
+                
+                function clearManualArray() {
+                    const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
+                    let algorithm;
+                    
+                    if (activeTab === 'insertion') {
+                        algorithm = insertionSort;
+                    } else if (activeTab === 'selection') {
+                        algorithm = selectionSort;
+                    }
+                    
+                    algorithm.manualArray = [];
+                    algorithm.updateManualArrayDisplay();
+                    algorithm.updateManualArrayStatus();
+                }
+                
+                function updateManualArrayStatus() {
+                    const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
+                    let algorithm;
+                    
+                    if (activeTab === 'insertion') {
+                        algorithm = insertionSort;
+                    } else if (activeTab === 'selection') {
+                        algorithm = selectionSort;
+                    }
+                    
+                    algorithm.updateManualArrayStatus();
+                }
+                
+                function handleFileSelect(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('json-input').value = e.target.result;
+                    };
+                    reader.readAsText(file);
+                }
+                
+                function copyJsonToClipboard() {
+                    const jsonOutput = document.getElementById('json-output');
+                    jsonOutput.select();
+                    jsonOutput.setSelectionRange(0, 99999); // Para dispositivos móviles
+                    
+                    try {
+                        const successful = document.execCommand('copy');
+                        if (successful) {
+                            alert('JSON copiado al portapapeles');
+                        } else {
+                            alert('Error al copiar al portapapeles');
+                        }
+                    } catch (err) {
+                        console.error('Error al copiar: ', err);
+                        alert('Error al copiar al portapapeles');
+                    }
+                }
+                
+                function validateFilename() {
+                    const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
+                    let algorithm;
+                    
+                    if (activeTab === 'insertion') {
+                        algorithm = insertionSort;
+                    } else if (activeTab === 'selection') {
+                        algorithm = selectionSort;
+                    }
+                    
+                    algorithm.validateFilename();
+                }
+                
+                function closeAllModals() {
+                    document.querySelectorAll('.modal').forEach(modal => {
+                        modal.style.display = 'none';
+                    });
+                }
+            }
         });
     </script>
 </body>
