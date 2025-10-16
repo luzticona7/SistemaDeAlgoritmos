@@ -1636,7 +1636,7 @@
             const value = parseInt(valueInput.value);
             const targetSize = parseInt(document.getElementById('manual-size').value);
             
-            if (isNaN(value) || value < 10 || value > 100) {
+            if (isNaN(value) || value < 0 || value > 10000) {
                 alert('Por favor ingrese un valor válido entre 10 y 100');
                 return;
             }
@@ -1717,7 +1717,7 @@
             const sizeInput = document.getElementById('manual-size');
             const newSize = parseInt(sizeInput.value);
             
-            if (newSize < 1 || newSize > 50) {
+            if (newSize < 0 || newSize > 10000) {
                 alert('El tamaño debe estar entre 1 y 50');
                 return;
             }
