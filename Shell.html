@@ -1601,7 +1601,7 @@
             const value = parseInt(valueInput.value);
             const targetSize = parseInt(document.getElementById('manual-size').value);
             
-            if (isNaN(value) || value < 10 || value > 100) {
+            if (isNaN(value) || value < 0 || value > 10000) {
                 alert('Por favor ingrese un valor válido entre 10 y 100');
                 return;
             }
