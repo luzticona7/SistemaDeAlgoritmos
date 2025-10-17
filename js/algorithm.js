@@ -934,137 +934,152 @@
   // ---------- INICIO: reemplazar computeCriticalPath con algoritmo de asignación (Hungarian) ----------
   // computeCriticalPath ahora realiza una asignación (Hungarian) y muestra matrices
   function computeCriticalPath(mode = 'max') {
-    if (nodes.length === 0) {
-      showWarning('Agrega nodos primero.');
-      return;
-    }
+  if (nodes.length === 0) {
+    showWarning('Agrega nodos primero.');
+    return;
+  }
 
-    // Usamos la matriz de adyacencia que ya construye buildAdjacencyMatrix()
-    const { matrix: adjMatrix, ordered } = buildAdjacencyMatrix();
-    const n = ordered.length;
-    if (n === 0) { showWarning('No hay nodos.'); return; }
+  // ✅ LIMPIAR marcas críticas anteriores
+  edges.forEach(e => delete e.isCritical);
 
-    // Convertir la matrix adjMatrix (n x n) en matriz de costes para asignación
-    const { costMatrix, displayMatrix } = buildCostMatrixForAssignment(adjMatrix, ordered, mode);
+  const { matrix: adjMatrix, ordered } = buildAdjacencyMatrix();
+  const n = ordered.length;
+  if (n === 0) { showWarning('No hay nodos.'); return; }
 
-    // Ejecutar Hungarian (minimiza). Para maximizar, ya convertimos costos arriba.
-    const { assignment, totalCost } = hungarian(costMatrix);
+  const { costMatrix, displayMatrix } = buildCostMatrixForAssignment(adjMatrix, ordered, mode);
+  const { assignment, totalCost } = hungarian(costMatrix);
 
-    // Construir matriz resultado (0/1) y pares asignados
-    const resultMatrix = Array.from({length: n}, ()=>Array(n).fill(0));
-    const pairs = [];
-    for (let i = 0; i < assignment.length; i++) {
-      const j = assignment[i];
-      if (j >= 0 && j < n) {
+  const resultMatrix = Array.from({length: n}, () => Array(n).fill(0));
+  const pairs = [];
+
+  for (let i = 0; i < assignment.length; i++) {
+    const j = assignment[i];
+    if (j >= 0 && j < n) {
+      // Solo marcar si hay una arista real (peso > 0 en displayMatrix)
+      if (displayMatrix[i][j] > 0) {
         resultMatrix[i][j] = 1;
-        // Marcar arista asignada si existe
-        const uId = ordered[i].id, vId = ordered[j].id;
+        const uId = ordered[i].id;
+        const vId = ordered[j].id;
         edges.forEach(e => {
           if (e.source === uId && e.target === vId) e.isCritical = true;
           else if ((e.type === 'undirected' || e.type === 'bidirectional') &&
-                   ((e.source === uId && e.target === vId) || (e.source === vId && e.target === uId))) e.isCritical = true;
+                   ((e.source === uId && e.target === vId) || (e.source === vId && e.target === uId))) {
+            e.isCritical = true;
+          }
         });
         pairs.push(`${ordered[i].label} → ${ordered[j].label}`);
       }
     }
-
-    // Mostrar resultados: matriz de coste y matriz resultado
-    const resultDiv = document.getElementById('critical-path-result');
-    // Limpiar marca previa en nodos ET/LT
-    for (let nd of ordered) { delete nd.et; delete nd.lt; }
-    // quitar slack antiguo
-    for (let e of edges) { delete e.slack; }
-
-    const sign = (mode === 'max') ? 'Maximizar' : 'Minimizar';
-    // Construir tablas HTML
-    function matrixToHtml(mat, labels){
-      // CABECERA SOLO CON LABELS
-      let html = '<table class="table table-sm table-striped"><thead><tr>';
-      html += labels.map(l => `<th>${l}</th>`).join('') + '</tr></thead><tbody>';
-      
-      // FILAS SIN PRIMERA COLUMNA DE LABELS
-      for (let i = 0; i < mat.length; i++){
-        html += `<tr>`;
-        for (let j = 0; j < mat[i].length; j++) {
-          const v = mat[i][j];
-          html += `<td>${(Number.isFinite(v) ? (Math.abs(v) > 999999 ? '∞' : v.toFixed ? v.toFixed(2) : v) : '∞')}</td>`;
-        }
-        html += '</tr>';
-      }
-      html += '</tbody></table>';
-      return html;
-    }
-
-    const labels = ordered.map(x => x.label);
-    const costHtml = matrixToHtml(displayMatrix, labels); // displayMatrix: la matriz de costos legible (antes de transformar para maximizar)
-    const resultHtml = matrixToHtml(resultMatrix, labels);
-
-    const total = (mode === 'max') ? totalCost : totalCost; // totalCost ya se calcula sobre la matriz final usada por Hungarian
-    resultDiv.innerHTML = `
-      <div><strong>Asignación (${sign}):</strong></div>
-      <div class="mt-2"><strong>Pares asignados:</strong> ${pairs.length ? pairs.join(', ') : '(ninguna)'}</div>
-      <div class="mt-2"><strong>Costo total (según matriz usada):</strong> ${Number.isFinite(total) ? total.toFixed(2) : '∞'}</div>
-      <hr style="border-color: rgba(255,255,255,0.08)" />
-      <div><strong>Matriz de costos (entrada):</strong>${costHtml}</div>
-      <div><strong>Matriz resultado (0 = no asignado, 1 = asignado):</strong>${resultHtml}</div>
-      <small class="text-muted">Nota: celdas con "∞" significan que no existía arista y se usó coste grande para evitar asignación.</small>
-    `;
-
-    render();
   }
+
+  // Limpiar ET/LT y slack anteriores
+  for (let nd of ordered) { delete nd.et; delete nd.lt; }
+  for (let e of edges) { delete e.slack; }
+
+  const resultDiv = document.getElementById('critical-path-result');
+  const sign = (mode === 'max') ? 'Maximizar' : 'Minimizar';
+
+  function matrixToHtml(mat, labels) {
+    let html = '<table class="table table-sm table-striped"><thead><tr>';
+    html += labels.map(l => `<th>${l}</th>`).join('') + '</tr></thead><tbody>';
+    for (let i = 0; i < mat.length; i++) {
+      html += '<tr>';
+      for (let j = 0; j < mat[i].length; j++) {
+        const v = mat[i][j];
+        const cell = (Number.isFinite(v) && Math.abs(v) < 1e6) ? v.toFixed(2) : '∞';
+        html += `<td>${cell}</td>`;
+      }
+      html += '</tr>';
+    }
+    html += '</tbody></table>';
+    return html;
+  }
+
+  const labels = ordered.map(x => x.label);
+  const costHtml = matrixToHtml(displayMatrix, labels);
+  const resultHtml = matrixToHtml(resultMatrix, labels);
+
+  // Calcular total REAL (no el transformado)
+  let realTotal = 0;
+  for (let i = 0; i < assignment.length; i++) {
+    const j = assignment[i];
+    if (j >= 0 && j < n && displayMatrix[i][j] > 0) {
+      realTotal += displayMatrix[i][j];
+    }
+  }
+
+  resultDiv.innerHTML = `
+    <div><strong>Asignación (${sign}):</strong></div>
+    <div class="mt-2"><strong>Pares asignados:</strong> ${pairs.length ? pairs.join(', ') : '(ninguno)'}</div>
+    <div class="mt-2"><strong>Total real:</strong> ${realTotal.toFixed(2)}</div>
+    <hr style="border-color: rgba(255,255,255,0.08)" />
+    <details class="mt-2">
+      <summary class="text-muted" style="cursor:pointer">Ver matrices</summary>
+      <div><strong>Matriz de pesos originales:</strong></div>
+      ${costHtml}
+      <div class="mt-3"><strong>Matriz de asignación (1 = asignado):</strong></div>
+      ${resultHtml}
+    </details>
+  `;
+
+  render();
+}
 
   // Construye matriz de costos a partir de la matriz de adyacencia M (que buildAdjacencyMatrix crea)
   // Devuelve costMatrix (para Hungarian) y displayMatrix (costes legibles, antes de la transformación para maximizar)
-  function buildCostMatrixForAssignment(M, ordered, mode='max'){
-    const n = ordered.length;
-    // Copiar M para mostrar (si hay NaN o faltantes, interpretamos como 0 mostrado)
-    const display = Array.from({length:n}, (_,i)=> Array.from({length:n}, (_,j) => {
-      const v = (M && M[i] && M[i][j] != null) ? M[i][j] : 0;
-      return Number.isFinite(v) ? v : 0;
-    }));
+// Construye matriz de costos a partir de la matriz de adyacencia M
+function buildCostMatrixForAssignment(M, ordered, mode = 'max') {
+  const n = ordered.length;
+  if (n === 0) return { costMatrix: [], displayMatrix: [] };
 
-    // Para Hungarian, necesitamos costos finitos y preferiblemente evitar auto-asignaciones.
-    // Usamos un "big" suficientemente grande comparado a los costes existentes.
-    let maxVal = 0;
-    for (let i=0;i<n;i++) for (let j=0;j<n;j++) if (Number.isFinite(display[i][j])) maxVal = Math.max(maxVal, Math.abs(display[i][j]));
-    const big = Math.max(1e6, (maxVal + 1) * 1000);
+  // Paso 1: Crear una matriz limpia de valores originales (0 = sin arista)
+  const original = Array.from({ length: n }, (_, i) =>
+    Array.from({ length: n }, (_, j) => {
+      const val = M?.[i]?.[j] ?? 0;
+      return Number.isFinite(val) && val > 0 ? val : 0;
+    })
+  );
 
-    // Construir matriz de costos (clon)
-    const cost = Array.from({length:n}, (_,i)=> Array.from({length:n}, (_,j) => {
-      let val = (M && M[i] && M[i][j] != null) ? Number(M[i][j]) : Infinity;
-      if (!Number.isFinite(val)) val = big;
-      // evitar auto-asignación
-      if (i === j) val = big;
-      return val;
-    }));
-
-    // Si el usuario pidió maximizar, transformamos para minimizar: cost' = Cmax - cost
-    if (mode === 'max') {
-      // Para transformar correctamente, calcular Cmax finito (no contar big)
-      let Cmax = 0;
-      for (let i=0;i<n;i++){
-        for (let j=0;j<n;j++){
-          if (cost[i][j] < big) Cmax = Math.max(Cmax, cost[i][j]);
-        }
-      }
-      Cmax = Cmax || 0;
-      // Si todos son big (no aristas), dejar la matriz como está (no hay asignación real)
-      if (Cmax === 0) {
-        // convertimos: cost' = (big - cost) para mantener big as low priority
-        for (let i=0;i<n;i++) for (let j=0;j<n;j++) {
-          if (cost[i][j] >= big) cost[i][j] = big;
-          else cost[i][j] = (Cmax + 1) - cost[i][j]; // invertir para max
-        }
-      } else {
-        for (let i=0;i<n;i++) for (let j=0;j<n;j++) {
-          if (cost[i][j] >= big) cost[i][j] = big;
-          else cost[i][j] = Cmax - cost[i][j];
-        }
+  // Paso 2: Determinar el valor máximo entre aristas reales (solo > 0)
+  let maxWeight = 0;
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      if (original[i][j] > 0) {
+        maxWeight = Math.max(maxWeight, original[i][j]);
       }
     }
-
-    return { costMatrix: cost, displayMatrix: display };
   }
+
+  // Si no hay ninguna arista con peso > 0, no hay asignación posible
+  const hasEdges = maxWeight > 0;
+
+  // Paso 3: Definir un valor "infinito" grande
+  const BIG = hasEdges ? (maxWeight + 1) * 1000 : 1e9;
+
+  // Paso 4: Construir displayMatrix (para mostrar al usuario)
+  const displayMatrix = original.map(row => [...row]);
+
+  // Paso 5: Construir costMatrix para Hungarian
+  const costMatrix = Array.from({ length: n }, (_, i) =>
+    Array.from({ length: n }, (_, j) => {
+      // No permitir auto-asignación
+      if (i === j) return BIG;
+
+      const hasEdge = original[i][j] > 0;
+      if (!hasEdge) return BIG;
+
+      if (mode === 'max') {
+        // Convertir maximización en minimización
+        return maxWeight - original[i][j];
+      } else {
+        // Minimización directa
+        return original[i][j];
+      }
+    })
+  );
+
+  return { costMatrix, displayMatrix };
+}
 
   // Hungarian algorithm (O(n^3)), input: square matrix of finite numbers (use big for "forbidden")
   // returns { assignment: array where assignment[i] = column assigned to row i (or -1), totalCost }
