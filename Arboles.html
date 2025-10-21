@@ -121,6 +121,9 @@
     button.error{
       background: linear-gradient(180deg, #ef4444, #dc2626);
     }
+    button.warning{
+      background: linear-gradient(180deg, var(--carrot-orange), #e57c1a);
+    }
 
     .controls{
       display: flex;
@@ -437,6 +440,89 @@
       margin-bottom: 20px;
     }
 
+    /* Switch de modo */
+    .mode-switch {
+      display: flex;
+      background: rgba(11, 19, 38, 0.7);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .mode-option {
+      flex: 1;
+      padding: 10px 16px;
+      text-align: center;
+      cursor: pointer;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .mode-option.active {
+      background: linear-gradient(135deg, var(--pastel-orange), var(--carrot-orange));
+      color: #05121a;
+      box-shadow: 0 2px 8px rgba(251, 189, 64, 0.3);
+    }
+
+    .mode-option:not(.active) {
+      color: rgba(255,255,255,0.7);
+    }
+
+    .mode-option:not(.active):hover {
+      background: rgba(255,255,255,0.05);
+      color: var(--ink);
+    }
+
+    /* Inputs para modo manual */
+    .manual-input {
+      margin-bottom: 15px;
+    }
+
+    .manual-input label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+
+    .manual-input input {
+      width: 100%;
+    }
+
+    .manual-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .manual-actions button {
+      flex: 1;
+    }
+
+    /* Estilos para deshabilitar el canvas en modo manual */
+    .canvas-disabled {
+      opacity: 0.5;
+      pointer-events: none;
+      position: relative;
+    }
+
+    .canvas-disabled::after {
+      content: "Modo Manual Activado";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      text-align: center;
+      z-index: 100;
+    }
+
     @media (max-width: 1200px) {
       .wrap{
         grid-template-columns: 1fr;
@@ -473,11 +559,17 @@
           </svg>
           Captura
         </button>
+        <button id="btnDeleteNode" class="warning">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          Eliminar Nodo
+        </button>
         <button id="btnReset" class="error">
           <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          Limpiar
+          Limpiar Todo
         </button>
       </div>
     </div>
@@ -493,17 +585,58 @@
         Recorridos del Árbol
       </h1>
 
+      <!-- Switch de modo -->
+      <div class="mode-switch">
+        <div class="mode-option active" data-mode="graphic">Modo Gráfico</div>
+        <div class="mode-option" data-mode="manual">Modo Manual</div>
+      </div>
+
       <div id="statusArea"></div>
 
-      <div class="root-input-container">
-        <label>Valor del Nodo Raíz</label>
-        <input type="number" id="rootValue" placeholder="Ingresa el valor raíz" value="50">
-        <button id="btnSetRoot" style="margin-top: 10px; width: 100%;">
-          <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-          </svg>
-          Establecer Raíz
-        </button>
+      <!-- Contenido modo gráfico -->
+      <div id="graphicModeContent">
+        <div class="root-input-container">
+          <label>Valor del Nodo Raíz</label>
+          <input type="number" id="rootValue" placeholder="Ingresa el valor raíz" value="50">
+          <button id="btnSetRoot" style="margin-top: 10px; width: 100%;">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Establecer Raíz
+          </button>
+        </div>
+      </div>
+
+      <!-- Contenido modo manual -->
+      <div id="manualModeContent" style="display: none;">
+        <div class="manual-input">
+          <label>In-Order (separado por comas)</label>
+          <input type="text" id="manualInOrder" placeholder="Ej: 4,2,5,1,6,3,7" onkeypress="return validateManualInput(event)">
+        </div>
+
+        <div class="manual-input">
+          <label>Selecciona el segundo recorrido:</label>
+          <select id="secondTraversalType" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(11, 19, 38, 0.7); color: var(--ink); border: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;">
+            <option value="pre">Pre-Order</option>
+            <option value="post">Post-Order</option>
+          </select>
+          <input type="text" id="manualSecondOrder" placeholder="Ej: 1,2,4,5,3,6,7" onkeypress="return validateManualInput(event)">
+        </div>
+
+        <div class="manual-actions">
+          <button id="btnGenerateTree" class="success" style="flex: 2;">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Generar Árbol
+          </button>
+          <button id="btnClearManual" class="secondary" style="flex: 1;">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Limpiar
+          </button>
+        </div>
       </div>
 
       <div class="section-title">In-Order (Izq - Raíz - Der)</div>
@@ -554,12 +687,30 @@
         </div>
         
         <div class="help-section">
-          <h3>Cómo usar esta herramienta</h3>
+          <h3>Modos de Operación</h3>
+          <ul>
+            <li><strong>Modo Gráfico:</strong> Interactúa visualmente con el árbol, agregando nodos mediante clics</li>
+            <li><strong>Modo Manual:</strong> Ingresa los recorridos del árbol y genera la estructura automáticamente</li>
+          </ul>
+        </div>
+        
+        <div class="help-section">
+          <h3>Cómo usar el Modo Gráfico</h3>
           <ul>
             <li><strong>Establecer raíz:</strong> Ingresa el valor del nodo raíz y presiona "Establecer Raíz"</li>
             <li><strong>Agregar nodos:</strong> Haz clic en el botón "+" para agregar nuevos nodos</li>
+            <li><strong>Eliminar nodos:</strong> Usa el botón "Eliminar Nodo" y luego haz clic en el nodo a eliminar</li>
             <li><strong>Ver recorridos:</strong> Los recorridos se actualizan automáticamente en el panel izquierdo</li>
-            <li><strong>Mover nodos:</strong> Los nodos se posicionan automáticamente según las reglas del BST</li>
+          </ul>
+        </div>
+        
+        <div class="help-section">
+          <h3>Cómo usar el Modo Manual</h3>
+          <ul>
+            <li><strong>In-Order:</strong> Siempre requerido (ej: "4,2,5,1,6,3,7")</li>
+            <li><strong>Pre-Order o Post-Order:</strong> Selecciona uno y proporciona los valores</li>
+            <li><strong>Generar:</strong> Presiona "Generar Árbol" para crear la estructura</li>
+            <li><strong>Solo números y comas:</strong> Los inputs solo aceptan números y comas como separadores</li>
           </ul>
         </div>
         
@@ -569,16 +720,6 @@
             <li><strong>In-Order:</strong> Visita subárbol izquierdo, raíz, subárbol derecho (orden ascendente)</li>
             <li><strong>Pre-Order:</strong> Visita raíz, subárbol izquierdo, subárbol derecho</li>
             <li><strong>Post-Order:</strong> Visita subárbol izquierdo, subárbol derecho, raíz</li>
-          </ul>
-        </div>
-        
-        <div class="help-section">
-          <h3>Reglas de Inserción</h3>
-          <ul>
-            <li>Si el valor es menor que el nodo actual, va al subárbol izquierdo</li>
-            <li>Si el valor es mayor que el nodo actual, va al subárbol derecho</li>
-            <li>No se permiten valores duplicados</li>
-            <li>Solo se aceptan números enteros</li>
           </ul>
         </div>
       </div>
@@ -599,6 +740,25 @@
         <div class="modal-actions">
           <button id="cancelAddNode" class="secondary">Cancelar</button>
           <button id="confirmAddNode" class="success">Agregar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para eliminar nodo -->
+  <div id="deleteNodeModal" class="modal-overlay" style="display: none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Eliminar Nodo</h2>
+        <button class="close-btn" id="closeDeleteNode">&times;</button>
+      </div>
+      <div class="help-content">
+        <label>Valor del nodo a eliminar:</label>
+        <input type="number" id="deleteNodeValue" class="node-input" placeholder="Ej: 25" step="1">
+        <div id="deleteNodeError" style="color: var(--error); font-size: 12px; margin-top: 8px; display: none;"></div>
+        <div class="modal-actions">
+          <button id="cancelDeleteNode" class="secondary">Cancelar</button>
+          <button id="confirmDeleteNode" class="error">Eliminar</button>
         </div>
       </div>
     </div>
@@ -654,6 +814,50 @@
             return this._insertNode(node.right, newNode);
           }
         }
+      }
+
+      // Método para eliminar un nodo
+      delete(value) {
+        this.root = this._deleteNode(this.root, value);
+      }
+
+      _deleteNode(node, value) {
+        if (node === null) {
+          return null;
+        }
+
+        if (value < node.value) {
+          node.left = this._deleteNode(node.left, value);
+          return node;
+        } else if (value > node.value) {
+          node.right = this._deleteNode(node.right, value);
+          return node;
+        } else {
+          // Nodo encontrado
+          if (node.left === null && node.right === null) {
+            // Caso 1: Nodo hoja
+            return null;
+          } else if (node.left === null) {
+            // Caso 2: Solo hijo derecho
+            return node.right;
+          } else if (node.right === null) {
+            // Caso 2: Solo hijo izquierdo
+            return node.left;
+          } else {
+            // Caso 3: Dos hijos
+            const minNode = this._findMin(node.right);
+            node.value = minNode.value;
+            node.right = this._deleteNode(node.right, minNode.value);
+            return node;
+          }
+        }
+      }
+
+      _findMin(node) {
+        while (node.left !== null) {
+          node = node.left;
+        }
+        return node;
       }
 
       inOrder(node = this.root, result = []) {
@@ -716,13 +920,143 @@
           this._collectNodes(node.right, nodes);
         }
       }
+
+      // Método para construir árbol desde recorridos
+      buildFromTraversals(inOrder, preOrder = null, postOrder = null) {
+        if ((preOrder && postOrder) || (!preOrder && !postOrder)) {
+          throw new Error("Debe proporcionar exactamente uno de: preOrder o postOrder");
+        }
+
+        if (preOrder) {
+          this.root = this._buildFromPreIn(preOrder, inOrder);
+        } else {
+          this.root = this._buildFromPostIn(postOrder, inOrder);
+        }
+      }
+
+      _buildFromPreIn(preOrder, inOrder) {
+        if (preOrder.length === 0 || inOrder.length === 0) return null;
+        if (preOrder.length !== inOrder.length) {
+          throw new Error("Los recorridos deben tener la misma longitud");
+        }
+
+        const rootValue = preOrder[0];
+        const root = new TreeNode(rootValue);
+        
+        const rootIndex = inOrder.indexOf(rootValue);
+        if (rootIndex === -1) {
+          throw new Error("Los recorridos son inconsistentes");
+        }
+
+        const leftInOrder = inOrder.slice(0, rootIndex);
+        const rightInOrder = inOrder.slice(rootIndex + 1);
+        
+        const leftPreOrder = preOrder.slice(1, 1 + leftInOrder.length);
+        const rightPreOrder = preOrder.slice(1 + leftInOrder.length);
+
+        root.left = this._buildFromPreIn(leftPreOrder, leftInOrder);
+        root.right = this._buildFromPreIn(rightPreOrder, rightInOrder);
+
+        return root;
+      }
+
+      _buildFromPostIn(postOrder, inOrder) {
+        if (postOrder.length === 0 || inOrder.length === 0) return null;
+        if (postOrder.length !== inOrder.length) {
+          throw new Error("Los recorridos deben tener la misma longitud");
+        }
+
+        const rootValue = postOrder[postOrder.length - 1];
+        const root = new TreeNode(rootValue);
+        
+        const rootIndex = inOrder.indexOf(rootValue);
+        if (rootIndex === -1) {
+          throw new Error("Los recorridos son inconsistentes");
+        }
+
+        const leftInOrder = inOrder.slice(0, rootIndex);
+        const rightInOrder = inOrder.slice(rootIndex + 1);
+        
+        const leftPostOrder = postOrder.slice(0, leftInOrder.length);
+        const rightPostOrder = postOrder.slice(leftInOrder.length, postOrder.length - 1);
+
+        root.left = this._buildFromPostIn(leftPostOrder, leftInOrder);
+        root.right = this._buildFromPostIn(rightPostOrder, rightInOrder);
+
+        return root;
+      }
     }
 
     // Estado de la aplicación
     const tree = new BinaryTree();
     let hasRoot = false;
+    let currentMode = 'graphic'; // 'graphic' o 'manual'
+    let deleteMode = false; // Para controlar el modo de eliminación
 
     const el = id => document.getElementById(id);
+
+    // Función para validar input del modo manual (solo números y comas)
+    function validateManualInput(event) {
+      const charCode = event.which ? event.which : event.keyCode;
+      const char = String.fromCharCode(charCode);
+      
+      // Permitir: números (0-9), comas, backspace, delete, tab, enter, flechas
+      if (
+        (charCode >= 48 && charCode <= 57) || // números 0-9
+        charCode === 44 || // coma
+        charCode === 8 || // backspace
+        charCode === 46 || // delete
+        charCode === 9 || // tab
+        charCode === 13 || // enter
+        (charCode >= 37 && charCode <= 40) // flechas
+      ) {
+        return true;
+      }
+      
+      // Prevenir cualquier otro carácter
+      event.preventDefault();
+      return false;
+    }
+
+    // Cambiar entre modos
+    function switchMode(mode) {
+      currentMode = mode;
+      deleteMode = false; // Desactivar modo eliminación al cambiar modo
+      updateDeleteButtonState();
+      
+      // Actualizar UI del switch
+      document.querySelectorAll('.mode-option').forEach(option => {
+        option.classList.toggle('active', option.dataset.mode === mode);
+      });
+      
+      // Mostrar/ocultar contenido según el modo
+      el('graphicModeContent').style.display = mode === 'graphic' ? 'block' : 'none';
+      el('manualModeContent').style.display = mode === 'manual' ? 'block' : 'none';
+      
+      // Habilitar/deshabilitar canvas
+      const canvas = el('treeCanvas');
+      if (mode === 'manual') {
+        canvas.classList.add('canvas-disabled');
+      } else {
+        canvas.classList.remove('canvas-disabled');
+      }
+      
+      updateStatus(`Modo ${mode === 'graphic' ? 'Gráfico' : 'Manual'} activado.`, 'info');
+    }
+
+    // Actualizar estado del botón de eliminar
+    function updateDeleteButtonState() {
+      const deleteBtn = el('btnDeleteNode');
+      if (currentMode !== 'graphic' || !hasRoot) {
+        deleteBtn.disabled = true;
+        deleteBtn.style.opacity = '0.5';
+        deleteBtn.style.cursor = 'not-allowed';
+      } else {
+        deleteBtn.disabled = false;
+        deleteBtn.style.opacity = '1';
+        deleteBtn.style.cursor = 'pointer';
+      }
+    }
 
     // Actualización de estado
     function updateStatus(message, type) {
@@ -749,6 +1083,9 @@
       el('nodeCount').textContent = tree.countNodes();
       el('treeHeight').textContent = tree.getHeight();
       el('leafCount').textContent = tree.countLeaves();
+
+      // Actualizar estado del botón eliminar
+      updateDeleteButtonState();
     }
 
     // Calcular posiciones de los nodos
@@ -856,13 +1193,22 @@
         nodeEl.style.left = (pos.x - 25) + 'px';
         nodeEl.style.top = (pos.y - 25) + 'px';
         
+        // Agregar evento de clic para eliminación
+        if (deleteMode) {
+          nodeEl.style.cursor = 'pointer';
+          nodeEl.style.boxShadow = '0 0 0 3px red';
+          nodeEl.addEventListener('click', () => {
+            deleteNodeByValue(pos.value);
+          });
+        }
+        
         canvas.appendChild(nodeEl);
       });
 
       updateTraversals();
     }
 
-    // Establecer raíz
+    // Establecer raíz (modo gráfico)
     function setRoot() {
       const value = parseInt(el('rootValue').value);
       
@@ -879,6 +1225,55 @@
       updateStatus(`Nodo raíz establecido con valor ${value}.`, 'success');
     }
 
+    // Generar árbol desde recorridos (modo manual)
+    function generateTreeFromTraversals() {
+      const inOrderStr = el('manualInOrder').value.trim();
+      const secondOrderStr = el('manualSecondOrder').value.trim();
+      const traversalType = el('secondTraversalType').value;
+      
+      if (!inOrderStr || !secondOrderStr) {
+        updateStatus('Por favor ingresa ambos recorridos.', 'error');
+        return;
+      }
+
+      try {
+        // Convertir strings a arrays de números
+        const inOrder = inOrderStr.split(',').map(val => parseInt(val.trim())).filter(val => !isNaN(val));
+        const secondOrder = secondOrderStr.split(',').map(val => parseInt(val.trim())).filter(val => !isNaN(val));
+        
+        if (inOrder.length === 0 || secondOrder.length === 0) {
+          updateStatus('Los recorridos deben contener números válidos.', 'error');
+          return;
+        }
+
+        if (inOrder.length !== secondOrder.length) {
+          updateStatus('Los recorridos deben tener la misma cantidad de elementos.', 'error');
+          return;
+        }
+
+        // Construir el árbol
+        tree.clear();
+        if (traversalType === 'pre') {
+          tree.buildFromTraversals(inOrder, secondOrder, null);
+        } else {
+          tree.buildFromTraversals(inOrder, null, secondOrder);
+        }
+        
+        hasRoot = true;
+        renderTree();
+        updateStatus(`Árbol generado desde In-Order y ${traversalType === 'pre' ? 'Pre-Order' : 'Post-Order'}.`, 'success');
+        
+      } catch (error) {
+        updateStatus('Error al generar el árbol: ' + error.message, 'error');
+      }
+    }
+
+    // Limpiar inputs del modo manual
+    function clearManualInputs() {
+      el('manualInOrder').value = '';
+      el('manualSecondOrder').value = '';
+    }
+
     // Mostrar modal para agregar nodo
     function showAddNodeModal() {
       if (!hasRoot) {
@@ -892,7 +1287,7 @@
       el('newNodeValue').focus();
     }
 
-    // Ocultar modal
+    // Ocultar modal agregar nodo
     function hideAddNodeModal() {
       el('addNodeModal').style.display = 'none';
     }
@@ -921,12 +1316,65 @@
       updateStatus(`Nodo con valor ${value} agregado correctamente.`, 'success');
     }
 
+    // Mostrar modal para eliminar nodo
+    function showDeleteNodeModal() {
+      if (!hasRoot || currentMode !== 'graphic') {
+        updateStatus('Esta función solo está disponible en modo gráfico con árbol existente.', 'warning');
+        return;
+      }
+
+      el('deleteNodeModal').style.display = 'flex';
+      el('deleteNodeValue').value = '';
+      el('deleteNodeError').style.display = 'none';
+      el('deleteNodeValue').focus();
+    }
+
+    // Ocultar modal eliminar nodo
+    function hideDeleteNodeModal() {
+      el('deleteNodeModal').style.display = 'none';
+      deleteMode = false;
+      renderTree(); // Re-renderizar para quitar efectos visuales de eliminación
+    }
+
+    // Eliminar nodo por valor
+    function deleteNodeByValue(value) {
+      if (!hasRoot) {
+        updateStatus('No hay árbol para eliminar nodos.', 'warning');
+        return;
+      }
+
+      const inOrderBefore = tree.inOrder();
+      if (!inOrderBefore.includes(value)) {
+        updateStatus(`El valor ${value} no existe en el árbol.`, 'error');
+        return;
+      }
+
+      tree.delete(value);
+      renderTree();
+      updateStatus(`Nodo con valor ${value} eliminado correctamente.`, 'success');
+      hideDeleteNodeModal();
+    }
+
+    // Activar modo eliminación
+    function activateDeleteMode() {
+      if (!hasRoot || currentMode !== 'graphic') {
+        updateStatus('Esta función solo está disponible en modo gráfico con árbol existente.', 'warning');
+        return;
+      }
+
+      deleteMode = true;
+      updateStatus('Modo eliminación activado. Haz clic en cualquier nodo para eliminarlo.', 'warning');
+      renderTree(); // Re-renderizar para mostrar efectos visuales
+    }
+
     // Limpiar árbol
     function resetTree() {
       if (confirm('¿Estás seguro de que deseas limpiar todo el árbol?')) {
         tree.clear();
         hasRoot = false;
+        deleteMode = false;
         el('rootValue').value = '50';
+        clearManualInputs();
         renderTree();
         updateStatus('Árbol limpiado. Puedes crear uno nuevo.', 'info');
       }
@@ -948,7 +1396,8 @@
           nodeCount: tree.countNodes(),
           height: tree.getHeight(),
           leafCount: tree.countLeaves()
-        }
+        },
+        mode: currentMode
       };
       
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -984,6 +1433,7 @@
           
           tree.clear();
           hasRoot = false;
+          deleteMode = false;
           
           data.nodes.forEach(value => {
             tree.insert(value);
@@ -992,6 +1442,11 @@
           
           if (tree.root !== null) {
             el('rootValue').value = tree.root.value;
+          }
+          
+          // Restaurar modo si está en el archivo
+          if (data.mode) {
+            switchMode(data.mode);
           }
           
           renderTree();
@@ -1041,6 +1496,15 @@
     el('closeAddNode').onclick = hideAddNodeModal;
     el('cancelAddNode').onclick = hideAddNodeModal;
     el('confirmAddNode').onclick = addNode;
+    el('btnDeleteNode').onclick = activateDeleteMode;
+    el('closeDeleteNode').onclick = hideDeleteNodeModal;
+    el('cancelDeleteNode').onclick = hideDeleteNodeModal;
+    el('confirmDeleteNode').onclick = () => {
+      const value = parseInt(el('deleteNodeValue').value);
+      if (!isNaN(value)) {
+        deleteNodeByValue(value);
+      }
+    };
     el('btnReset').onclick = resetTree;
     el('btnExport').onclick = exportTree;
     el('btnImport').onclick = importTree;
@@ -1048,6 +1512,15 @@
     el('btnHelp').onclick = showHelp;
     el('closeHelp').onclick = hideHelp;
     el('fileInput').addEventListener('change', handleFileImport);
+    el('btnGenerateTree').onclick = generateTreeFromTraversals;
+    el('btnClearManual').onclick = clearManualInputs;
+
+    // Event listeners para el switch de modo
+    document.querySelectorAll('.mode-option').forEach(option => {
+      option.addEventListener('click', () => {
+        switchMode(option.dataset.mode);
+      });
+    });
 
     // Permitir Enter en inputs
     el('rootValue').addEventListener('keypress', (e) => {
@@ -1058,6 +1531,23 @@
       if (e.key === 'Enter') addNode();
     });
 
+    el('deleteNodeValue').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const value = parseInt(el('deleteNodeValue').value);
+        if (!isNaN(value)) {
+          deleteNodeByValue(value);
+        }
+      }
+    });
+
+    el('manualInOrder').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') generateTreeFromTraversals();
+    });
+
+    el('manualSecondOrder').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') generateTreeFromTraversals();
+    });
+
     // Cerrar modales al hacer clic fuera
     el('helpModal').addEventListener('click', (e) => {
       if (e.target === el('helpModal')) hideHelp();
@@ -1066,10 +1556,15 @@
     el('addNodeModal').addEventListener('click', (e) => {
       if (e.target === el('addNodeModal')) hideAddNodeModal();
     });
+    
+    el('deleteNodeModal').addEventListener('click', (e) => {
+      if (e.target === el('deleteNodeModal')) hideDeleteNodeModal();
+    });
 
     // Inicialización
-    updateStatus('Bienvenido. Establece el valor del nodo raíz para comenzar.', 'info');
+    updateStatus('Bienvenido. Selecciona el modo de operación para comenzar.', 'info');
     updateTraversals();
+    switchMode('graphic'); // Modo gráfico por defecto
   </script>
 </body>
 </html>
