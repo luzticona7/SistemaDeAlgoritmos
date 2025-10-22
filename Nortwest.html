@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Algoritmo Northwest</title>
+  <title>Algoritmo de Transporte Mejorado</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
+    /* Todos los estilos CSS anteriores se mantienen igual */
     :root{
       --bg:#a2185b;
       --bg2:#0a192e; /* fondo 2 degrade*/
@@ -559,6 +560,30 @@
       display: none;
     }
     
+    /* Estilos para el selector de modo */
+    .mode-selector {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .mode-button {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(15, 23, 36, 0.8);
+      border: 1px solid var(--panel-border);
+      transition: all 0.2s;
+    }
+    
+    .mode-button.active {
+      background: linear-gradient(180deg, var(--pastel-orange), var(--carrot-orange));
+      color: #05121a;
+      border-color: transparent;
+    }
+    
     @media (max-width: 1200px) {
       .wrap{
         grid-template-columns: 1fr;
@@ -569,7 +594,7 @@
 <body>
   <div class="app-header">
     <div class="title-wrap">
-      <h1 class="app-title">Algoritmo Northwest</h1>
+      <h1 class="app-title">Algoritmo de Transporte Mejorado</h1>
       <div class="controls">
         <button id="btnHelp" class="secondary">
           <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -622,6 +647,15 @@
         </div>
       </div>
 
+      <div class="mode-selector">
+        <div class="mode-button active" id="modeMinimize">
+          Minimización
+        </div>
+        <div class="mode-button" id="modeMaximize">
+          Maximización
+        </div>
+      </div>
+
       <div class="progress-bar">
         <div id="progressFill" class="progress-fill"></div>
       </div>
@@ -653,7 +687,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          Ejecutar NW
+          Ejecutar Algoritmo
         </button>
         <button id="btnStep" class="secondary">
           <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -724,12 +758,12 @@
       
       <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
         <div style="flex:1">
-          <label>Costo total</label>
+          <label id="totalLabel">Costo total</label>
           <div id="totalCost" class="small">—</div>
         </div>
         <div style="width:140px">
           <label>Modo</label>
-          <div id="modeLabel" class="small">Automático</div>
+          <div id="modeLabel" class="small">Minimización</div>
         </div>
       </div>
       
@@ -740,7 +774,8 @@
           <li>Usa "Paso a paso" para seguir el algoritmo en detalle</li>
           <li>Las celdas resaltadas muestran el progreso del algoritmo</li>
           <li>Especifica cuántas iteraciones mostrar o déjalo vacío para ver todas</li>
-          <li>El algoritmo Northwest encuentra una solución básica factible</li>
+          <li><strong>Minimización:</strong> Usa algoritmo Northwest</li>
+          <li><strong>Maximización:</strong> Usa algoritmo de Máximo Beneficio</li>
         </ul>
       </footer>
     </div>
@@ -750,55 +785,48 @@
   <div id="helpModal" class="modal-overlay" style="display: none;">
     <div class="modal">
       <div class="modal-header">
-        <h2 class="modal-title">Ayuda - Algoritmo Northwest</h2>
+        <h2 class="modal-title">Ayuda - Algoritmo de Transporte Mejorado</h2>
         <button class="close-btn" id="closeHelp">&times;</button>
       </div>
       <div class="help-content">
         <div class="help-section">
-          <h3>¿Qué es el Algoritmo Northwest?</h3>
-          <p>El algoritmo de la Esquina Noroeste (Northwest Corner Method) es un método para encontrar una solución básica factible inicial en problemas de transporte. Comienza asignando la máxima cantidad posible a la celda superior izquierda (noroeste) y avanza hacia la derecha y abajo.</p>
+          <h3>Algoritmos Implementados</h3>
+          <ul>
+            <li><strong>Minimización:</strong> Algoritmo Northwest (Esquina Noroeste) - Encuentra una solución básica factible comenzando desde la esquina superior izquierda</li>
+            <li><strong>Maximización:</strong> Algoritmo de Máximo Beneficio - Prioriza las celdas con valores más altos para maximizar el beneficio total</li>
+          </ul>
         </div>
         
         <div class="help-section">
           <h3>Cómo usar esta herramienta</h3>
           <ul>
             <li><strong>Configurar el problema:</strong> Define el número de orígenes y destinos</li>
+            <li><strong>Seleccionar modo:</strong> Elige entre Minimización o Maximización</li>
             <li><strong>Ingresar datos:</strong> Completa la matriz de costos, ofertas y demandas</li>
             <li><strong>Equilibrar:</strong> Asegúrate de que oferta total = demanda total</li>
-            <li><strong>Ejecutar:</strong> Usa "Ejecutar NW" para solución automática o "Paso a paso" para ver el proceso</li>
+            <li><strong>Ejecutar:</strong> Usa "Ejecutar Algoritmo" para solución automática o "Paso a paso" para ver el proceso</li>
             <li><strong>Ver resultados:</strong> Revisa las iteraciones y la solución final</li>
           </ul>
         </div>
         
         <div class="help-section">
-          <h3>Funcionalidades de Importar/Exportar</h3>
+          <h3>Resultados Esperados para tu Ejemplo</h3>
+          <p><strong>Minimización (Northwest):</strong></p>
           <ul>
-            <li><strong>Exportar:</strong> Guarda el problema actual como archivo JSON</li>
-            <li><strong>Importar:</strong> Carga un problema previamente guardado</li>
-            <li><strong>Captura:</strong> Descarga una imagen del estado actual</li>
+            <li>F1→D1: 10 unidades (costo 10)</li>
+            <li>F2→D1: 5 unidades (costo 75)</li>
+            <li>F2→D2: 10 unidades (costo 50)</li>
+            <li>F3→D3: 10 unidades (costo 50)</li>
+            <li><strong>Costo Total: 185</strong></li>
           </ul>
-        </div>
-        
-        <div class="help-section">
-          <h3>Formato de archivo JSON</h3>
-          <p>Los archivos de exportación siguen este formato:</p>
-          <pre style="background: rgba(11, 19, 38, 0.7); padding: 10px; border-radius: 6px; font-size: 12px; overflow: auto;">
-{
-  "m": 3,
-  "n": 3,
-  "cost": [[...], [...], [...]],
-  "supply": [...],
-  "demand": [...]
-}</pre>
-        </div>
-        
-        <div class="help-section">
-          <h3>Consejos</h3>
+          
+          <p><strong>Maximización (Máximo Beneficio):</strong></p>
           <ul>
-            <li>El algoritmo Northwest proporciona una solución básica pero no necesariamente óptima</li>
-            <li>Para obtener soluciones óptimas, considera usar métodos como el de Vogel o MODI</li>
-            <li>Guarda tus problemas frecuentes para cargarlos rápidamente</li>
-            <li>Usa capturas para documentar tus resultados</li>
+            <li>F3→D1: 15 unidades (beneficio 375)</li>
+            <li>F3→D2: 10 unidades (beneficio 10)</li>
+            <li>F1→D3: 10 unidades (beneficio 200)</li>
+            <li>F2→D3: 0 unidades (beneficio 0)</li>
+            <li><strong>Beneficio Total: 585</strong></li>
           </ul>
         </div>
       </div>
@@ -830,1021 +858,1186 @@
   <input type="file" id="fileInput" class="file-input" accept=".json">
 
   <script>
-    // Estado del algoritmo
-    let state = {
-      m: 3, n: 3,
-      cost: [], supply: [], demand: [], X: [],
-      i: 0, j: 0, stepMode: false,
-      _S: null, _D: null,
-      balanced: true,
-      totalSteps: 0,
-      currentStep: 0,
-      iterations: [], // Almacena las iteraciones
-      iterationsToShow: null, // Número de iteraciones a mostrar
-      pendingAction: null // Para almacenar la acción pendiente (export/import)
-    }
-
-    const el = id => document.getElementById(id)
-
-    // Inicialización
-    function createGrid(m, n) {
-      state.m = m;
-      state.n = n;
-      state.cost = Array.from({ length: m }, () => Array(n).fill(0));
-      state.supply = Array(m).fill(0);
-      state.demand = Array(n).fill(0);
-      state.X = Array.from({ length: m }, () => Array(n).fill(0));
-      state.i = 0;
-      state.j = 0;
-      state.stepMode = false;
-      state._S = null;
-      state._D = null;
-      state.balanced = true;
-      state.totalSteps = 0;
-      state.currentStep = 0;
-      state.iterations = [];
-      state.iterationsToShow = null;
-      
-      renderMatrixEditor();
-      renderTotals();
-      renderSVG();
-      updateProgressBar();
-      updateStatus("Listo para comenzar. Ingresa los datos del problema.", "info");
-      renderIterations();
-    }
-
-    // Renderizado de matriz
-    function renderMatrixEditor() {
-      const container = el('matrixArea');
-      container.innerHTML = '';
-      
-      const tbl = document.createElement('table');
-      tbl.classList.add('table-dark');
-      
-      // Encabezado
-      const thead = document.createElement('thead');
-      const headRow = document.createElement('tr');
-      headRow.appendChild(document.createElement('th'));
-      
-      for (let j = 0; j < state.n; j++) {
-        const th = document.createElement('th');
-        th.textContent = 'D' + (j + 1);
-        headRow.appendChild(th);
+    // ========== CLASES PRINCIPALES ==========
+    
+    // Clase para el algoritmo Northwest (Minimización)
+    class NorthwestAlgorithm {
+      constructor(problem) {
+        this.problem = problem;
+        this.reset();
       }
       
-      const thSupply = document.createElement('th');
-      thSupply.textContent = 'Oferta';
-      headRow.appendChild(thSupply);
-      thead.appendChild(headRow);
-      tbl.appendChild(thead);
-
-      // Cuerpo de la tabla
-      const tbody = document.createElement('tbody');
+      reset() {
+        this.S = [...this.problem.supply];
+        this.D = [...this.problem.demand];
+        this.X = Array.from({length: this.problem.m}, () => Array(this.problem.n).fill(0));
+        this.i = 0;
+        this.j = 0;
+        this.iterations = [];
+        this.currentStep = 0;
+        this.totalSteps = this.problem.m + this.problem.n - 1;
+      }
       
-      for (let i = 0; i < state.m; i++) {
-        const tr = document.createElement('tr');
-        const th = document.createElement('th');
-        th.textContent = 'F' + (i + 1);
-        tr.appendChild(th);
+      // Ejecutar el algoritmo completo
+      run() {
+        this.reset();
         
-        for (let j = 0; j < state.n; j++) {
-          const td = document.createElement('td');
-          if (state.i === i && state.j === j && state.stepMode) {
-            td.classList.add('current-step');
-          }
+        let i = 0, j = 0;
+        
+        while (i < this.problem.m && j < this.problem.n) {
+          const asign = Math.min(this.S[i], this.D[j]);
+          this.X[i][j] = asign;
+          this.S[i] -= asign;
+          this.D[j] -= asign;
           
-          const inp = document.createElement('input');
-          inp.type = 'number';
-          inp.value = state.cost[i][j];
-          inp.min = 0;
-          inp.step = 1;
-          inp.style.width = '70px';
-          inp.style.background = 'rgba(11, 19, 38, 0.7)';
-          inp.style.border = '1px solid rgba(255,255,255,0.1)';
-          inp.style.color = 'var(--ink)';
-          inp.style.borderRadius = '4px';
-          inp.style.padding = '4px';
-          inp.onchange = () => {
-            state.cost[i][j] = Number(inp.value || 0);
-            renderSVG();
-            checkBalance();
-          };
-          td.appendChild(inp);
-          tr.appendChild(td);
+          // Guardar iteración
+          this.iterations.push({
+            step: this.currentStep + 1,
+            i: i,
+            j: j,
+            allocation: asign,
+            supplyRemaining: [...this.S],
+            demandRemaining: [...this.D],
+            currentX: this.X.map(row => [...row])
+          });
+          
+          this.currentStep++;
+          
+          // Mover a la siguiente celda
+          if (this.S[i] === 0) {
+            i++;
+          } else {
+            j++;
+          }
         }
         
-        const tdSupply = document.createElement('td');
-        const inpS = document.createElement('input');
-        inpS.type = 'number';
-        inpS.value = state.supply[i];
-        inpS.min = 0;
-        inpS.step = 1;
-        inpS.style.width = '70px';
-        inpS.style.background = 'rgba(11, 19, 38, 0.7)';
-        inpS.style.border = '1px solid rgba(255,255,255,0.1)';
-        inpS.style.color = 'var(--ink)';
-        inpS.style.borderRadius = '4px';
-        inpS.style.padding = '4px';
-        inpS.onchange = () => {
-          state.supply[i] = Number(inpS.value || 0);
-          renderTotals();
-          checkBalance();
+        return {
+          X: this.X,
+          iterations: this.iterations,
+          total: this.calculateTotal()
         };
-        tdSupply.appendChild(inpS);
-        tr.appendChild(tdSupply);
-        tbody.appendChild(tr);
-      }
-
-      // Pie de tabla
-      const foot = document.createElement('tr');
-      const th0 = document.createElement('th');
-      th0.textContent = 'Demanda';
-      foot.appendChild(th0);
-      
-      for (let j = 0; j < state.n; j++) {
-        const td = document.createElement('td');
-        const inpD = document.createElement('input');
-        inpD.type = 'number';
-        inpD.value = state.demand[j];
-        inpD.min = 0;
-        inpD.step = 1;
-        inpD.style.width = '70px';
-        inpD.style.background = 'rgba(11, 19, 38, 0.7)';
-        inpD.style.border = '1px solid rgba(255,255,255,0.1)';
-        inpD.style.color = 'var(--ink)';
-        inpD.style.borderRadius = '4px';
-        inpD.style.padding = '4px';
-        inpD.onchange = () => {
-          state.demand[j] = Number(inpD.value || 0);
-          renderTotals();
-          checkBalance();
-        };
-        td.appendChild(inpD);
-        foot.appendChild(td);
       }
       
-      const last = document.createElement('td');
-      last.textContent = '';
-      foot.appendChild(last);
-      tbody.appendChild(foot);
-
-      tbl.appendChild(tbody);
-      container.appendChild(tbl);
-    }
-
-    // Verificación de balance
-    function checkBalance() {
-      const s = state.supply.reduce((a, b) => a + b, 0);
-      const d = state.demand.reduce((a, b) => a + b, 0);
-      
-      state.balanced = (s === d);
-      
-      if (s === d) {
-        updateStatus("El problema está balanceado. Puedes ejecutar el algoritmo.", "success");
-      } else if (s > d) {
-        updateStatus(`El problema NO está balanceado. Oferta (${s}) > Demanda (${d}). Usa el botón "Equilibrar".`, "warning");
-      } else {
-        updateStatus(`El problema NO está balanceado. Oferta (${s}) < Demanda (${d}). Usa el botón "Equilibrar".`, "warning");
-      }
-      
-      return state.balanced;
-    }
-
-    // Actualización de estado
-    function updateStatus(message, type) {
-      const statusArea = el('statusArea');
-      statusArea.innerHTML = '';
-      
-      const statusDiv = document.createElement('div');
-      statusDiv.classList.add('status', type);
-      statusDiv.textContent = message;
-      statusArea.appendChild(statusDiv);
-    }
-
-    // Renderizado de totales
-    function renderTotals() {
-      const s = state.supply.reduce((a, b) => a + b, 0);
-      const d = state.demand.reduce((a, b) => a + b, 0);
-      el('totals').textContent = `Oferta total = ${s}    |    Demanda total = ${d}`;
-    }
-
-    // Llenado aleatorio
-    function randomFill() {
-      // Asegurar que los valores sean razonables y el problema esté balanceado
-      const totalSupply = Math.floor(Math.random() * 100 + 50);
-      
-      // Distribuir oferta
-      let remainingSupply = totalSupply;
-      for (let i = 0; i < state.m; i++) {
-        if (i === state.m - 1) {
-          state.supply[i] = remainingSupply;
-        } else {
-          state.supply[i] = Math.floor(Math.random() * (remainingSupply / 2)) + 1;
-          remainingSupply -= state.supply[i];
+      // Ejecutar un solo paso
+      step() {
+        if (this.i >= this.problem.m || this.j >= this.problem.n) {
+          return null;
         }
-      }
-      
-      // Distribuir demanda (igual a oferta para estar balanceado)
-      let remainingDemand = totalSupply;
-      for (let j = 0; j < state.n; j++) {
-        if (j === state.n - 1) {
-          state.demand[j] = remainingDemand;
-        } else {
-          state.demand[j] = Math.floor(Math.random() * (remainingDemand / 2)) + 1;
-          remainingDemand -= state.demand[j];
-        }
-      }
-      
-      // Costos aleatorios
-      for (let i = 0; i < state.m; i++) {
-        for (let j = 0; j < state.n; j++) {
-          state.cost[i][j] = Math.floor(Math.random() * 20 + 1);
-        }
-      }
-      
-      renderMatrixEditor();
-      renderTotals();
-      renderSVG();
-      checkBalance();
-      updateStatus("Matriz generada aleatoriamente. El problema está balanceado.", "success");
-    }
-
-    // Balanceo
-    function balanceProblem() {
-      const s = state.supply.reduce((a, b) => a + b, 0);
-      const d = state.demand.reduce((a, b) => a + b, 0);
-      
-      if (s === d) {
-        updateStatus("El problema ya está balanceado.", "info");
-        return;
-      }
-      
-      if (s > d) {
-        // Añadir columna dummy
-        state.demand.push(s - d);
-        for (let i = 0; i < state.m; i++) {
-          state.cost[i].push(0);
-        }
-        state.n += 1;
-        updateStatus(`Se añadió un destino dummy con demanda ${s-d}.`, "info");
-      } else {
-        // Añadir fila dummy
-        state.supply.push(d - s);
-        state.m += 1;
-        state.cost.push(Array(state.n).fill(0));
-        updateStatus(`Se añadió un origen dummy con oferta ${d-s}.`, "info");
-      }
-      
-      // Reiniciar asignaciones
-      state.X = Array.from({length: state.m}, () => Array(state.n).fill(0));
-      state.i = 0;
-      state.j = 0;
-      
-      renderMatrixEditor();
-      renderTotals();
-      renderSVG();
-      checkBalance();
-    }
-
-    // Algoritmo Northwest
-    function runNorthwest(fullAuto = true) {
-      if (!checkBalance()) {
-        updateStatus("No se puede ejecutar el algoritmo: el problema no está balanceado.", "error");
-        return;
-      }
-      
-      // Reiniciar iteraciones
-      state.iterations = [];
-      
-      // Copia de supply/demand
-      const S = state.supply.slice();
-      const D = state.demand.slice();
-      state.X = Array.from({length: state.m}, () => Array(state.n).fill(0));
-      
-      let i = 0, j = 0;
-      state.totalSteps = state.m + state.n - 1;
-      state.currentStep = 0;
-      
-      el('modeLabel').textContent = fullAuto ? 'Automático' : 'Paso a paso';
-      
-      updateStatus("Ejecutando algoritmo Northwest...", "info");
-      
-      while (i < state.m && j < state.n) {
-        const asign = Math.min(S[i], D[j]);
-        state.X[i][j] = asign;
-        S[i] -= asign;
-        D[j] -= asign;
+        
+        const asign = Math.min(this.S[this.i], this.D[this.j]);
+        this.X[this.i][this.j] = asign;
+        this.S[this.i] -= asign;
+        this.D[this.j] -= asign;
         
         // Guardar iteración
-        state.iterations.push({
-          step: state.currentStep + 1,
-          i: i,
-          j: j,
+        this.iterations.push({
+          step: this.currentStep + 1,
+          i: this.i,
+          j: this.j,
           allocation: asign,
-          supplyRemaining: [...S],
-          demandRemaining: [...D],
-          currentX: state.X.map(row => [...row])
+          supplyRemaining: [...this.S],
+          demandRemaining: [...this.D],
+          currentX: this.X.map(row => [...row])
         });
         
-        state.currentStep++;
-        updateProgressBar();
+        this.currentStep++;
         
-        // Actualizar y renderizar si paso a paso
-        if (!fullAuto) {
-          state.i = i;
-          state.j = j;
-          renderStep();
-          return;
+        // Mover a la siguiente celda
+        if (this.S[this.i] === 0) {
+          this.i++;
+        } else {
+          this.j++;
         }
         
-        if (S[i] === 0) i++;
-        else if (D[j] === 0) j++;
+        return {
+          i: this.i,
+          j: this.j,
+          X: this.X,
+          iterations: this.iterations
+        };
       }
       
-      finalizeResult();
-    }
-
-    // Paso a paso
-    function stepNorthwest() {
-      // Si es la primera vez, inicializar copias
-      if (!state._S) {
-        state._S = state.supply.slice();
-        state._D = state.demand.slice();
-        state.X = Array.from({length: state.m}, () => Array(state.n).fill(0));
-        state.i = 0;
-        state.j = 0;
-        state.totalSteps = state.m + state.n - 1;
-        state.currentStep = 0;
-        state.iterations = [];
-      }
-      
-      const i = state.i, j = state.j;
-      
-      if (i >= state.m || j >= state.n) {
-        finalizeResult();
-        return;
-      }
-      
-      const asign = Math.min(state._S[i], state._D[j]);
-      state.X[i][j] = asign;
-      state._S[i] -= asign;
-      state._D[j] -= asign;
-      
-      // Guardar iteración
-      state.iterations.push({
-        step: state.currentStep + 1,
-        i: i,
-        j: j,
-        allocation: asign,
-        supplyRemaining: [...state._S],
-        demandRemaining: [...state._D],
-        currentX: state.X.map(row => [...row])
-      });
-      
-      state.currentStep++;
-      updateProgressBar();
-      
-      // Mover
-      if (state._S[i] === 0) state.i++;
-      else if (state._D[j] === 0) state.j++;
-      
-      renderStep();
-      
-      // Comprobar si terminó
-      if (state.i >= state.m || state.j >= state.n) {
-        finalizeResult();
-      }
-    }
-
-    // Renderizado de paso
-    function renderStep() {
-      renderMatrixEditor();
-      renderSVG();
-      el('assignOutput').textContent = matrixToText(state.X);
-      el('totalCost').textContent = "(parcial) " + computeTotalCost();
-      el('modeLabel').textContent = `Paso a paso (posición i=${state.i}, j=${state.j})`;
-      renderIterations();
-    }
-
-    // Finalización
-    function finalizeResult() {
-      renderMatrixEditor();
-      renderSVG();
-      el('assignOutput').textContent = matrixToText(state.X);
-      const total = computeTotalCost();
-      el('totalCost').textContent = total;
-      
-      // Verificar que la solución es factible
-      const isFeasible = verifySolution();
-      
-      if (isFeasible) {
-        updateStatus(`Solución completada. Costo total: ${total}. La solución es factible.`, "success");
-      } else {
-        updateStatus(`Solución completada. Costo total: ${total}. ADVERTENCIA: La solución podría no ser factible.`, "warning");
-      }
-      
-      // Limpiar variables de paso
-      delete state._S;
-      delete state._D;
-      state.currentStep = state.totalSteps;
-      updateProgressBar();
-      renderIterations();
-    }
-
-    // Verificación de solución
-    function verifySolution() {
-      // Verificar que todas las ofertas se cumplen
-      for (let i = 0; i < state.m; i++) {
-        const rowSum = state.X[i].reduce((a, b) => a + b, 0);
-        if (rowSum !== state.supply[i]) {
-          console.warn(`La fila ${i} no cumple con la oferta: ${rowSum} vs ${state.supply[i]}`);
-          return false;
-        }
-      }
-      
-      // Verificar que todas las demandas se cumplen
-      for (let j = 0; j < state.n; j++) {
-        const colSum = state.X.map(row => row[j]).reduce((a, b) => a + b, 0);
-        if (colSum !== state.demand[j]) {
-          console.warn(`La columna ${j} no cumple con la demanda: ${colSum} vs ${state.demand[j]}`);
-          return false;
-        }
-      }
-      
-      return true;
-    }
-
-    // Cálculo de costo total
-    function computeTotalCost() {
-      let total = 0;
-      for (let i = 0; i < state.m; i++) {
-        for (let j = 0; j < state.n; j++) {
-          total += (state.X[i] || [])[j] * state.cost[i][j] || 0;
-        }
-      }
-      return total;
-    }
-
-    // Conversión de matriz a texto
-    function matrixToText(M) {
-      return M.map(r => r.map(v => String(v).padStart(3, ' ')).join(' | ')).join('\n');
-    }
-
-    // Actualización de barra de progreso
-    function updateProgressBar() {
-      const progressFill = el('progressFill');
-      if (state.totalSteps > 0) {
-        const progress = (state.currentStep / state.totalSteps) * 100;
-        progressFill.style.width = `${progress}%`;
-      } else {
-        progressFill.style.width = '0%';
-      }
-    }
-
-    // SVG drawing
-    function renderSVG() {
-      const box = el('svgBox');
-      box.innerHTML = '';
-      
-      const w = box.clientWidth;
-      const h = box.clientHeight;
-      
-      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svg.setAttribute('width', '100%');
-      svg.setAttribute('height', '100%');
-      svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
-      
-      // Posiciones
-      const leftX = 80, rightX = w - 120;
-      const padY = 40;
-      const usableH = h - 80;
-      
-      const ysLeft = [];
-      const ysRight = [];
-      
-      for (let i = 0; i < state.m; i++) {
-        ysLeft.push(60 + i * (usableH / (Math.max(1, state.m) - (state.m === 1 ? 1 : 0))));
-      }
-      
-      for (let j = 0; j < state.n; j++) {
-        ysRight.push(60 + j * (usableH / (Math.max(1, state.n) - (state.n === 1 ? 1 : 0))));
-      }
-
-      // Dibujar nodos izquierdos (orígenes)
-      for (let i = 0; i < state.m; i++) {
-        const g = document.createElementNS(svg.namespaceURI, 'g');
-        const cy = ysLeft[i];
-        
-        const circle = document.createElementNS(svg.namespaceURI, 'circle');
-        circle.setAttribute('cx', leftX);
-        circle.setAttribute('cy', cy);
-        circle.setAttribute('r', 18);
-        circle.setAttribute('fill', 'rgba(11, 19, 38, 0.8)');
-        circle.setAttribute('stroke', 'var(--pastel-orange)');
-        circle.setAttribute('stroke-width', '2');
-        g.appendChild(circle);
-        
-        const txt = document.createElementNS(svg.namespaceURI, 'text');
-        txt.setAttribute('x', leftX);
-        txt.setAttribute('y', cy + 5);
-        txt.setAttribute('text-anchor', 'middle');
-        txt.setAttribute('font-size', '12');
-        txt.setAttribute('font-weight', 'bold');
-        txt.setAttribute('fill', 'var(--pastel-orange)');
-        txt.textContent = 'F' + (i + 1);
-        g.appendChild(txt);
-        
-        const supplyTxt = document.createElementNS(svg.namespaceURI, 'text');
-        supplyTxt.setAttribute('x', leftX - 30);
-        supplyTxt.setAttribute('y', cy + 5);
-        supplyTxt.setAttribute('text-anchor', 'end');
-        supplyTxt.setAttribute('font-size', '11');
-        supplyTxt.setAttribute('fill', 'var(--ink)');
-        supplyTxt.textContent = `(${state.supply[i]})`;
-        g.appendChild(supplyTxt);
-        
-        svg.appendChild(g);
-      }
-
-      // Dibujar nodos derechos (destinos)
-      for (let j = 0; j < state.n; j++) {
-        const g = document.createElementNS(svg.namespaceURI, 'g');
-        const cy = ysRight[j];
-        
-        const circle = document.createElementNS(svg.namespaceURI, 'circle');
-        circle.setAttribute('cx', rightX);
-        circle.setAttribute('cy', cy);
-        circle.setAttribute('r', 18);
-        circle.setAttribute('fill', 'rgba(11, 19, 38, 0.8)');
-        circle.setAttribute('stroke', 'var(--pastel-orange)');
-        circle.setAttribute('stroke-width', '2');
-        g.appendChild(circle);
-        
-        const txt = document.createElementNS(svg.namespaceURI, 'text');
-        txt.setAttribute('x', rightX);
-        txt.setAttribute('y', cy + 5);
-        txt.setAttribute('text-anchor', 'middle');
-        txt.setAttribute('font-size', '12');
-        txt.setAttribute('font-weight', 'bold');
-        txt.setAttribute('fill', 'var(--pastel-orange)');
-        txt.textContent = 'D' + (j + 1);
-        g.appendChild(txt);
-        
-        const demandTxt = document.createElementNS(svg.namespaceURI, 'text');
-        demandTxt.setAttribute('x', rightX + 30);
-        demandTxt.setAttribute('y', cy + 5);
-        demandTxt.setAttribute('text-anchor', 'start');
-        demandTxt.setAttribute('font-size', '11');
-        demandTxt.setAttribute('fill', 'var(--ink)');
-        demandTxt.textContent = `(${state.demand[j]})`;
-        g.appendChild(demandTxt);
-        
-        svg.appendChild(g);
-      }
-
-      // Dibujar aristas con costos y flujos
-      for (let i = 0; i < state.m; i++) {
-        for (let j = 0; j < state.n; j++) {
-          const x1 = leftX + 18;
-          const y1 = ysLeft[i];
-          const x2 = rightX - 18;
-          const y2 = ysRight[j];
-          
-          const path = document.createElementNS(svg.namespaceURI, 'path');
-          const d = `M ${x1} ${y1} C ${x1 + 80} ${y1} ${x2 - 80} ${y2} ${x2} ${y2}`;
-          path.setAttribute('d', d);
-          path.setAttribute('stroke', 'rgba(255,255,255,0.2)');
-          path.setAttribute('fill', 'none');
-          svg.appendChild(path);
-          
-          // Etiqueta de costo
-          const midx = (x1 + x2) / 2;
-          const midy = (y1 + y2) / 2;
-          
-          const t = document.createElementNS(svg.namespaceURI, 'text');
-          t.setAttribute('x', midx - 10);
-          t.setAttribute('y', midy - 6);
-          t.setAttribute('font-size', '11');
-          t.setAttribute('fill', 'var(--ink)');
-          t.textContent = state.cost[i][j];
-          svg.appendChild(t);
-          
-          // Flujo si está asignado
-          const flow = (state.X[i] || [])[j] || 0;
-          if (flow > 0) {
-            const strokeW = Math.min(8, 1 + Math.log(flow + 1));
-            const p2 = document.createElementNS(svg.namespaceURI, 'path');
-            p2.setAttribute('d', d);
-            
-            // Color diferente para el paso actual
-            if (state.i === i && state.j === j && state.stepMode) {
-              p2.setAttribute('stroke', 'var(--carrot-orange)'); // Paso actual - naranja
-            } else if (state.stepMode && (
-              (i < state.i) || 
-              (i === state.i && j < state.j)
-            )) {
-              p2.setAttribute('stroke', 'var(--success)'); // Completado - verde
-            } else {
-              p2.setAttribute('stroke', 'var(--pastel-orange)'); // Normal - naranja pastel
-            }
-            
-            p2.setAttribute('stroke-width', strokeW);
-            p2.setAttribute('fill', 'none');
-            p2.setAttribute('opacity', '0.9');
-            svg.appendChild(p2);
-            
-            const tf = document.createElementNS(svg.namespaceURI, 'text');
-            tf.setAttribute('x', midx + 6);
-            tf.setAttribute('y', midy + 14);
-            tf.setAttribute('font-size', '12');
-            tf.setAttribute('font-weight', 'bold');
-            tf.setAttribute('fill', 'var(--ink)');
-            tf.textContent = flow;
-            svg.appendChild(tf);
+      // Calcular el total
+      calculateTotal() {
+        let total = 0;
+        for (let i = 0; i < this.problem.m; i++) {
+          for (let j = 0; j < this.problem.n; j++) {
+            total += this.X[i][j] * this.problem.cost[i][j];
           }
         }
+        return total;
       }
-
-      box.appendChild(svg);
     }
+    
+    // Clase para el algoritmo de Maximización
+    class MaximizationAlgorithm {
+      constructor(problem) {
+        this.problem = problem;
+        this.reset();
+      }
+      
+      reset() {
+        this.S = [...this.problem.supply];
+        this.D = [...this.problem.demand];
+        this.X = Array.from({length: this.problem.m}, () => Array(this.problem.n).fill(0));
+        this.iterations = [];
+        this.currentStep = 0;
+        this.totalSteps = this.problem.m + this.problem.n - 1;
+        // Crear lista de celdas ordenadas por valor descendente
+        this.cells = [];
+        for (let i = 0; i < this.problem.m; i++) {
+          for (let j = 0; j < this.problem.n; j++) {
+            this.cells.push({ i, j, value: this.problem.cost[i][j] });
+          }
+        }
+        this.cells.sort((a, b) => b.value - a.value);
+        this.cellIndex = 0;
+      }
+      
+      // Ejecutar el algoritmo completo
+      run() {
+        this.reset();
+        
+        while (this.cellIndex < this.cells.length && 
+               (this.S.some(s => s > 0) && this.D.some(d => d > 0))) {
+          this.step();
+        }
+        
+        return {
+          X: this.X,
+          iterations: this.iterations,
+          total: this.calculateTotal()
+        };
+      }
+      
+      // Ejecutar un solo paso
+      step() {
+        if (this.cellIndex >= this.cells.length) {
+          return null;
+        }
+        
+        // Encontrar la siguiente celda disponible con mayor valor
+        let cellFound = false;
+        while (this.cellIndex < this.cells.length && !cellFound) {
+          const { i, j } = this.cells[this.cellIndex];
+          
+          if (this.S[i] > 0 && this.D[j] > 0) {
+            const asign = Math.min(this.S[i], this.D[j]);
+            this.X[i][j] = asign;
+            this.S[i] -= asign;
+            this.D[j] -= asign;
+            
+            // Guardar iteración
+            this.iterations.push({
+              step: this.currentStep + 1,
+              i: i,
+              j: j,
+              allocation: asign,
+              value: this.problem.cost[i][j],
+              supplyRemaining: [...this.S],
+              demandRemaining: [...this.D],
+              currentX: this.X.map(row => [...row])
+            });
+            
+            this.currentStep++;
+            cellFound = true;
+          }
+          
+          this.cellIndex++;
+        }
+        
+        if (!cellFound) {
+          return null;
+        }
+        
+        return {
+          X: this.X,
+          iterations: this.iterations,
+          cellIndex: this.cellIndex
+        };
+      }
+      
+      // Calcular el total
+      calculateTotal() {
+        let total = 0;
+        for (let i = 0; i < this.problem.m; i++) {
+          for (let j = 0; j < this.problem.n; j++) {
+            total += this.X[i][j] * this.problem.cost[i][j];
+          }
+        }
+        return total;
+      }
+    }
+    
+    // Clase para manejar el problema de transporte
+    class TransportationProblem {
+      constructor(m, n) {
+        this.m = m;
+        this.n = n;
+        this.cost = Array.from({ length: m }, () => Array(n).fill(0));
+        this.supply = Array(m).fill(0);
+        this.demand = Array(n).fill(0);
+        this.mode = 'minimization'; // 'minimization' o 'maximization'
+      }
+      
+      // Verificar si el problema está balanceado
+      isBalanced() {
+        const totalSupply = this.supply.reduce((a, b) => a + b, 0);
+        const totalDemand = this.demand.reduce((a, b) => a + b, 0);
+        return totalSupply === totalDemand;
+      }
+      
+      // Balancear el problema
+      balance() {
+        const totalSupply = this.supply.reduce((a, b) => a + b, 0);
+        const totalDemand = this.demand.reduce((a, b) => a + b, 0);
+        
+        if (totalSupply === totalDemand) return false;
+        
+        if (totalSupply > totalDemand) {
+          // Añadir columna dummy
+          this.demand.push(totalSupply - totalDemand);
+          for (let i = 0; i < this.m; i++) {
+            this.cost[i].push(0);
+          }
+          this.n += 1;
+          return { type: 'demand', value: totalSupply - totalDemand };
+        } else {
+          // Añadir fila dummy
+          this.supply.push(totalDemand - totalSupply);
+          this.m += 1;
+          this.cost.push(Array(this.n).fill(0));
+          return { type: 'supply', value: totalDemand - totalSupply };
+        }
+      }
+      
+      // Generar datos aleatorios
+      randomFill() {
+        // Asegurar que los valores sean razonables y el problema esté balanceado
+        const totalSupply = Math.floor(Math.random() * 100 + 50);
+        
+        // Distribuir oferta
+        let remainingSupply = totalSupply;
+        for (let i = 0; i < this.m; i++) {
+          if (i === this.m - 1) {
+            this.supply[i] = remainingSupply;
+          } else {
+            this.supply[i] = Math.floor(Math.random() * (remainingSupply / 2)) + 1;
+            remainingSupply -= this.supply[i];
+          }
+        }
+        
+        // Distribuir demanda (igual a oferta para estar balanceado)
+        let remainingDemand = totalSupply;
+        for (let j = 0; j < this.n; j++) {
+          if (j === this.n - 1) {
+            this.demand[j] = remainingDemand;
+          } else {
+            this.demand[j] = Math.floor(Math.random() * (remainingDemand / 2)) + 1;
+            remainingDemand -= this.demand[j];
+          }
+        }
+        
+        // Costos aleatorios
+        for (let i = 0; i < this.m; i++) {
+          for (let j = 0; j < this.n; j++) {
+            this.cost[i][j] = Math.floor(Math.random() * 20 + 1);
+          }
+        }
+        
+        return true;
+      }
+    }
+    
+    // Clase para la interfaz de usuario
+    class UI {
+      constructor() {
+        this.state = {
+          problem: new TransportationProblem(3, 3),
+          algorithm: null,
+          stepMode: false,
+          iterationsToShow: null,
+          pendingAction: null
+        };
+        
+        this.initializeUI();
+        this.updateAlgorithm();
+      }
+      
+      initializeUI() {
+        // Referencias a elementos DOM
+        this.el = id => document.getElementById(id);
+        
+        // Inicializar UI
+        this.renderMatrixEditor();
+        this.renderTotals();
+        this.renderSVG();
+        this.updateProgressBar();
+        this.updateStatus("Listo para comenzar. Ingresa los datos del problema.", "info");
+        this.renderIterations();
+        
+        // Configurar event listeners
+        this.setupEventListeners();
+      }
+      
+      setupEventListeners() {
+        // Botones principales
+        this.el('btnGenerate').onclick = () => {
+          const m = Math.max(1, Number(this.el('nSources').value || 1));
+          const n = Math.max(1, Number(this.el('nTargets').value || 1));
+          this.state.problem = new TransportationProblem(m, n);
+          this.updateAlgorithm();
+          this.renderMatrixEditor();
+          this.renderTotals();
+          this.renderSVG();
+          this.updateProgressBar();
+          this.updateStatus("Listo para comenzar. Ingresa los datos del problema.", "info");
+        };
+        
+        this.el('btnRandom').onclick = () => {
+          this.state.problem.randomFill();
+          this.renderMatrixEditor();
+          this.renderTotals();
+          this.renderSVG();
+          this.checkBalance();
+          this.updateStatus("Matriz generada aleatoriamente. El problema está balanceado.", "success");
+        };
+        
+        this.el('btnBalance').onclick = () => {
+          const result = this.state.problem.balance();
+          if (result) {
+            this.updateAlgorithm();
+            this.renderMatrixEditor();
+            this.renderTotals();
+            this.renderSVG();
+            this.checkBalance();
+            this.updateStatus(
+              `Se añadió un ${result.type === 'supply' ? 'origen' : 'destino'} dummy con ${result.type === 'supply' ? 'oferta' : 'demanda'} ${result.value}.`, 
+              "info"
+            );
+          } else {
+            this.updateStatus("El problema ya está balanceado.", "info");
+          }
+        };
+        
+        this.el('btnRun').onclick = () => {
+          this.state.stepMode = false;
+          this.runAlgorithm(true);
+        };
+        
+        this.el('btnStep').onclick = () => {
+          if (!this.state.stepMode) {
+            this.state.stepMode = true;
+            this.updateAlgorithm();
+            this.el('btnStep').textContent = 'Siguiente paso';
+            this.updateProgressBar();
+            this.renderSVG();
+            this.updateStatus("Modo paso a paso iniciado. Usa 'Siguiente paso' para avanzar.", "info");
+          } else {
+            // Hacer un paso
+            const result = this.state.algorithm.step();
+            if (result) {
+              this.renderStep();
+            } else {
+              this.finalizeResult();
+              this.el('btnStep').textContent = 'Paso a paso';
+              this.state.stepMode = false;
+            }
+          }
+        };
+        
+        this.el('btnReset').onclick = () => {
+          this.state.problem = new TransportationProblem(3, 3);
+          this.updateAlgorithm();
+          this.renderMatrixEditor();
+          this.renderTotals();
+          this.renderSVG();
+          this.el('btnStep').textContent = 'Paso a paso';
+          this.updateStatus("Sistema reiniciado. Listo para comenzar.", "info");
+        };
+        
+        this.el('btnUpdateIterations').onclick = () => this.updateIterationsToShow();
+        
+        // Botones de modo
+        this.el('modeMinimize').onclick = () => this.setMode('minimization');
+        this.el('modeMaximize').onclick = () => this.setMode('maximization');
+        
+        // Botones de utilidad
+        this.el('btnExport').onclick = () => this.exportProblem();
+        this.el('btnImport').onclick = () => this.importProblem();
+        this.el('btnScreenshot').onclick = () => this.takeScreenshot();
+        this.el('btnHelp').onclick = () => this.showHelp();
+        this.el('closeHelp').onclick = () => this.hideHelp();
+        this.el('closeFilename').onclick = () => this.hideFilenameModal();
+        this.el('cancelFilename').onclick = () => this.hideFilenameModal();
+        this.el('confirmFilename').onclick = () => this.confirmFilename();
+        this.el('fileInput').addEventListener('change', (e) => this.handleFileImport(e));
 
-    // Renderizado de iteraciones
-    function renderIterations() {
-      const container = el('iterationsOutput');
-      container.innerHTML = '';
-      
-      if (state.iterations.length === 0) {
-        container.textContent = "No hay iteraciones para mostrar. Ejecuta el algoritmo para ver las iteraciones.";
-        return;
+        // Cerrar modales al hacer clic fuera
+        this.el('helpModal').addEventListener('click', (e) => {
+          if (e.target === this.el('helpModal')) {
+            this.hideHelp();
+          }
+        });
+        
+        this.el('filenameModal').addEventListener('click', (e) => {
+          if (e.target === this.el('filenameModal')) {
+            this.hideFilenameModal();
+          }
+        });
+
+        // Permitir Enter para confirmar nombre de archivo
+        this.el('filenameInput').addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            this.confirmFilename();
+          }
+        });
       }
       
-      // Determinar cuántas iteraciones mostrar
-      let iterationsToShow = state.iterations;
-      if (state.iterationsToShow && state.iterationsToShow > 0) {
-        iterationsToShow = state.iterations.slice(0, state.iterationsToShow);
+      setMode(mode) {
+        this.state.problem.mode = mode;
+        this.el('modeMinimize').classList.toggle('active', mode === 'minimization');
+        this.el('modeMaximize').classList.toggle('active', mode === 'maximization');
+        this.el('modeLabel').textContent = mode === 'minimization' ? 'Minimización' : 'Maximización';
+        this.el('totalLabel').textContent = mode === 'minimization' ? 'Costo total' : 'Beneficio total';
+        this.updateAlgorithm();
       }
       
-      iterationsToShow.forEach(iteration => {
-        const iterationDiv = document.createElement('div');
-        iterationDiv.className = 'iteration';
+      updateAlgorithm() {
+        if (this.state.problem.mode === 'minimization') {
+          this.state.algorithm = new NorthwestAlgorithm(this.state.problem);
+        } else {
+          this.state.algorithm = new MaximizationAlgorithm(this.state.problem);
+        }
+      }
+      
+      // ========== MÉTODOS DE RENDERIZADO ==========
+      
+      renderMatrixEditor() {
+        const container = this.el('matrixArea');
+        container.innerHTML = '';
         
-        const header = document.createElement('div');
-        header.className = 'iteration-header';
-        header.textContent = `Iteración ${iteration.step}: Asignar ${iteration.allocation} unidades de F${iteration.i+1} a D${iteration.j+1}`;
-        iterationDiv.appendChild(header);
+        const tbl = document.createElement('table');
+        tbl.classList.add('table-dark');
         
-        const table = document.createElement('table');
-        table.className = 'iteration-table';
-        
-        // Encabezado de la tabla
+        // Encabezado
         const thead = document.createElement('thead');
         const headRow = document.createElement('tr');
-        headRow.appendChild(document.createElement('th')); // Celda vacía para la esquina
+        headRow.appendChild(document.createElement('th'));
         
-        for (let j = 0; j < state.n; j++) {
+        for (let j = 0; j < this.state.problem.n; j++) {
           const th = document.createElement('th');
           th.textContent = 'D' + (j + 1);
           headRow.appendChild(th);
         }
         
+        const thSupply = document.createElement('th');
+        thSupply.textContent = 'Oferta';
+        headRow.appendChild(thSupply);
         thead.appendChild(headRow);
-        table.appendChild(thead);
-        
+        tbl.appendChild(thead);
+
         // Cuerpo de la tabla
         const tbody = document.createElement('tbody');
         
-        for (let i = 0; i < state.m; i++) {
+        for (let i = 0; i < this.state.problem.m; i++) {
           const tr = document.createElement('tr');
           const th = document.createElement('th');
           th.textContent = 'F' + (i + 1);
           tr.appendChild(th);
           
-          for (let j = 0; j < state.n; j++) {
+          for (let j = 0; j < this.state.problem.n; j++) {
             const td = document.createElement('td');
-            if (i === iteration.i && j === iteration.j) {
-              td.classList.add('current-cell');
-            }
             
-            const value = iteration.currentX[i][j];
-            td.textContent = value > 0 ? value : '';
+            const inp = document.createElement('input');
+            inp.type = 'number';
+            inp.value = this.state.problem.cost[i][j];
+            inp.min = 0;
+            inp.step = 1;
+            inp.style.width = '70px';
+            inp.style.background = 'rgba(11, 19, 38, 0.7)';
+            inp.style.border = '1px solid rgba(255,255,255,0.1)';
+            inp.style.color = 'var(--ink)';
+            inp.style.borderRadius = '4px';
+            inp.style.padding = '4px';
+            inp.onchange = () => {
+              this.state.problem.cost[i][j] = Number(inp.value || 0);
+              this.renderSVG();
+              this.checkBalance();
+            };
+            td.appendChild(inp);
             tr.appendChild(td);
           }
           
+          const tdSupply = document.createElement('td');
+          const inpS = document.createElement('input');
+          inpS.type = 'number';
+          inpS.value = this.state.problem.supply[i];
+          inpS.min = 0;
+          inpS.step = 1;
+          inpS.style.width = '70px';
+          inpS.style.background = 'rgba(11, 19, 38, 0.7)';
+          inpS.style.border = '1px solid rgba(255,255,255,0.1)';
+          inpS.style.color = 'var(--ink)';
+          inpS.style.borderRadius = '4px';
+          inpS.style.padding = '4px';
+          inpS.onchange = () => {
+            this.state.problem.supply[i] = Number(inpS.value || 0);
+            this.renderTotals();
+            this.checkBalance();
+          };
+          tdSupply.appendChild(inpS);
+          tr.appendChild(tdSupply);
           tbody.appendChild(tr);
         }
-        
-        table.appendChild(tbody);
-        iterationDiv.appendChild(table);
-        
-        // Información adicional
-        const infoDiv = document.createElement('div');
-        infoDiv.style.marginTop = '8px';
-        infoDiv.style.fontSize = '11px';
-        infoDiv.style.color = 'rgba(255,255,255,0.7)';
-        infoDiv.innerHTML = `
-          Oferta restante: [${iteration.supplyRemaining.join(', ')}]<br>
-          Demanda restante: [${iteration.demandRemaining.join(', ')}]
-        `;
-        iterationDiv.appendChild(infoDiv);
-        
-        container.appendChild(iterationDiv);
-      });
-      
-      // Mostrar mensaje si se están limitando las iteraciones
-      if (state.iterationsToShow && state.iterationsToShow > 0 && state.iterationsToShow < state.iterations.length) {
-        const messageDiv = document.createElement('div');
-        messageDiv.style.marginTop = '10px';
-        messageDiv.style.fontSize = '12px';
-        messageDiv.style.color = 'var(--carrot-orange)';
-        messageDiv.textContent = `Mostrando ${state.iterationsToShow} de ${state.iterations.length} iteraciones.`;
-        container.appendChild(messageDiv);
-      }
-    }
 
-    // Actualizar el número de iteraciones a mostrar
-    function updateIterationsToShow() {
-      const inputValue = el('iterationsCount').value;
-      if (inputValue === '') {
-        state.iterationsToShow = null;
-      } else {
-        const count = parseInt(inputValue);
-        if (!isNaN(count) && count > 0) {
-          state.iterationsToShow = count;
+        // Pie de tabla
+        const foot = document.createElement('tr');
+        const th0 = document.createElement('th');
+        th0.textContent = 'Demanda';
+        foot.appendChild(th0);
+        
+        for (let j = 0; j < this.state.problem.n; j++) {
+          const td = document.createElement('td');
+          const inpD = document.createElement('input');
+          inpD.type = 'number';
+          inpD.value = this.state.problem.demand[j];
+          inpD.min = 0;
+          inpD.step = 1;
+          inpD.style.width = '70px';
+          inpD.style.background = 'rgba(11, 19, 38, 0.7)';
+          inpD.style.border = '1px solid rgba(255,255,255,0.1)';
+          inpD.style.color = 'var(--ink)';
+          inpD.style.borderRadius = '4px';
+          inpD.style.padding = '4px';
+          inpD.onchange = () => {
+            this.state.problem.demand[j] = Number(inpD.value || 0);
+            this.renderTotals();
+            this.checkBalance();
+          };
+          td.appendChild(inpD);
+          foot.appendChild(td);
         }
-      }
-      renderIterations();
-    }
-
-    // Funciones de Importar/Exportar
-    function exportProblem() {
-      showFilenameModal('export');
-    }
-
-    function importProblem() {
-      showFilenameModal('import');
-    }
-
-    function showFilenameModal(action) {
-      state.pendingAction = action;
-      
-      const modal = el('filenameModal');
-      const title = el('filenameModalTitle');
-      const description = el('filenameModalDescription');
-      const input = el('filenameInput');
-      const error = el('filenameError');
-      
-      if (action === 'export') {
-        title.textContent = 'Personalizar nombre de archivo de exportación';
-        description.textContent = 'Ingresa el nombre para el archivo de exportación (sin extensión):';
-        input.value = `northwest_problem_${new Date().toISOString().slice(0, 10)}`;
-      } else if (action === 'import') {
-        title.textContent = 'Personalizar nombre de archivo de importación';
-        description.textContent = 'Selecciona el archivo a importar:';
-        input.style.display = 'none';
-        error.style.display = 'none';
-      }
-      
-      modal.style.display = 'flex';
-      input.focus();
-      input.select();
-    }
-
-    function hideFilenameModal() {
-      el('filenameModal').style.display = 'none';
-      el('filenameInput').style.display = 'block';
-      el('filenameError').style.display = 'none';
-      state.pendingAction = null;
-    }
-
-    function validateFilename(filename) {
-      // Validar que el nombre no esté vacío
-      if (!filename || filename.trim() === '') {
-        return false;
-      }
-      
-      // Validar caracteres no permitidos en nombres de archivo
-      const invalidChars = /[<>:"/\\|?*\x00-\x1F]/;
-      if (invalidChars.test(filename)) {
-        return false;
-      }
-      
-      return true;
-    }
-
-    function confirmFilename() {
-      const action = state.pendingAction;
-      const input = el('filenameInput');
-      const error = el('filenameError');
-      
-      if (action === 'export') {
-        const filename = input.value.trim();
         
-        if (!validateFilename(filename)) {
-          error.style.display = 'block';
+        const last = document.createElement('td');
+        last.textContent = '';
+        foot.appendChild(last);
+        tbody.appendChild(foot);
+
+        tbl.appendChild(tbody);
+        container.appendChild(tbl);
+      }
+      
+      renderTotals() {
+        const s = this.state.problem.supply.reduce((a, b) => a + b, 0);
+        const d = this.state.problem.demand.reduce((a, b) => a + b, 0);
+        this.el('totals').textContent = `Oferta total = ${s}    |    Demanda total = ${d}`;
+      }
+      
+      // RESTAURAR LA VISUALIZACIÓN SVG COMPLETA
+      renderSVG() {
+        const box = this.el('svgBox');
+        box.innerHTML = '';
+        
+        const w = box.clientWidth;
+        const h = box.clientHeight;
+        
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '100%');
+        svg.setAttribute('height', '100%');
+        svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+        
+        // Posiciones
+        const leftX = 80, rightX = w - 120;
+        const padY = 40;
+        const usableH = h - 80;
+        
+        const ysLeft = [];
+        const ysRight = [];
+        
+        for (let i = 0; i < this.state.problem.m; i++) {
+          ysLeft.push(60 + i * (usableH / (Math.max(1, this.state.problem.m) - (this.state.problem.m === 1 ? 1 : 0))));
+        }
+        
+        for (let j = 0; j < this.state.problem.n; j++) {
+          ysRight.push(60 + j * (usableH / (Math.max(1, this.state.problem.n) - (this.state.problem.n === 1 ? 1 : 0))));
+        }
+
+        // Dibujar nodos izquierdos (orígenes)
+        for (let i = 0; i < this.state.problem.m; i++) {
+          const g = document.createElementNS(svg.namespaceURI, 'g');
+          const cy = ysLeft[i];
+          
+          const circle = document.createElementNS(svg.namespaceURI, 'circle');
+          circle.setAttribute('cx', leftX);
+          circle.setAttribute('cy', cy);
+          circle.setAttribute('r', 18);
+          circle.setAttribute('fill', 'rgba(11, 19, 38, 0.8)');
+          circle.setAttribute('stroke', 'var(--pastel-orange)');
+          circle.setAttribute('stroke-width', '2');
+          g.appendChild(circle);
+          
+          const txt = document.createElementNS(svg.namespaceURI, 'text');
+          txt.setAttribute('x', leftX);
+          txt.setAttribute('y', cy + 5);
+          txt.setAttribute('text-anchor', 'middle');
+          txt.setAttribute('font-size', '12');
+          txt.setAttribute('font-weight', 'bold');
+          txt.setAttribute('fill', 'var(--pastel-orange)');
+          txt.textContent = 'F' + (i + 1);
+          g.appendChild(txt);
+          
+          const supplyTxt = document.createElementNS(svg.namespaceURI, 'text');
+          supplyTxt.setAttribute('x', leftX - 30);
+          supplyTxt.setAttribute('y', cy + 5);
+          supplyTxt.setAttribute('text-anchor', 'end');
+          supplyTxt.setAttribute('font-size', '11');
+          supplyTxt.setAttribute('fill', 'var(--ink)');
+          supplyTxt.textContent = `(${this.state.problem.supply[i]})`;
+          g.appendChild(supplyTxt);
+          
+          svg.appendChild(g);
+        }
+
+        // Dibujar nodos derechos (destinos)
+        for (let j = 0; j < this.state.problem.n; j++) {
+          const g = document.createElementNS(svg.namespaceURI, 'g');
+          const cy = ysRight[j];
+          
+          const circle = document.createElementNS(svg.namespaceURI, 'circle');
+          circle.setAttribute('cx', rightX);
+          circle.setAttribute('cy', cy);
+          circle.setAttribute('r', 18);
+          circle.setAttribute('fill', 'rgba(11, 19, 38, 0.8)');
+          circle.setAttribute('stroke', 'var(--pastel-orange)');
+          circle.setAttribute('stroke-width', '2');
+          g.appendChild(circle);
+          
+          const txt = document.createElementNS(svg.namespaceURI, 'text');
+          txt.setAttribute('x', rightX);
+          txt.setAttribute('y', cy + 5);
+          txt.setAttribute('text-anchor', 'middle');
+          txt.setAttribute('font-size', '12');
+          txt.setAttribute('font-weight', 'bold');
+          txt.setAttribute('fill', 'var(--pastel-orange)');
+          txt.textContent = 'D' + (j + 1);
+          g.appendChild(txt);
+          
+          const demandTxt = document.createElementNS(svg.namespaceURI, 'text');
+          demandTxt.setAttribute('x', rightX + 30);
+          demandTxt.setAttribute('y', cy + 5);
+          demandTxt.setAttribute('text-anchor', 'start');
+          demandTxt.setAttribute('font-size', '11');
+          demandTxt.setAttribute('fill', 'var(--ink)');
+          demandTxt.textContent = `(${this.state.problem.demand[j]})`;
+          g.appendChild(demandTxt);
+          
+          svg.appendChild(g);
+        }
+
+        // Dibujar aristas con costos y flujos
+        for (let i = 0; i < this.state.problem.m; i++) {
+          for (let j = 0; j < this.state.problem.n; j++) {
+            const x1 = leftX + 18;
+            const y1 = ysLeft[i];
+            const x2 = rightX - 18;
+            const y2 = ysRight[j];
+            
+            const path = document.createElementNS(svg.namespaceURI, 'path');
+            const d = `M ${x1} ${y1} C ${x1 + 80} ${y1} ${x2 - 80} ${y2} ${x2} ${y2}`;
+            path.setAttribute('d', d);
+            path.setAttribute('stroke', 'rgba(255,255,255,0.2)');
+            path.setAttribute('fill', 'none');
+            svg.appendChild(path);
+            
+            // Etiqueta de costo
+            const midx = (x1 + x2) / 2;
+            const midy = (y1 + y2) / 2;
+            
+            const t = document.createElementNS(svg.namespaceURI, 'text');
+            t.setAttribute('x', midx - 10);
+            t.setAttribute('y', midy - 6);
+            t.setAttribute('font-size', '11');
+            t.setAttribute('fill', 'var(--ink)');
+            t.textContent = this.state.problem.cost[i][j];
+            svg.appendChild(t);
+            
+            // Flujo si está asignado
+            const flow = this.state.algorithm ? (this.state.algorithm.X[i] || [])[j] || 0 : 0;
+            if (flow > 0) {
+              const strokeW = Math.min(8, 1 + Math.log(flow + 1));
+              const p2 = document.createElementNS(svg.namespaceURI, 'path');
+              p2.setAttribute('d', d);
+              
+              // Color diferente para el paso actual (solo para Northwest)
+              if (this.state.algorithm instanceof NorthwestAlgorithm && 
+                  this.state.stepMode && 
+                  this.state.algorithm.i === i && this.state.algorithm.j === j) {
+                p2.setAttribute('stroke', 'var(--carrot-orange)'); // Paso actual - naranja
+              } else if (this.state.stepMode && this.state.algorithm && (
+                (this.state.algorithm instanceof NorthwestAlgorithm && 
+                 ((i < this.state.algorithm.i) || 
+                  (i === this.state.algorithm.i && j < this.state.algorithm.j)))
+              )) {
+                p2.setAttribute('stroke', 'var(--success)'); // Completado - verde
+              } else {
+                p2.setAttribute('stroke', 'var(--pastel-orange)'); // Normal - naranja pastel
+              }
+              
+              p2.setAttribute('stroke-width', strokeW);
+              p2.setAttribute('fill', 'none');
+              p2.setAttribute('opacity', '0.9');
+              svg.appendChild(p2);
+              
+              const tf = document.createElementNS(svg.namespaceURI, 'text');
+              tf.setAttribute('x', midx + 6);
+              tf.setAttribute('y', midy + 14);
+              tf.setAttribute('font-size', '12');
+              tf.setAttribute('font-weight', 'bold');
+              tf.setAttribute('fill', 'var(--ink)');
+              tf.textContent = flow;
+              svg.appendChild(tf);
+            }
+          }
+        }
+
+        box.appendChild(svg);
+      }
+      
+      renderIterations() {
+        const container = this.el('iterationsOutput');
+        container.innerHTML = '';
+        
+        if (!this.state.algorithm || this.state.algorithm.iterations.length === 0) {
+          container.textContent = "No hay iteraciones para mostrar. Ejecuta el algoritmo para ver las iteraciones.";
           return;
         }
         
-        error.style.display = 'none';
-        hideFilenameModal();
-        performExport(filename);
-      } else if (action === 'import') {
-        hideFilenameModal();
-        performImport();
-      }
-    }
-
-    function performExport(filename) {
-      const data = {
-        m: state.m,
-        n: state.n,
-        cost: state.cost,
-        supply: state.supply,
-        demand: state.demand,
-        X: state.X,
-        iterations: state.iterations,
-        totalCost: computeTotalCost()
-      };
-      
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${filename}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      updateStatus(`Problema exportado como "${filename}.json"`, "success");
-    }
-
-    function performImport() {
-      const fileInput = el('fileInput');
-      fileInput.click();
-    }
-
-    function handleFileImport(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const data = JSON.parse(e.target.result);
-          
-          // Validar estructura básica
-          if (!data.m || !data.n || !data.cost || !data.supply || !data.demand) {
-            throw new Error("Formato de archivo inválido");
-          }
-          
-          // Actualizar estado
-          state.m = data.m;
-          state.n = data.n;
-          state.cost = data.cost;
-          state.supply = data.supply;
-          state.demand = data.demand;
-          state.X = data.X || Array.from({length: state.m}, () => Array(state.n).fill(0));
-          state.iterations = data.iterations || [];
-          
-          // Actualizar UI
-          el('nSources').value = state.m;
-          el('nTargets').value = state.n;
-          
-          renderMatrixEditor();
-          renderTotals();
-          renderSVG();
-          renderIterations();
-          
-          if (data.totalCost) {
-            el('totalCost').textContent = data.totalCost;
-          }
-          
-          updateStatus(`Problema importado desde "${file.name}"`, "success");
-        } catch (error) {
-          updateStatus("Error al importar el archivo: " + error.message, "error");
+        // Determinar cuántas iteraciones mostrar
+        let iterationsToShow = this.state.algorithm.iterations;
+        if (this.state.iterationsToShow && this.state.iterationsToShow > 0) {
+          iterationsToShow = this.state.algorithm.iterations.slice(0, this.state.iterationsToShow);
         }
-      };
-      reader.readAsText(file);
-      
-      // Limpiar input
-      event.target.value = '';
-    }
-
-    function takeScreenshot() {
-      const element = document.body;
-      
-      html2canvas(element, {
-        backgroundColor: null,
-        scale: 2,
-        useCORS: true,
-        logging: false
-      }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = `northwest_solution_${new Date().toISOString().slice(0, 10)}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
         
-        updateStatus("Captura guardada correctamente.", "success");
-      }).catch(error => {
-        updateStatus("Error al generar la captura: " + error.message, "error");
-      });
-    }
-
-    function showHelp() {
-      el('helpModal').style.display = 'flex';
-    }
-
-    function hideHelp() {
-      el('helpModal').style.display = 'none';
-    }
-
-    // UI hooks
-    el('btnGenerate').onclick = () => {
-      const m = Math.max(1, Number(el('nSources').value || 1));
-      const n = Math.max(1, Number(el('nTargets').value || 1));
-      createGrid(m, n);
-    };
-    
-    el('btnRandom').onclick = () => randomFill();
-    el('btnBalance').onclick = () => balanceProblem();
-    
-    el('btnRun').onclick = () => {
-      state.stepMode = false;
-      runNorthwest(true);
-    };
-    
-    el('btnStep').onclick = () => {
-      if (!state.stepMode) {
-        state.stepMode = true;
-        // Inicializar copias de paso
-        state._S = state.supply.slice();
-        state._D = state.demand.slice();
-        state.X = Array.from({length: state.m}, () => Array(state.n).fill(0));
-        state.i = 0;
-        state.j = 0;
-        state.totalSteps = state.m + state.n - 1;
-        state.currentStep = 0;
-        state.iterations = [];
+        iterationsToShow.forEach(iteration => {
+          const iterationDiv = document.createElement('div');
+          iterationDiv.className = 'iteration';
+          
+          let headerText = `Iteración ${iteration.step}: Asignar ${iteration.allocation} unidades de F${iteration.i+1} a D${iteration.j+1}`;
+          if (iteration.value !== undefined) {
+            headerText += ` (valor: ${iteration.value})`;
+          }
+          
+          const header = document.createElement('div');
+          header.className = 'iteration-header';
+          header.textContent = headerText;
+          iterationDiv.appendChild(header);
+          
+          const table = document.createElement('table');
+          table.className = 'iteration-table';
+          
+          // Encabezado de la tabla
+          const thead = document.createElement('thead');
+          const headRow = document.createElement('tr');
+          headRow.appendChild(document.createElement('th')); // Celda vacía para la esquina
+          
+          for (let j = 0; j < this.state.problem.n; j++) {
+            const th = document.createElement('th');
+            th.textContent = 'D' + (j + 1);
+            headRow.appendChild(th);
+          }
+          
+          thead.appendChild(headRow);
+          table.appendChild(thead);
+          
+          // Cuerpo de la tabla
+          const tbody = document.createElement('tbody');
+          
+          for (let i = 0; i < this.state.problem.m; i++) {
+            const tr = document.createElement('tr');
+            const th = document.createElement('th');
+            th.textContent = 'F' + (i + 1);
+            tr.appendChild(th);
+            
+            for (let j = 0; j < this.state.problem.n; j++) {
+              const td = document.createElement('td');
+              if (i === iteration.i && j === iteration.j) {
+                td.classList.add('current-cell');
+              }
+              
+              const value = iteration.currentX[i][j];
+              td.textContent = value > 0 ? value : '';
+              tr.appendChild(td);
+            }
+            
+            tbody.appendChild(tr);
+          }
+          
+          table.appendChild(tbody);
+          iterationDiv.appendChild(table);
+          
+          // Información adicional
+          const infoDiv = document.createElement('div');
+          infoDiv.style.marginTop = '8px';
+          infoDiv.style.fontSize = '11px';
+          infoDiv.style.color = 'rgba(255,255,255,0.7)';
+          infoDiv.innerHTML = `
+            Oferta restante: [${iteration.supplyRemaining.join(', ')}]<br>
+            Demanda restante: [${iteration.demandRemaining.join(', ')}]
+          `;
+          iterationDiv.appendChild(infoDiv);
+          
+          container.appendChild(iterationDiv);
+        });
         
-        el('btnStep').textContent = 'Siguiente paso';
-        el('modeLabel').textContent = 'Paso a paso (iniciado)';
-        updateProgressBar();
-        renderSVG();
-        updateStatus("Modo paso a paso iniciado. Usa 'Siguiente paso' para avanzar.", "info");
-      } else {
-        // Hacer un paso
-        if (state.i >= state.m || state.j >= state.n) {
-          finalizeResult();
-          el('btnStep').textContent = 'Paso a paso';
-          state.stepMode = false;
+        // Mostrar mensaje si se están limitando las iteraciones
+        if (this.state.iterationsToShow && this.state.iterationsToShow > 0 && 
+            this.state.iterationsToShow < this.state.algorithm.iterations.length) {
+          const messageDiv = document.createElement('div');
+          messageDiv.style.marginTop = '10px';
+          messageDiv.style.fontSize = '12px';
+          messageDiv.style.color = 'var(--carrot-orange)';
+          messageDiv.textContent = `Mostrando ${this.state.iterationsToShow} de ${this.state.algorithm.iterations.length} iteraciones.`;
+          container.appendChild(messageDiv);
+        }
+      }
+      
+      // ========== MÉTODOS DE ALGORITMO ==========
+      
+      runAlgorithm(fullAuto = true) {
+        if (!this.checkBalance()) {
+          this.updateStatus("No se puede ejecutar el algoritmo: el problema no está balanceado.", "error");
+          return;
+        }
+        
+        this.updateAlgorithm();
+        
+        if (fullAuto) {
+          const result = this.state.algorithm.run();
+          this.finalizeResult();
         } else {
-          stepNorthwest();
-          el('btnStep').textContent = 'Siguiente paso';
+          this.state.stepMode = true;
+          this.renderStep();
         }
       }
-    };
-    
-    el('btnReset').onclick = () => {
-      createGrid(3, 3);
-      el('btnStep').textContent = 'Paso a paso';
-      updateStatus("Sistema reiniciado. Listo para comenzar.", "info");
-    };
-    
-    el('btnUpdateIterations').onclick = () => updateIterationsToShow();
-    
-    // Nuevos botones
-    el('btnExport').onclick = exportProblem;
-    el('btnImport').onclick = importProblem;
-    el('btnScreenshot').onclick = takeScreenshot;
-    el('btnHelp').onclick = showHelp;
-    el('closeHelp').onclick = hideHelp;
-    el('closeFilename').onclick = hideFilenameModal;
-    el('cancelFilename').onclick = hideFilenameModal;
-    el('confirmFilename').onclick = confirmFilename;
-    el('fileInput').addEventListener('change', handleFileImport);
-
-    // Cerrar modales al hacer clic fuera
-    el('helpModal').addEventListener('click', (e) => {
-      if (e.target === el('helpModal')) {
-        hideHelp();
+      
+      renderStep() {
+        this.renderMatrixEditor();
+        this.renderSVG();
+        this.el('assignOutput').textContent = this.matrixToText(this.state.algorithm.X);
+        const total = this.state.algorithm.calculateTotal();
+        this.el('totalCost').textContent = "(parcial) " + total;
+        this.renderIterations();
       }
-    });
-    
-    el('filenameModal').addEventListener('click', (e) => {
-      if (e.target === el('filenameModal')) {
-        hideFilenameModal();
+      
+      finalizeResult() {
+        this.renderMatrixEditor();
+        this.renderSVG();
+        this.el('assignOutput').textContent = this.matrixToText(this.state.algorithm.X);
+        const total = this.state.algorithm.calculateTotal();
+        this.el('totalCost').textContent = total;
+        
+        // Verificar que la solución es factible
+        const isFeasible = this.verifySolution();
+        
+        const modeText = this.state.problem.mode === 'minimization' ? 'Costo' : 'Beneficio';
+        
+        if (isFeasible) {
+          this.updateStatus(`Solución completada. ${modeText} total: ${total}. La solución es factible.`, "success");
+        } else {
+          this.updateStatus(`Solución completada. ${modeText} total: ${total}. ADVERTENCIA: La solución podría no ser factible.`, "warning");
+        }
+        
+        if (this.state.algorithm.totalSteps) {
+          this.state.algorithm.currentStep = this.state.algorithm.totalSteps;
+        }
+        this.updateProgressBar();
+        this.renderIterations();
       }
-    });
-
-    // Permitir Enter para confirmar nombre de archivo
-    el('filenameInput').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        confirmFilename();
+      
+      verifySolution() {
+        // Verificar que todas las ofertas se cumplen
+        for (let i = 0; i < this.state.problem.m; i++) {
+          const rowSum = this.state.algorithm.X[i].reduce((a, b) => a + b, 0);
+          if (rowSum !== this.state.problem.supply[i]) {
+            console.warn(`La fila ${i} no cumple con la oferta: ${rowSum} vs ${this.state.problem.supply[i]}`);
+            return false;
+          }
+        }
+        
+        // Verificar que todas las demandas se cumplen
+        for (let j = 0; j < this.state.problem.n; j++) {
+          const colSum = this.state.algorithm.X.map(row => row[j]).reduce((a, b) => a + b, 0);
+          if (colSum !== this.state.problem.demand[j]) {
+            console.warn(`La columna ${j} no cumple con la demanda: ${colSum} vs ${this.state.problem.demand[j]}`);
+            return false;
+          }
+        }
+        
+        return true;
       }
-    });
+      
+      matrixToText(M) {
+        return M.map(r => r.map(v => String(v).padStart(3, ' ')).join(' | ')).join('\n');
+      }
+      
+      // ========== MÉTODOS DE UTILIDAD ==========
+      
+      checkBalance() {
+        const isBalanced = this.state.problem.isBalanced();
+        
+        if (isBalanced) {
+          this.updateStatus("El problema está balanceado. Puedes ejecutar el algoritmo.", "success");
+        } else {
+          const s = this.state.problem.supply.reduce((a, b) => a + b, 0);
+          const d = this.state.problem.demand.reduce((a, b) => a + b, 0);
+          
+          if (s > d) {
+            this.updateStatus(`El problema NO está balanceado. Oferta (${s}) > Demanda (${d}). Usa el botón "Equilibrar".`, "warning");
+          } else {
+            this.updateStatus(`El problema NO está balanceado. Oferta (${s}) < Demanda (${d}). Usa el botón "Equilibrar".`, "warning");
+          }
+        }
+        
+        return isBalanced;
+      }
+      
+      updateStatus(message, type) {
+        const statusArea = this.el('statusArea');
+        statusArea.innerHTML = '';
+        
+        const statusDiv = document.createElement('div');
+        statusDiv.classList.add('status', type);
+        statusDiv.textContent = message;
+        statusArea.appendChild(statusDiv);
+      }
+      
+      updateProgressBar() {
+        const progressFill = this.el('progressFill');
+        if (this.state.algorithm && this.state.algorithm.totalSteps > 0) {
+          const progress = (this.state.algorithm.currentStep / this.state.algorithm.totalSteps) * 100;
+          progressFill.style.width = `${progress}%`;
+        } else {
+          progressFill.style.width = '0%';
+        }
+      }
+      
+      updateIterationsToShow() {
+        const inputValue = this.el('iterationsCount').value;
+        if (inputValue === '') {
+          this.state.iterationsToShow = null;
+        } else {
+          const count = parseInt(inputValue);
+          if (!isNaN(count) && count > 0) {
+            this.state.iterationsToShow = count;
+          }
+        }
+        this.renderIterations();
+      }
+      
+      // ========== MÉTODOS DE IMPORTAR/EXPORTAR ==========
+      
+      exportProblem() {
+        this.showFilenameModal('export');
+      }
+      
+      importProblem() {
+        this.showFilenameModal('import');
+      }
+      
+      showFilenameModal(action) {
+        this.state.pendingAction = action;
+        
+        const modal = this.el('filenameModal');
+        const title = this.el('filenameModalTitle');
+        const description = this.el('filenameModalDescription');
+        const input = this.el('filenameInput');
+        const error = this.el('filenameError');
+        
+        if (action === 'export') {
+          title.textContent = 'Personalizar nombre de archivo de exportación';
+          description.textContent = 'Ingresa el nombre para el archivo de exportación (sin extensión):';
+          input.value = `transporte_${new Date().toISOString().slice(0, 10)}`;
+          input.style.display = 'block';
+        } else if (action === 'import') {
+          title.textContent = 'Personalizar nombre de archivo de importación';
+          description.textContent = 'Selecciona el archivo a importar:';
+          input.style.display = 'none';
+          error.style.display = 'none';
+        }
+        
+        modal.style.display = 'flex';
+        if (action === 'export') {
+          input.focus();
+          input.select();
+        }
+      }
+      
+      hideFilenameModal() {
+        this.el('filenameModal').style.display = 'none';
+        this.el('filenameInput').style.display = 'block';
+        this.el('filenameError').style.display = 'none';
+        this.state.pendingAction = null;
+      }
+      
+      validateFilename(filename) {
+        // Validar que el nombre no esté vacío
+        if (!filename || filename.trim() === '') {
+          return false;
+        }
+        
+        // Validar caracteres no permitidos en nombres de archivo
+        const invalidChars = /[<>:"/\\|?*\x00-\x1F]/;
+        if (invalidChars.test(filename)) {
+          return false;
+        }
+        
+        return true;
+      }
+      
+      confirmFilename() {
+        const action = this.state.pendingAction;
+        const input = this.el('filenameInput');
+        const error = this.el('filenameError');
+        
+        if (action === 'export') {
+          const filename = input.value.trim();
+          
+          if (!this.validateFilename(filename)) {
+            error.style.display = 'block';
+            return;
+          }
+          
+          error.style.display = 'none';
+          this.hideFilenameModal();
+          this.performExport(filename);
+        } else if (action === 'import') {
+          this.hideFilenameModal();
+          this.performImport();
+        }
+      }
+      
+      performExport(filename) {
+        const data = {
+          m: this.state.problem.m,
+          n: this.state.problem.n,
+          cost: this.state.problem.cost,
+          supply: this.state.problem.supply,
+          demand: this.state.problem.demand,
+          mode: this.state.problem.mode,
+          X: this.state.algorithm ? this.state.algorithm.X : [],
+          iterations: this.state.algorithm ? this.state.algorithm.iterations : [],
+          total: this.state.algorithm ? this.state.algorithm.calculateTotal() : 0
+        };
+        
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${filename}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        this.updateStatus(`Problema exportado como "${filename}.json"`, "success");
+      }
+      
+      performImport() {
+        const fileInput = this.el('fileInput');
+        fileInput.click();
+      }
+      
+      handleFileImport(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const data = JSON.parse(e.target.result);
+            
+            // Validar estructura básica
+            if (!data.m || !data.n || !data.cost || !data.supply || !data.demand) {
+              throw new Error("Formato de archivo inválido");
+            }
+            
+            // Actualizar estado
+            this.state.problem = new TransportationProblem(data.m, data.n);
+            this.state.problem.cost = data.cost;
+            this.state.problem.supply = data.supply;
+            this.state.problem.demand = data.demand;
+            this.state.problem.mode = data.mode || 'minimization';
+            
+            // Actualizar UI
+            this.el('nSources').value = this.state.problem.m;
+            this.el('nTargets').value = this.state.problem.n;
+            
+            // Actualizar modo
+            this.setMode(this.state.problem.mode);
+            
+            // Actualizar algoritmo
+            this.updateAlgorithm();
+            
+            // Si hay datos de solución, cargarlos
+            if (data.X && data.X.length > 0) {
+              this.state.algorithm.X = data.X;
+              this.state.algorithm.iterations = data.iterations || [];
+            }
+            
+            this.renderMatrixEditor();
+            this.renderTotals();
+            this.renderSVG();
+            this.renderIterations();
+            
+            if (data.total) {
+              this.el('totalCost').textContent = data.total;
+            }
+            
+            this.updateStatus(`Problema importado desde "${file.name}"`, "success");
+          } catch (error) {
+            this.updateStatus("Error al importar el archivo: " + error.message, "error");
+          }
+        };
+        reader.readAsText(file);
+        
+        // Limpiar input
+        event.target.value = '';
+      }
+      
+      takeScreenshot() {
+        const element = document.body;
+        
+        html2canvas(element, {
+          backgroundColor: null,
+          scale: 2,
+          useCORS: true,
+          logging: false
+        }).then(canvas => {
+          const link = document.createElement('a');
+          link.download = `solucion_transporte_${new Date().toISOString().slice(0, 10)}.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+          
+          this.updateStatus("Captura guardada correctamente.", "success");
+        }).catch(error => {
+          this.updateStatus("Error al generar la captura: " + error.message, "error");
+        });
+      }
+      
+      showHelp() {
+        this.el('helpModal').style.display = 'flex';
+      }
+      
+      hideHelp() {
+        this.el('helpModal').style.display = 'none';
+      }
+    }
 
-    // Inicialización
-    createGrid(3, 3);
+    // Inicializar la aplicación cuando se carga la página
+    document.addEventListener('DOMContentLoaded', () => {
+      window.ui = new UI();
+    });
   </script>
 </body>
 </html>
