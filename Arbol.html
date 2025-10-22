@@ -1,0 +1,1570 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Árbol Binario - Análisis</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    :root{
+      --bg:#a2185b;
+      --bg2:#0a192e;
+      --panel: #070b11cc;
+      --panel-border: #ffffff14;
+      --pastel-orange: #FBBD40;
+      --carrot-orange: #EE9029;
+      --hot-pink: #E75CB4;
+      --violet-red: #8C144E;
+      --dark-purple: #2F0C33;
+      --accent: var(--pastel-orange, #FBBD40);
+      --accent-2: var(--carrot-orange, #EE9029);
+      --ink: #eaf6ff;
+      --success: #10b981;
+      --warning: var(--carrot-orange);
+      --error: #ef4444;
+      --info: #3b82f6;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      min-height: 100%;
+      height: auto;
+      background:
+        radial-gradient(1200px 600px at 10% -10%, #1a2a6c22, transparent 60%),
+        radial-gradient(1000px 700px at 110% 10%, #00d4ff22, transparent 60%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+      color: var(--ink);
+      font-family: Poppins, Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    .container-fluid{padding:16px;}
+    .card-lite{
+      background: var(--panel);
+      border:1px solid var(--panel-border);
+      border-radius:14px; padding:10px 12px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    .small-muted{color: rgba(255,255,255,0.65); font-size:.92rem;}
+
+    /* Header +titulo*/
+    .app-header{
+      position: sticky; top:0; z-index:3; margin-bottom:10px;
+      padding:20px; border-radius:20px;
+      background: linear-gradient(135deg, #233164cc, #4b6077cc);
+      border:1px solid var(--panel-border);
+      backdrop-filter: blur(6px);
+    }
+    .title-wrap{
+      display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    }
+    .app-title{
+      margin:0;
+      font-size: clamp(1.3rem, 2vw + 1rem, 2.2rem);
+      font-weight:800;
+      letter-spacing: .3px;
+      background: linear-gradient(90deg, #ffffff, var(--accent-2, #EE9029), #ffffff);
+      -webkit-background-clip: text; background-clip:text; color:transparent;
+      text-shadow: 0 0 18px rgba(238,144,41,.06);
+    }
+    .app-sub{
+      margin:0; opacity:.85; font-weight:600; font-size:.98rem;
+    }
+
+    /* Smart toolbar */
+    .tool-group{gap:.35rem}
+    .btn-tool{
+      border-radius:12px;
+      border:1px solid var(--panel-border);
+      background: #0f1724;
+      color:#e8f6ff;
+      padding:.35rem .6rem;
+      transition: transform 0.2s;
+    }
+    .btn-tool:hover{ transform: translateY(-1px); }
+
+    button{
+      background: linear-gradient(180deg, var(--pastel-orange), var(--carrot-orange));
+      color: #05121a;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(251, 189, 64, 0.2);
+    }
+    button:hover{
+      background: linear-gradient(180deg, var(--carrot-orange), #e57c1a);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(251, 189, 64, 0.3);
+    }
+    button:active{
+      transform: translateY(0);
+    }
+    button.secondary{
+      background: rgba(15, 23, 36, 0.8);
+      color: var(--ink);
+      border: 1px solid var(--panel-border);
+      box-shadow: none;
+    }
+    button.secondary:hover{
+      background: rgba(25, 35, 55, 0.9);
+      border-color: rgba(255,255,255,0.2);
+    }
+    button.success{
+      background: linear-gradient(180deg, #10b981, #0da271);
+    }
+    button.error{
+      background: linear-gradient(180deg, #ef4444, #dc2626);
+    }
+    button.warning{
+      background: linear-gradient(180deg, var(--carrot-orange), #e57c1a);
+    }
+
+    .controls{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .icon{
+      width: 16px;
+      height: 16px;
+    }
+    
+    /* Estilos para modales */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+    
+    .modal {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 24px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--pastel-orange);
+      margin: 0;
+    }
+    
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--ink);
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .close-btn:hover {
+      color: var(--pastel-orange);
+    }
+    
+    .help-content {
+      line-height: 1.6;
+    }
+    
+    .help-section {
+      margin-bottom: 20px;
+    }
+    
+    .help-section h3 {
+      color: var(--pastel-orange);
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+    
+    .help-section ul {
+      padding-left: 20px;
+      margin: 8px 0;
+    }
+    
+    .help-section li {
+      margin-bottom: 4px;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    /* Layout principal */
+    .wrap {
+      max-width: 100%;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      gap: 24px;
+      padding: 16px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 20px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      transition: box-shadow 0.2s ease;
+    }
+    .card:hover{
+      box-shadow: 0 12px 35px rgba(0,0,0,.45);
+    }
+
+    h1{
+      font-size: 20px;
+      margin: 0 0 12px;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h1 svg{
+      width: 24px;
+      height: 24px;
+    }
+
+    label{
+      display: block;
+      font-size: 13px;
+      margin: 8px 0 4px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.8);
+    }
+
+    input[type=number], input[type=text]{
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(11, 19, 38, 0.7);
+      color: var(--ink);
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+    input[type=number]:focus, input[type=text]:focus{
+      outline: none;
+      border-color: var(--pastel-orange);
+      box-shadow: 0 0 0 3px rgba(251, 189, 64, 0.1);
+    }
+
+    .output{
+      white-space: pre-wrap;
+      font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+      background: rgba(11, 19, 38, 0.7);
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      max-height: 200px;
+      overflow-y: auto;
+      color: var(--ink);
+      border: 1px solid rgba(255,255,255,0.1);
+      min-height: 60px;
+    }
+
+    /* Área de canvas del árbol */
+    #treeCanvas {
+      width: 100%;
+      height: 600px;
+      background: rgba(11, 19, 38, 0.5);
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Botón flotante + */
+    .add-node-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, var(--pastel-orange), var(--carrot-orange));
+      border: none;
+      color: #05121a;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(251, 189, 64, 0.4);
+      transition: all 0.2s;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .add-node-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(251, 189, 64, 0.6);
+    }
+
+    /* Estilos para el input en el modal */
+    .node-input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(11, 19, 38, 0.7);
+      color: var(--ink);
+      font-size: 14px;
+      margin-bottom: 16px;
+      font-family: inherit;
+    }
+    
+    .node-input:focus {
+      outline: none;
+      border-color: var(--pastel-orange);
+      box-shadow: 0 0 0 3px rgba(251, 189, 64, 0.1);
+    }
+    
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .status{
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin: 12px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .status.info{
+      background: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
+      border-color: rgba(59, 130, 246, 0.2);
+    }
+    .status.success{
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+      border-color: rgba(16, 185, 129, 0.2);
+    }
+    .status.warning{
+      background: rgba(238, 144, 41, 0.1);
+      color: var(--carrot-orange);
+      border-color: rgba(238, 144, 41, 0.2);
+    }
+    .status.error{
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    /* Nodos del árbol */
+    .tree-node {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--pastel-orange), var(--carrot-orange));
+      border: 3px solid var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 16px;
+      color: #05121a;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      z-index: 5;
+    }
+
+    .tree-node:hover {
+      transform: scale(1.15);
+      box-shadow: 0 6px 16px rgba(251, 189, 64, 0.5);
+    }
+
+    .tree-node.root {
+      background: linear-gradient(135deg, var(--hot-pink), var(--violet-red));
+      border-color: #ffffff;
+    }
+
+    /* Líneas de conexión */
+    .tree-line {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.3);
+      transform-origin: top left;
+      z-index: 1;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 20px 0 10px;
+      color: var(--pastel-orange);
+    }
+
+    .root-input-container {
+      margin-bottom: 20px;
+    }
+
+    /* Switch de modo */
+    .mode-switch {
+      display: flex;
+      background: rgba(11, 19, 38, 0.7);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .mode-option {
+      flex: 1;
+      padding: 10px 16px;
+      text-align: center;
+      cursor: pointer;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .mode-option.active {
+      background: linear-gradient(135deg, var(--pastel-orange), var(--carrot-orange));
+      color: #05121a;
+      box-shadow: 0 2px 8px rgba(251, 189, 64, 0.3);
+    }
+
+    .mode-option:not(.active) {
+      color: rgba(255,255,255,0.7);
+    }
+
+    .mode-option:not(.active):hover {
+      background: rgba(255,255,255,0.05);
+      color: var(--ink);
+    }
+
+    /* Inputs para modo manual */
+    .manual-input {
+      margin-bottom: 15px;
+    }
+
+    .manual-input label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+
+    .manual-input input {
+      width: 100%;
+    }
+
+    .manual-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .manual-actions button {
+      flex: 1;
+    }
+
+    /* Estilos para deshabilitar el canvas en modo manual */
+    .canvas-disabled {
+      opacity: 0.5;
+      pointer-events: none;
+      position: relative;
+    }
+
+    .canvas-disabled::after {
+      content: "Modo Manual Activado";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      text-align: center;
+      z-index: 100;
+    }
+
+    @media (max-width: 1200px) {
+      .wrap{
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-header">
+    <div class="title-wrap">
+      <h1 class="app-title">Análisis de Árboles Binarios</h1>
+      <div class="controls">
+        <button id="btnHelp" class="secondary">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Ayuda
+        </button>
+        <button id="btnExport" class="secondary">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+          </svg>
+          Exportar
+        </button>
+        <button id="btnImport" class="secondary">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+          Importar
+        </button>
+        <button id="btnScreenshot" class="secondary">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          Captura
+        </button>
+        <button id="btnDeleteNode" class="warning">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          Eliminar Nodo
+        </button>
+        <button id="btnReset" class="error">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Limpiar Todo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <!-- Panel izquierdo: Recorridos -->
+    <div class="card">
+      <h1>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        Recorridos del Árbol
+      </h1>
+
+      <!-- Switch de modo -->
+      <div class="mode-switch">
+        <div class="mode-option active" data-mode="graphic">Modo Gráfico</div>
+        <div class="mode-option" data-mode="manual">Modo Manual</div>
+      </div>
+
+      <div id="statusArea"></div>
+
+      <!-- Contenido modo gráfico -->
+      <div id="graphicModeContent">
+        <div class="root-input-container">
+          <label>Valor del Nodo Raíz</label>
+          <input type="number" id="rootValue" placeholder="Ingresa el valor raíz" value="50">
+          <button id="btnSetRoot" style="margin-top: 10px; width: 100%;">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Establecer Raíz
+          </button>
+        </div>
+      </div>
+
+      <!-- Contenido modo manual -->
+      <div id="manualModeContent" style="display: none;">
+        <div class="manual-input">
+          <label>In-Order (separado por comas)</label>
+          <input type="text" id="manualInOrder" placeholder="Ej: 4,2,5,1,6,3,7" onkeypress="return validateManualInput(event)">
+        </div>
+
+        <div class="manual-input">
+          <label>Selecciona el segundo recorrido:</label>
+          <select id="secondTraversalType" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(11, 19, 38, 0.7); color: var(--ink); border: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;">
+            <option value="pre">Pre-Order</option>
+            <option value="post">Post-Order</option>
+          </select>
+          <input type="text" id="manualSecondOrder" placeholder="Ej: 1,2,4,5,3,6,7" onkeypress="return validateManualInput(event)">
+        </div>
+
+        <div class="manual-actions">
+          <button id="btnGenerateTree" class="success" style="flex: 2;">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Generar Árbol
+          </button>
+          <button id="btnClearManual" class="secondary" style="flex: 1;">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Limpiar
+          </button>
+        </div>
+      </div>
+
+      <div class="section-title">In-Order (Izq - Raíz - Der)</div>
+      <div id="inOrderOutput" class="output">—</div>
+
+      <div class="section-title">Pre-Order (Raíz - Izq - Der)</div>
+      <div id="preOrderOutput" class="output">—</div>
+
+      <div class="section-title">Post-Order (Izq - Der - Raíz)</div>
+      <div id="postOrderOutput" class="output">—</div>
+
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <div class="section-title">Estadísticas del Árbol</div>
+        <div style="font-size: 13px; color: rgba(255,255,255,0.8); line-height: 1.8;">
+          <div><strong>Total de nodos:</strong> <span id="nodeCount">0</span></div>
+          <div><strong>Altura del árbol:</strong> <span id="treeHeight">0</span></div>
+          <div><strong>Nodos hoja:</strong> <span id="leafCount">0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel derecho: Visualización del árbol -->
+    <div class="card">
+      <h1>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+        </svg>
+        Visualización del Árbol
+      </h1>
+      
+      <div id="treeCanvas">
+        <button class="add-node-btn" id="btnAddNode">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Ayuda -->
+  <div id="helpModal" class="modal-overlay" style="display: none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Ayuda - Árbol Binario</h2>
+        <button class="close-btn" id="closeHelp">&times;</button>
+      </div>
+      <div class="help-content">
+        <div class="help-section">
+          <h3>¿Qué es un Árbol Binario?</h3>
+          <p>Un árbol binario de búsqueda (BST) es una estructura de datos donde cada nodo tiene como máximo dos hijos (izquierdo y derecho), y se cumple que todos los valores en el subárbol izquierdo son menores que el nodo, y todos los valores en el subárbol derecho son mayores.</p>
+        </div>
+        
+        <div class="help-section">
+          <h3>Modos de Operación</h3>
+          <ul>
+            <li><strong>Modo Gráfico:</strong> Interactúa visualmente con el árbol, agregando nodos mediante clics</li>
+            <li><strong>Modo Manual:</strong> Ingresa los recorridos del árbol y genera la estructura automáticamente</li>
+          </ul>
+        </div>
+        
+        <div class="help-section">
+          <h3>Cómo usar el Modo Gráfico</h3>
+          <ul>
+            <li><strong>Establecer raíz:</strong> Ingresa el valor del nodo raíz y presiona "Establecer Raíz"</li>
+            <li><strong>Agregar nodos:</strong> Haz clic en el botón "+" para agregar nuevos nodos</li>
+            <li><strong>Eliminar nodos:</strong> Usa el botón "Eliminar Nodo" y luego haz clic en el nodo a eliminar</li>
+            <li><strong>Ver recorridos:</strong> Los recorridos se actualizan automáticamente en el panel izquierdo</li>
+          </ul>
+        </div>
+        
+        <div class="help-section">
+          <h3>Cómo usar el Modo Manual</h3>
+          <ul>
+            <li><strong>In-Order:</strong> Siempre requerido (ej: "4,2,5,1,6,3,7")</li>
+            <li><strong>Pre-Order o Post-Order:</strong> Selecciona uno y proporciona los valores</li>
+            <li><strong>Generar:</strong> Presiona "Generar Árbol" para crear la estructura</li>
+            <li><strong>Solo números y comas:</strong> Los inputs solo aceptan números y comas como separadores</li>
+          </ul>
+        </div>
+        
+        <div class="help-section">
+          <h3>Recorridos del Árbol</h3>
+          <ul>
+            <li><strong>In-Order:</strong> Visita subárbol izquierdo, raíz, subárbol derecho (orden ascendente)</li>
+            <li><strong>Pre-Order:</strong> Visita raíz, subárbol izquierdo, subárbol derecho</li>
+            <li><strong>Post-Order:</strong> Visita subárbol izquierdo, subárbol derecho, raíz</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para agregar nodo -->
+  <div id="addNodeModal" class="modal-overlay" style="display: none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Agregar Nodo</h2>
+        <button class="close-btn" id="closeAddNode">&times;</button>
+      </div>
+      <div class="help-content">
+        <label>Valor del nuevo nodo (solo números enteros):</label>
+        <input type="number" id="newNodeValue" class="node-input" placeholder="Ej: 25" step="1">
+        <div id="nodeError" style="color: var(--error); font-size: 12px; margin-top: 8px; display: none;"></div>
+        <div class="modal-actions">
+          <button id="cancelAddNode" class="secondary">Cancelar</button>
+          <button id="confirmAddNode" class="success">Agregar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para eliminar nodo -->
+  <div id="deleteNodeModal" class="modal-overlay" style="display: none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Eliminar Nodo</h2>
+        <button class="close-btn" id="closeDeleteNode">&times;</button>
+      </div>
+      <div class="help-content">
+        <label>Valor del nodo a eliminar:</label>
+        <input type="number" id="deleteNodeValue" class="node-input" placeholder="Ej: 25" step="1">
+        <div id="deleteNodeError" style="color: var(--error); font-size: 12px; margin-top: 8px; display: none;"></div>
+        <div class="modal-actions">
+          <button id="cancelDeleteNode" class="secondary">Cancelar</button>
+          <button id="confirmDeleteNode" class="error">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input oculto para importar archivos -->
+  <input type="file" id="fileInput" class="file-input" accept=".json">
+
+  <script>
+    // Clase Nodo
+    class TreeNode {
+      constructor(value) {
+        this.value = value;
+        this.left = null;
+        this.right = null;
+      }
+    }
+
+    // Clase Árbol Binario
+    class BinaryTree {
+      constructor() {
+        this.root = null;
+      }
+
+      insert(value) {
+        const newNode = new TreeNode(value);
+        
+        if (this.root === null) {
+          this.root = newNode;
+          return true;
+        }
+
+        return this._insertNode(this.root, newNode);
+      }
+
+      _insertNode(node, newNode) {
+        if (newNode.value === node.value) {
+          return false; // No se permiten duplicados
+        }
+
+        if (newNode.value < node.value) {
+          if (node.left === null) {
+            node.left = newNode;
+            return true;
+          } else {
+            return this._insertNode(node.left, newNode);
+          }
+        } else {
+          if (node.right === null) {
+            node.right = newNode;
+            return true;
+          } else {
+            return this._insertNode(node.right, newNode);
+          }
+        }
+      }
+
+      // Método para eliminar un nodo
+      delete(value) {
+        this.root = this._deleteNode(this.root, value);
+      }
+
+      _deleteNode(node, value) {
+        if (node === null) {
+          return null;
+        }
+
+        if (value < node.value) {
+          node.left = this._deleteNode(node.left, value);
+          return node;
+        } else if (value > node.value) {
+          node.right = this._deleteNode(node.right, value);
+          return node;
+        } else {
+          // Nodo encontrado
+          if (node.left === null && node.right === null) {
+            // Caso 1: Nodo hoja
+            return null;
+          } else if (node.left === null) {
+            // Caso 2: Solo hijo derecho
+            return node.right;
+          } else if (node.right === null) {
+            // Caso 2: Solo hijo izquierdo
+            return node.left;
+          } else {
+            // Caso 3: Dos hijos
+            const minNode = this._findMin(node.right);
+            node.value = minNode.value;
+            node.right = this._deleteNode(node.right, minNode.value);
+            return node;
+          }
+        }
+      }
+
+      _findMin(node) {
+        while (node.left !== null) {
+          node = node.left;
+        }
+        return node;
+      }
+
+      inOrder(node = this.root, result = []) {
+        if (node !== null) {
+          this.inOrder(node.left, result);
+          result.push(node.value);
+          this.inOrder(node.right, result);
+        }
+        return result;
+      }
+
+      preOrder(node = this.root, result = []) {
+        if (node !== null) {
+          result.push(node.value);
+          this.preOrder(node.left, result);
+          this.preOrder(node.right, result);
+        }
+        return result;
+      }
+
+      postOrder(node = this.root, result = []) {
+        if (node !== null) {
+          this.postOrder(node.left, result);
+          this.postOrder(node.right, result);
+          result.push(node.value);
+        }
+        return result;
+      }
+
+      getHeight(node = this.root) {
+        if (node === null) return 0;
+        return 1 + Math.max(this.getHeight(node.left), this.getHeight(node.right));
+      }
+
+      countNodes(node = this.root) {
+        if (node === null) return 0;
+        return 1 + this.countNodes(node.left) + this.countNodes(node.right);
+      }
+
+      countLeaves(node = this.root) {
+        if (node === null) return 0;
+        if (node.left === null && node.right === null) return 1;
+        return this.countLeaves(node.left) + this.countLeaves(node.right);
+      }
+
+      clear() {
+        this.root = null;
+      }
+
+      toArray() {
+        const nodes = [];
+        this._collectNodes(this.root, nodes);
+        return nodes;
+      }
+
+      _collectNodes(node, nodes) {
+        if (node !== null) {
+          nodes.push(node.value);
+          this._collectNodes(node.left, nodes);
+          this._collectNodes(node.right, nodes);
+        }
+      }
+
+      // Método para construir árbol desde recorridos
+      buildFromTraversals(inOrder, preOrder = null, postOrder = null) {
+        if ((preOrder && postOrder) || (!preOrder && !postOrder)) {
+          throw new Error("Debe proporcionar exactamente uno de: preOrder o postOrder");
+        }
+
+        if (preOrder) {
+          this.root = this._buildFromPreIn(preOrder, inOrder);
+        } else {
+          this.root = this._buildFromPostIn(postOrder, inOrder);
+        }
+      }
+
+      _buildFromPreIn(preOrder, inOrder) {
+        if (preOrder.length === 0 || inOrder.length === 0) return null;
+        if (preOrder.length !== inOrder.length) {
+          throw new Error("Los recorridos deben tener la misma longitud");
+        }
+
+        const rootValue = preOrder[0];
+        const root = new TreeNode(rootValue);
+        
+        const rootIndex = inOrder.indexOf(rootValue);
+        if (rootIndex === -1) {
+          throw new Error("Los recorridos son inconsistentes");
+        }
+
+        const leftInOrder = inOrder.slice(0, rootIndex);
+        const rightInOrder = inOrder.slice(rootIndex + 1);
+        
+        const leftPreOrder = preOrder.slice(1, 1 + leftInOrder.length);
+        const rightPreOrder = preOrder.slice(1 + leftInOrder.length);
+
+        root.left = this._buildFromPreIn(leftPreOrder, leftInOrder);
+        root.right = this._buildFromPreIn(rightPreOrder, rightInOrder);
+
+        return root;
+      }
+
+      _buildFromPostIn(postOrder, inOrder) {
+        if (postOrder.length === 0 || inOrder.length === 0) return null;
+        if (postOrder.length !== inOrder.length) {
+          throw new Error("Los recorridos deben tener la misma longitud");
+        }
+
+        const rootValue = postOrder[postOrder.length - 1];
+        const root = new TreeNode(rootValue);
+        
+        const rootIndex = inOrder.indexOf(rootValue);
+        if (rootIndex === -1) {
+          throw new Error("Los recorridos son inconsistentes");
+        }
+
+        const leftInOrder = inOrder.slice(0, rootIndex);
+        const rightInOrder = inOrder.slice(rootIndex + 1);
+        
+        const leftPostOrder = postOrder.slice(0, leftInOrder.length);
+        const rightPostOrder = postOrder.slice(leftInOrder.length, postOrder.length - 1);
+
+        root.left = this._buildFromPostIn(leftPostOrder, leftInOrder);
+        root.right = this._buildFromPostIn(rightPostOrder, rightInOrder);
+
+        return root;
+      }
+    }
+
+    // Estado de la aplicación
+    const tree = new BinaryTree();
+    let hasRoot = false;
+    let currentMode = 'graphic'; // 'graphic' o 'manual'
+    let deleteMode = false; // Para controlar el modo de eliminación
+
+    const el = id => document.getElementById(id);
+
+    // Función para validar input del modo manual (solo números y comas)
+    function validateManualInput(event) {
+      const charCode = event.which ? event.which : event.keyCode;
+      const char = String.fromCharCode(charCode);
+      
+      // Permitir: números (0-9), comas, backspace, delete, tab, enter, flechas
+      if (
+        (charCode >= 48 && charCode <= 57) || // números 0-9
+        charCode === 44 || // coma
+        charCode === 8 || // backspace
+        charCode === 46 || // delete
+        charCode === 9 || // tab
+        charCode === 13 || // enter
+        (charCode >= 37 && charCode <= 40) // flechas
+      ) {
+        return true;
+      }
+      
+      // Prevenir cualquier otro carácter
+      event.preventDefault();
+      return false;
+    }
+
+    // Cambiar entre modos
+    function switchMode(mode) {
+      currentMode = mode;
+      deleteMode = false; // Desactivar modo eliminación al cambiar modo
+      updateDeleteButtonState();
+      
+      // Actualizar UI del switch
+      document.querySelectorAll('.mode-option').forEach(option => {
+        option.classList.toggle('active', option.dataset.mode === mode);
+      });
+      
+      // Mostrar/ocultar contenido según el modo
+      el('graphicModeContent').style.display = mode === 'graphic' ? 'block' : 'none';
+      el('manualModeContent').style.display = mode === 'manual' ? 'block' : 'none';
+      
+      // Habilitar/deshabilitar canvas
+      const canvas = el('treeCanvas');
+      if (mode === 'manual') {
+        canvas.classList.add('canvas-disabled');
+      } else {
+        canvas.classList.remove('canvas-disabled');
+      }
+      
+      updateStatus(`Modo ${mode === 'graphic' ? 'Gráfico' : 'Manual'} activado.`, 'info');
+    }
+
+    // Actualizar estado del botón de eliminar
+    function updateDeleteButtonState() {
+      const deleteBtn = el('btnDeleteNode');
+      if (currentMode !== 'graphic' || !hasRoot) {
+        deleteBtn.disabled = true;
+        deleteBtn.style.opacity = '0.5';
+        deleteBtn.style.cursor = 'not-allowed';
+      } else {
+        deleteBtn.disabled = false;
+        deleteBtn.style.opacity = '1';
+        deleteBtn.style.cursor = 'pointer';
+      }
+    }
+
+    // Actualización de estado
+    function updateStatus(message, type) {
+      const statusArea = el('statusArea');
+      statusArea.innerHTML = '';
+      
+      const statusDiv = document.createElement('div');
+      statusDiv.classList.add('status', type);
+      statusDiv.textContent = message;
+      statusArea.appendChild(statusDiv);
+    }
+
+    // Actualización de recorridos
+    function updateTraversals() {
+      const inOrder = tree.inOrder();
+      const preOrder = tree.preOrder();
+      const postOrder = tree.postOrder();
+
+      el('inOrderOutput').textContent = inOrder.length > 0 ? inOrder.join(' → ') : '—';
+      el('preOrderOutput').textContent = preOrder.length > 0 ? preOrder.join(' → ') : '—';
+      el('postOrderOutput').textContent = postOrder.length > 0 ? postOrder.join(' → ') : '—';
+
+      // Actualizar estadísticas
+      el('nodeCount').textContent = tree.countNodes();
+      el('treeHeight').textContent = tree.getHeight();
+      el('leafCount').textContent = tree.countLeaves();
+
+      // Actualizar estado del botón eliminar
+      updateDeleteButtonState();
+    }
+
+    // Calcular posiciones de los nodos
+    function calculateNodePositions() {
+      const canvas = el('treeCanvas');
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      
+      const positions = [];
+      if (tree.root === null) return positions;
+
+      const levelHeight = 100;
+      const nodeRadius = 25;
+
+      function traverse(node, x, y, level, xOffset) {
+        if (node === null) return;
+
+        positions.push({
+          value: node.value,
+          x: x,
+          y: y,
+          isRoot: node === tree.root
+        });
+
+        const nextY = y + levelHeight;
+        const nextOffset = xOffset / 2;
+
+        // Conectar con hijo izquierdo
+        if (node.left !== null) {
+          const leftX = x - xOffset;
+          positions.push({
+            isLine: true,
+            x1: x,
+            y1: y + nodeRadius,
+            x2: leftX,
+            y2: nextY - nodeRadius
+          });
+          traverse(node.left, leftX, nextY, level + 1, nextOffset);
+        }
+
+        // Conectar con hijo derecho
+        if (node.right !== null) {
+          const rightX = x + xOffset;
+          positions.push({
+            isLine: true,
+            x1: x,
+            y1: y + nodeRadius,
+            x2: rightX,
+            y2: nextY - nodeRadius
+          });
+          traverse(node.right, rightX, nextY, level + 1, nextOffset);
+        }
+      }
+
+      const startX = width / 2;
+      const startY = 80;
+      const initialOffset = width / 4;
+
+      traverse(tree.root, startX, startY, 0, initialOffset);
+
+      return positions;
+    }
+
+    // Renderizar el árbol
+    function renderTree() {
+      const canvas = el('treeCanvas');
+      
+      // Limpiar nodos y líneas anteriores
+      const oldNodes = canvas.querySelectorAll('.tree-node');
+      const oldLines = canvas.querySelectorAll('.tree-line');
+      oldNodes.forEach(node => node.remove());
+      oldLines.forEach(line => line.remove());
+
+      if (tree.root === null) return;
+
+      const positions = calculateNodePositions();
+
+      // Renderizar líneas primero (para que estén detrás)
+      positions.filter(p => p.isLine).forEach(line => {
+        const lineEl = document.createElement('div');
+        lineEl.className = 'tree-line';
+        
+        const dx = line.x2 - line.x1;
+        const dy = line.y2 - line.y1;
+        const length = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+        lineEl.style.width = length + 'px';
+        lineEl.style.height = '2px';
+        lineEl.style.left = line.x1 + 'px';
+        lineEl.style.top = line.y1 + 'px';
+        lineEl.style.transform = `rotate(${angle}deg)`;
+
+        canvas.appendChild(lineEl);
+      });
+
+      // Renderizar nodos
+      positions.filter(p => !p.isLine).forEach(pos => {
+        const nodeEl = document.createElement('div');
+        nodeEl.className = 'tree-node';
+        if (pos.isRoot) {
+          nodeEl.classList.add('root');
+        }
+        nodeEl.textContent = pos.value;
+        nodeEl.style.left = (pos.x - 25) + 'px';
+        nodeEl.style.top = (pos.y - 25) + 'px';
+        
+        // Agregar evento de clic para eliminación
+        if (deleteMode) {
+          nodeEl.style.cursor = 'pointer';
+          nodeEl.style.boxShadow = '0 0 0 3px red';
+          nodeEl.addEventListener('click', () => {
+            deleteNodeByValue(pos.value);
+          });
+        }
+        
+        canvas.appendChild(nodeEl);
+      });
+
+      updateTraversals();
+    }
+
+    // Establecer raíz (modo gráfico)
+    function setRoot() {
+      const value = parseInt(el('rootValue').value);
+      
+      if (isNaN(value)) {
+        updateStatus('Por favor ingresa un valor numérico válido para la raíz.', 'error');
+        return;
+      }
+
+      tree.clear();
+      tree.insert(value);
+      hasRoot = true;
+      
+      renderTree();
+      updateStatus(`Nodo raíz establecido con valor ${value}.`, 'success');
+    }
+
+    // Generar árbol desde recorridos (modo manual)
+    function generateTreeFromTraversals() {
+      const inOrderStr = el('manualInOrder').value.trim();
+      const secondOrderStr = el('manualSecondOrder').value.trim();
+      const traversalType = el('secondTraversalType').value;
+      
+      if (!inOrderStr || !secondOrderStr) {
+        updateStatus('Por favor ingresa ambos recorridos.', 'error');
+        return;
+      }
+
+      try {
+        // Convertir strings a arrays de números
+        const inOrder = inOrderStr.split(',').map(val => parseInt(val.trim())).filter(val => !isNaN(val));
+        const secondOrder = secondOrderStr.split(',').map(val => parseInt(val.trim())).filter(val => !isNaN(val));
+        
+        if (inOrder.length === 0 || secondOrder.length === 0) {
+          updateStatus('Los recorridos deben contener números válidos.', 'error');
+          return;
+        }
+
+        if (inOrder.length !== secondOrder.length) {
+          updateStatus('Los recorridos deben tener la misma cantidad de elementos.', 'error');
+          return;
+        }
+
+        // Construir el árbol
+        tree.clear();
+        if (traversalType === 'pre') {
+          tree.buildFromTraversals(inOrder, secondOrder, null);
+        } else {
+          tree.buildFromTraversals(inOrder, null, secondOrder);
+        }
+        
+        hasRoot = true;
+        renderTree();
+        updateStatus(`Árbol generado desde In-Order y ${traversalType === 'pre' ? 'Pre-Order' : 'Post-Order'}.`, 'success');
+        
+      } catch (error) {
+        updateStatus('Error al generar el árbol: ' + error.message, 'error');
+      }
+    }
+
+    // Limpiar inputs del modo manual
+    function clearManualInputs() {
+      el('manualInOrder').value = '';
+      el('manualSecondOrder').value = '';
+    }
+
+    // Mostrar modal para agregar nodo
+    function showAddNodeModal() {
+      if (!hasRoot) {
+        updateStatus('Primero debes establecer un nodo raíz.', 'warning');
+        return;
+      }
+
+      el('addNodeModal').style.display = 'flex';
+      el('newNodeValue').value = '';
+      el('nodeError').style.display = 'none';
+      el('newNodeValue').focus();
+    }
+
+    // Ocultar modal agregar nodo
+    function hideAddNodeModal() {
+      el('addNodeModal').style.display = 'none';
+    }
+
+    // Agregar nodo
+    function addNode() {
+      const value = parseInt(el('newNodeValue').value);
+      const errorEl = el('nodeError');
+      
+      if (isNaN(value)) {
+        errorEl.textContent = 'Por favor ingresa un número entero válido.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      const success = tree.insert(value);
+      
+      if (!success) {
+        errorEl.textContent = `El valor ${value} ya existe en el árbol. No se permiten duplicados.`;
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      hideAddNodeModal();
+      renderTree();
+      updateStatus(`Nodo con valor ${value} agregado correctamente.`, 'success');
+    }
+
+    // Mostrar modal para eliminar nodo
+    function showDeleteNodeModal() {
+      if (!hasRoot || currentMode !== 'graphic') {
+        updateStatus('Esta función solo está disponible en modo gráfico con árbol existente.', 'warning');
+        return;
+      }
+
+      el('deleteNodeModal').style.display = 'flex';
+      el('deleteNodeValue').value = '';
+      el('deleteNodeError').style.display = 'none';
+      el('deleteNodeValue').focus();
+    }
+
+    // Ocultar modal eliminar nodo
+    function hideDeleteNodeModal() {
+      el('deleteNodeModal').style.display = 'none';
+      deleteMode = false;
+      renderTree(); // Re-renderizar para quitar efectos visuales de eliminación
+    }
+
+    // Eliminar nodo por valor
+    function deleteNodeByValue(value) {
+      if (!hasRoot) {
+        updateStatus('No hay árbol para eliminar nodos.', 'warning');
+        return;
+      }
+
+      const inOrderBefore = tree.inOrder();
+      if (!inOrderBefore.includes(value)) {
+        updateStatus(`El valor ${value} no existe en el árbol.`, 'error');
+        return;
+      }
+
+      tree.delete(value);
+      renderTree();
+      updateStatus(`Nodo con valor ${value} eliminado correctamente.`, 'success');
+      hideDeleteNodeModal();
+    }
+
+    // Activar modo eliminación
+    function activateDeleteMode() {
+      if (!hasRoot || currentMode !== 'graphic') {
+        updateStatus('Esta función solo está disponible en modo gráfico con árbol existente.', 'warning');
+        return;
+      }
+
+      deleteMode = true;
+      updateStatus('Modo eliminación activado. Haz clic en cualquier nodo para eliminarlo.', 'warning');
+      renderTree(); // Re-renderizar para mostrar efectos visuales
+    }
+
+    // Limpiar árbol
+    function resetTree() {
+      if (confirm('¿Estás seguro de que deseas limpiar todo el árbol?')) {
+        tree.clear();
+        hasRoot = false;
+        deleteMode = false;
+        el('rootValue').value = '50';
+        clearManualInputs();
+        renderTree();
+        updateStatus('Árbol limpiado. Puedes crear uno nuevo.', 'info');
+      }
+    }
+
+    // Exportar árbol
+    function exportTree() {
+      if (tree.root === null) {
+        updateStatus('No hay árbol para exportar.', 'warning');
+        return;
+      }
+
+      const data = {
+        nodes: tree.toArray(),
+        inOrder: tree.inOrder(),
+        preOrder: tree.preOrder(),
+        postOrder: tree.postOrder(),
+        statistics: {
+          nodeCount: tree.countNodes(),
+          height: tree.getHeight(),
+          leafCount: tree.countLeaves()
+        },
+        mode: currentMode
+      };
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `binary_tree_${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      updateStatus('Árbol exportado correctamente.', 'success');
+    }
+
+    // Importar árbol
+    function importTree() {
+      el('fileInput').click();
+    }
+
+    function handleFileImport(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          
+          if (!data.nodes || !Array.isArray(data.nodes)) {
+            throw new Error("Formato de archivo inválido");
+          }
+          
+          tree.clear();
+          hasRoot = false;
+          deleteMode = false;
+          
+          data.nodes.forEach(value => {
+            tree.insert(value);
+            if (!hasRoot) hasRoot = true;
+          });
+          
+          if (tree.root !== null) {
+            el('rootValue').value = tree.root.value;
+          }
+          
+          // Restaurar modo si está en el archivo
+          if (data.mode) {
+            switchMode(data.mode);
+          }
+          
+          renderTree();
+          updateStatus(`Árbol importado desde "${file.name}" con ${data.nodes.length} nodos.`, 'success');
+        } catch (error) {
+          updateStatus('Error al importar el archivo: ' + error.message, 'error');
+        }
+      };
+      reader.readAsText(file);
+      
+      event.target.value = '';
+    }
+
+    // Captura de pantalla
+    function takeScreenshot() {
+      const element = document.body;
+      
+      html2canvas(element, {
+        backgroundColor: null,
+        scale: 2,
+        useCORS: true,
+        logging: false
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `binary_tree_${new Date().toISOString().slice(0, 10)}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        updateStatus('Captura guardada correctamente.', 'success');
+      }).catch(error => {
+        updateStatus('Error al generar la captura: ' + error.message, 'error');
+      });
+    }
+
+    // Mostrar ayuda
+    function showHelp() {
+      el('helpModal').style.display = 'flex';
+    }
+
+    function hideHelp() {
+      el('helpModal').style.display = 'none';
+    }
+
+    // Event Listeners
+    el('btnSetRoot').onclick = setRoot;
+    el('btnAddNode').onclick = showAddNodeModal;
+    el('closeAddNode').onclick = hideAddNodeModal;
+    el('cancelAddNode').onclick = hideAddNodeModal;
+    el('confirmAddNode').onclick = addNode;
+    el('btnDeleteNode').onclick = activateDeleteMode;
+    el('closeDeleteNode').onclick = hideDeleteNodeModal;
+    el('cancelDeleteNode').onclick = hideDeleteNodeModal;
+    el('confirmDeleteNode').onclick = () => {
+      const value = parseInt(el('deleteNodeValue').value);
+      if (!isNaN(value)) {
+        deleteNodeByValue(value);
+      }
+    };
+    el('btnReset').onclick = resetTree;
+    el('btnExport').onclick = exportTree;
+    el('btnImport').onclick = importTree;
+    el('btnScreenshot').onclick = takeScreenshot;
+    el('btnHelp').onclick = showHelp;
+    el('closeHelp').onclick = hideHelp;
+    el('fileInput').addEventListener('change', handleFileImport);
+    el('btnGenerateTree').onclick = generateTreeFromTraversals;
+    el('btnClearManual').onclick = clearManualInputs;
+
+    // Event listeners para el switch de modo
+    document.querySelectorAll('.mode-option').forEach(option => {
+      option.addEventListener('click', () => {
+        switchMode(option.dataset.mode);
+      });
+    });
+
+    // Permitir Enter en inputs
+    el('rootValue').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') setRoot();
+    });
+
+    el('newNodeValue').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') addNode();
+    });
+
+    el('deleteNodeValue').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const value = parseInt(el('deleteNodeValue').value);
+        if (!isNaN(value)) {
+          deleteNodeByValue(value);
+        }
+      }
+    });
+
+    el('manualInOrder').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') generateTreeFromTraversals();
+    });
+
+    el('manualSecondOrder').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') generateTreeFromTraversals();
+    });
+
+    // Cerrar modales al hacer clic fuera
+    el('helpModal').addEventListener('click', (e) => {
+      if (e.target === el('helpModal')) hideHelp();
+    });
+    
+    el('addNodeModal').addEventListener('click', (e) => {
+      if (e.target === el('addNodeModal')) hideAddNodeModal();
+    });
+    
+    el('deleteNodeModal').addEventListener('click', (e) => {
+      if (e.target === el('deleteNodeModal')) hideDeleteNodeModal();
+    });
+
+    // Inicialización
+    updateStatus('Bienvenido. Selecciona el modo de operación para comenzar.', 'info');
+    updateTraversals();
+    switchMode('graphic'); // Modo gráfico por defecto
+  </script>
+</body>
+</html>
