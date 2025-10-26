@@ -583,6 +583,49 @@
       color: #05121a;
       border-color: transparent;
     }
+
+    /* Estilos para la sección de rutas */
+    .routes-container {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      background: rgba(11, 19, 38, 0.5);
+    }
+    
+    .routes-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: var(--pastel-orange);
+      font-size: 14px;
+    }
+    
+    .routes-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+    }
+    
+    .route-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(15, 23, 36, 0.7);
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .route-arrow {
+      color: var(--pastel-orange);
+      font-weight: bold;
+    }
+    
+    .route-value {
+      color: var(--carrot-orange);
+      font-weight: bold;
+    }
     
     @media (max-width: 1200px) {
       .wrap{
@@ -754,6 +797,12 @@
           <button id="btnUpdateIterations" class="secondary small">Actualizar</button>
         </div>
         <div id="iterationsOutput" class="iterations-container">—</div>
+      </div>
+
+      <!-- NUEVA SECCIÓN: RUTAS DE ASIGNACIÓN -->
+      <div class="routes-container">
+        <div class="routes-title">Rutas de Asignación:</div>
+        <div id="routesList" class="routes-list">—</div>
       </div>
       
       <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
@@ -1175,6 +1224,7 @@
         this.updateProgressBar();
         this.updateStatus("Listo para comenzar. Ingresa los datos del problema.", "info");
         this.renderIterations();
+        this.renderRoutes(); // Nueva función para renderizar rutas
         
         // Configurar event listeners
         this.setupEventListeners();
@@ -1192,6 +1242,7 @@
           this.renderSVG();
           this.updateProgressBar();
           this.updateStatus("Listo para comenzar. Ingresa los datos del problema.", "info");
+          this.renderRoutes();
         };
         
         this.el('btnRandom').onclick = () => {
@@ -1201,6 +1252,7 @@
           this.renderSVG();
           this.checkBalance();
           this.updateStatus("Matriz generada aleatoriamente. El problema está balanceado.", "success");
+          this.renderRoutes();
         };
         
         this.el('btnBalance').onclick = () => {
@@ -1215,6 +1267,7 @@
               `Se añadió un ${result.type === 'supply' ? 'origen' : 'destino'} dummy con ${result.type === 'supply' ? 'oferta' : 'demanda'} ${result.value}.`, 
               "info"
             );
+            this.renderRoutes();
           } else {
             this.updateStatus("El problema ya está balanceado.", "info");
           }
@@ -1254,6 +1307,7 @@
           this.renderSVG();
           this.el('btnStep').textContent = 'Paso a paso';
           this.updateStatus("Sistema reiniciado. Listo para comenzar.", "info");
+          this.renderRoutes();
         };
         
         this.el('btnUpdateIterations').onclick = () => this.updateIterationsToShow();
@@ -1432,6 +1486,61 @@
         const s = this.state.problem.supply.reduce((a, b) => a + b, 0);
         const d = this.state.problem.demand.reduce((a, b) => a + b, 0);
         this.el('totals').textContent = `Oferta total = ${s}    |    Demanda total = ${d}`;
+      }
+      
+      // NUEVA FUNCIÓN: Renderizar rutas de asignación
+      renderRoutes() {
+        const routesContainer = this.el('routesList');
+        routesContainer.innerHTML = '';
+        
+        if (!this.state.algorithm || !this.state.algorithm.X) {
+          routesContainer.textContent = "—";
+          return;
+        }
+        
+        const routes = [];
+        
+        // Recorrer la matriz de asignación para encontrar las rutas con flujo > 0
+        for (let i = 0; i < this.state.problem.m; i++) {
+          for (let j = 0; j < this.state.problem.n; j++) {
+            const flow = this.state.algorithm.X[i][j];
+            if (flow > 0) {
+              routes.push({
+                from: `F${i + 1}`,
+                to: `D${j + 1}`,
+                units: flow,
+                cost: this.state.problem.cost[i][j],
+                total: flow * this.state.problem.cost[i][j]
+              });
+            }
+          }
+        }
+        
+        if (routes.length === 0) {
+          routesContainer.textContent = "No hay asignaciones";
+          return;
+        }
+        
+        // Ordenar las rutas para mejor visualización
+        routes.sort((a, b) => {
+          if (a.from !== b.from) return a.from.localeCompare(b.from);
+          return a.to.localeCompare(b.to);
+        });
+        
+        // Crear elementos para cada ruta
+        routes.forEach(route => {
+          const routeItem = document.createElement('div');
+          routeItem.className = 'route-item';
+          
+          routeItem.innerHTML = `
+            <span>${route.from}</span>
+            <span class="route-arrow">→</span>
+            <span>${route.to}</span>
+            <span class="route-value">${route.units} unidades</span>
+          `;
+          
+          routesContainer.appendChild(routeItem);
+        });
       }
       
       // RESTAURAR LA VISUALIZACIÓN SVG COMPLETA
@@ -1728,6 +1837,7 @@
         const total = this.state.algorithm.calculateTotal();
         this.el('totalCost').textContent = "(parcial) " + total;
         this.renderIterations();
+        this.renderRoutes(); // Actualizar rutas en cada paso
       }
       
       finalizeResult() {
@@ -1753,6 +1863,7 @@
         }
         this.updateProgressBar();
         this.renderIterations();
+        this.renderRoutes(); // Actualizar rutas al finalizar
       }
       
       verifySolution() {
@@ -1989,6 +2100,7 @@
             this.renderTotals();
             this.renderSVG();
             this.renderIterations();
+            this.renderRoutes(); // Actualizar rutas al importar
             
             if (data.total) {
               this.el('totalCost').textContent = data.total;
