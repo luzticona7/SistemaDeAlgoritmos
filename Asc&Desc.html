@@ -1,0 +1,2415 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Ordenamiento Interactivo con Burbujas</title>
+    <style>
+        :root{
+          --bg:#a2185b;
+          --bg2:#0a192e; /* fondo 2 degrade*/
+          --panel: #070b11cc; /* conteedores */
+          --panel-border: #ffffff14;
+          /* paletita */
+          --pastel-orange: #FBBD40;
+          --carrot-orange: #EE9029;
+          --hot-pink: #E75CB4;
+          --violet-red: #8C144E;
+          --dark-purple: #2F0C33;
+          /* losss fallbackes*/
+          --accent: var(--pastel-orange, #FBBD40);
+          --accent-2: var(--carrot-orange, #EE9029);
+          --ink: #eaf6ff;
+        }
+        html, body {
+          height: 100%;
+          margin: 0;
+          min-height: 100%; /* cubree altura del nuestra web */
+          height: auto; /* Permite que crezca con el contenido */
+          background:
+            radial-gradient(1200px 600px at 10% -10%, #1a2a6c22, transparent 60%),
+            radial-gradient(1000px 700px at 110% 10%, #00d4ff22, transparent 60%),
+            linear-gradient(180deg, var(--bg), var(--bg2));
+          color: var(--ink);
+          font-family: Poppins, Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        }
+        .container-fluid{padding:16px;}
+        .card-lite{
+          background: var(--panel);
+          border:1px solid var(--panel-border);
+          border-radius:14px; padding:10px 12px;
+          backdrop-filter: blur(8px);
+          box-shadow: 0 10px 30px rgba(0,0,0,.35);
+        }
+        #canvas{
+          border-radius:14px; display:block;
+          background:
+            linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 30px rgba(0,0,0,0.5);
+        }
+        .small-muted{color: rgba(255,255,255,0.65); font-size:.92rem;}/* dexripciones*/
+        .table-matrix th,.table-matrix td{padding:.25rem .5rem; text-align:center; font-size:.82rem;}
+
+        /* Header +titulo*/
+        .app-header{
+          position: sticky; top:0; z-index:3; margin-bottom:10px;
+          padding:20px; border-radius:20px;
+          background: linear-gradient(135deg, #233164cc, #4b6077cc); /* cajita del tituo*/
+          border:1px solid var(--panel-border);
+          backdrop-filter: blur(6px);
+        }
+        /* containnnn*/
+        .title-wrap{
+          display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+        }
+        .app-title{
+          margin:0;
+          font-size: clamp(1.3rem, 2vw + 1rem, 2.2rem);
+          font-weight:800;
+          letter-spacing: .3px;
+          background: linear-gradient(90deg, #ffffff, var(--accent-2, #EE9029), #ffffff);/* TITULOO */
+          -webkit-background-clip: text; background-clip:text; color:transparent;
+          text-shadow: 0 0 18px rgba(238,144,41,.06); /* sombre*/
+        }
+        .app-sub{
+          margin:0; opacity:.85; font-weight:600; font-size:.98rem;
+        }
+
+        /* Smart toolbar */
+        .tool-group{gap:.35rem}
+        .btn-tool{
+          border-radius:12px;
+          border:1px solid var(--panel-border);
+          background: #0f1724;
+          color:#e8f6ff;
+          padding:.35rem .6rem;
+          transition: transform 0.2s;
+        }
+        .btn-tool:hover{ transform: translateY(-1px); }
+        .btn-tool.on{
+          background: linear-gradient(180deg, var(--pastel-orange, #FBBD40), var(--carrot-orange, #EE9029));
+          color:#05121a; border-color: transparent;
+          box-shadow: 0 6px 16px rgba(255,189,64,.3); 
+        }
+        .vr{border-left:1px solid var(--panel-border); height:22px; margin:0 6px;}
+        .pill{
+          border-radius:999px; background:#0c1730; border:1px solid var(--panel-border); padding:4px; /* botones aristasss */
+        }
+        .pill .btn{
+          border-radius:999px; border:1px solid transparent;
+        }
+        .pill .btn.active{
+          background: #0ff0d81a; border-color:var(--hot-pink, #E75CB4);
+          box-shadow: inset 0 0 0 1px var(--hot-pink, #E75CB4);
+        }
+
+        /* Right column sections */
+        h6{letter-spacing:.3px; font-weight:700; color: var(--violet-red, #8C144E)}
+        .section-card{padding-top:10px}
+
+        /* Edge table buttons */
+        .table-dark td,.table-dark th{border-color: #ffffff10 !important;}
+        .table-dark{--bs-table-bg: transparent;}
+
+        /* Helpers */
+        .fade-in{animation: fadeIn .4s ease both;}
+        @keyframes fadeIn{from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none}}
+
+        /* Fix for compact inputs */
+        .form-control-sm, .form-select-sm{background:#0b1326; color:#eaf6ff; border:1px solid #ffffff1a;}/* nombre img*/
+        .form-control:focus, .form-select:focus{box-shadow:0 0 0 .15rem var(--pastel-orange, #FBBD40); border-color:var(--pastel-orange, #FBBD40)}
+        .form-control-color{padding:.15rem}
+
+        /* Estilos específicos para el algoritmo de ordenamiento */
+        .main-content {
+          display: grid;
+          grid-template-columns: 350px 1fr;
+          gap: 20px;
+          height: calc(100vh - 180px);
+        }
+        
+        @media (max-width: 900px) {
+          .main-content {
+            grid-template-columns: 1fr;
+            height: auto;
+          }
+        }
+        
+        .controls {
+          background: var(--panel);
+          border-radius: 15px;
+          padding: 20px;
+          backdrop-filter: blur(10px);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+          overflow-y: auto;
+          max-height: 100%;
+          z-index: 100;
+          position: relative;
+          border: 1px solid var(--panel-border);
+        }
+        
+        .control-group {
+          margin-bottom: 20px;
+        }
+        
+        h2 {
+          font-size: 1.4rem;
+          margin-bottom: 12px;
+          color: var(--accent);
+        }
+        
+        .btn {
+          background: var(--violet-red);
+          color: white;
+          border: none;
+          padding: 10px 15px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 0.9rem;
+          font-weight: 600;
+          transition: all 0.3s ease;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          flex: 1;
+          min-width: 110px;
+        }
+        
+        .btn:hover {
+          background: var(--hot-pink);
+          transform: translateY(-2px);
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:active {
+          transform: translateY(0);
+        }
+        
+        .btn-group {
+          display: flex;
+          gap: 6px;
+          flex-wrap: wrap;
+        }
+        
+        .btn-secondary {
+          background: var(--dark-purple);
+        }
+        
+        .btn-accent {
+          background: var(--pastel-orange);
+          color: #05121a;
+        }
+        
+        .btn-stop {
+          background: #8B0000;
+        }
+        
+        .btn-stop:hover {
+          background: #A52A2A;
+          transform: translateY(-2px);
+          box-shadow: 0 5px 15px rgba(165, 42, 42, 0.3);
+        }
+        
+        .btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+        }
+        
+        .btn:disabled:hover {
+          transform: none;
+          box-shadow: none;
+        }
+        
+        .slider-container {
+          margin-bottom: 15px;
+        }
+        
+        .slider-label {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 8px;
+        }
+        
+        .slider {
+          width: 100%;
+          height: 8px;
+          border-radius: 4px;
+          background: rgba(255, 255, 255, 0.1);
+          outline: none;
+          -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: var(--pastel-orange);
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        
+        .slider::-webkit-slider-thumb:hover {
+          background: var(--carrot-orange);
+          transform: scale(1.2);
+        }
+        
+        .visualization {
+          background: var(--panel);
+          border-radius: 15px;
+          padding: 20px;
+          backdrop-filter: blur(10px);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+          display: flex;
+          flex-direction: column;
+          min-height: 100%;
+          position: relative;
+          overflow: hidden;
+          border: 1px solid var(--panel-border);
+        }
+        
+        .bubbles-container {
+          flex: 1;
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+          gap: 12px;
+          padding: 20px;
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 10px;
+          margin-bottom: 15px;
+          flex-wrap: wrap;
+          min-height: 400px;
+          position: relative;
+          transition: all 0.5s ease;
+        }
+        
+        .bubble {
+          background: var(--violet-red);
+          border-radius: 50%;
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: bold;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+          border: 3px solid rgba(255, 255, 255, 0.1);
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .bubble::after {
+          content: '';
+          position: absolute;
+          top: -10%;
+          left: -10%;
+          width: 120%;
+          height: 120%;
+          background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent 70%);
+          border-radius: 50%;
+        }
+        
+        .bubble.comparing {
+          background: var(--carrot-orange);
+          transform: translateY(-40px) scale(1.2);
+          box-shadow: 0 0 30px var(--carrot-orange), 0 10px 25px rgba(0, 0, 0, 0.5);
+          z-index: 100;
+          border-color: rgba(255, 255, 255, 0.5);
+          animation: float 1.5s ease-in-out infinite;
+        }
+        
+        .bubble.swapping {
+          background: var(--hot-pink);
+          transform: translateY(-60px) scale(1.3);
+          box-shadow: 0 0 40px var(--hot-pink), 0 15px 30px rgba(0, 0, 0, 0.6);
+          z-index: 200;
+          border-color: rgba(255, 255, 255, 0.7);
+          animation: swapFloat 0.8s ease-in-out infinite;
+        }
+        
+        .bubble.pivot {
+          background: var(--pastel-orange);
+          transform: translateY(-80px) scale(1.4);
+          box-shadow: 0 0 50px var(--pastel-orange), 0 20px 35px rgba(0, 0, 0, 0.7);
+          z-index: 300;
+          border-color: rgba(255, 255, 255, 0.9);
+          animation: pivotFloat 1s ease-in-out infinite;
+        }
+        
+        .bubble.partition {
+          background: var(--dark-purple);
+          border-color: rgba(47, 12, 51, 0.6);
+          box-shadow: 0 0 20px var(--dark-purple);
+        }
+        
+        .bubble.gap {
+          opacity: 0.4;
+          transform: scale(0.8);
+          background: var(--violet-red);
+        }
+        
+        .bubble.sorted {
+          background: var(--pastel-orange);
+          border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .bubble.moving {
+          position: absolute;
+          transition: all 0.5s ease;
+        }
+        
+        .bubble.merge {
+          background: var(--hot-pink);
+          border-color: rgba(231, 92, 180, 0.6);
+          box-shadow: 0 0 20px var(--hot-pink);
+        }
+        
+        @keyframes float {
+          0%, 100% { transform: translateY(-40px) scale(1.2); }
+          50% { transform: translateY(-50px) scale(1.25); }
+        }
+        
+        @keyframes swapFloat {
+          0%, 100% { transform: translateY(-60px) scale(1.3); }
+          50% { transform: translateY(-70px) scale(1.35); }
+        }
+        
+        @keyframes pivotFloat {
+          0%, 100% { transform: translateY(-80px) scale(1.4); }
+          50% { transform: translateY(-90px) scale(1.45); }
+        }
+        
+        .stats {
+          display: flex;
+          justify-content: space-between;
+          background: rgba(0, 0, 0, 0.2);
+          padding: 15px;
+          border-radius: 10px;
+          margin-top: 10px;
+        }
+        
+        .stat-item {
+          text-align: center;
+          flex: 1;
+        }
+        
+        .stat-value {
+          font-size: 1.5rem;
+          font-weight: bold;
+          color: var(--pastel-orange);
+        }
+        
+        .stat-label {
+          font-size: 0.9rem;
+          opacity: 0.8;
+        }
+        
+        .algorithm-info {
+          margin-top: 15px;
+          padding: 15px;
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 10px;
+          font-size: 0.9rem;
+          line-height: 1.5;
+        }
+        
+        .highlight {
+          color: var(--hot-pink);
+          font-weight: bold;
+        }
+        
+        .pulse {
+          animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+          100% { transform: scale(1); }
+        }
+        
+        .sorting {
+          pointer-events: none;
+        }
+        
+        .collapsible {
+          margin-top: 10px;
+        }
+        
+        .collapsible-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          cursor: pointer;
+          padding: 10px 0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .collapsible-content {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.3s ease;
+        }
+        
+        .collapsible-content.expanded {
+          max-height: 600px;
+        }
+        
+        .arrow {
+          transition: transform 0.3s ease;
+        }
+        
+        .arrow.expanded {
+          transform: rotate(180deg);
+        }
+        
+        .algorithm-description {
+          margin-top: 10px;
+          padding: 10px;
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 8px;
+          font-size: 0.85rem;
+        }
+        
+        .current-operation {
+          position: absolute;
+          top: 10px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: rgba(0, 0, 0, 0.7);
+          padding: 8px 15px;
+          border-radius: 20px;
+          font-size: 0.9rem;
+          color: var(--carrot-orange);
+          border: 1px solid var(--carrot-orange);
+          backdrop-filter: blur(10px);
+          z-index: 1000;
+        }
+        
+        .partition-boundary {
+          position: absolute;
+          height: 100%;
+          width: 3px;
+          background: var(--dark-purple);
+          opacity: 0.7;
+          z-index: 50;
+        }
+        
+        .merge-boundary {
+          position: absolute;
+          height: 100%;
+          width: 3px;
+          background: var(--hot-pink);
+          opacity: 0.7;
+          z-index: 50;
+        }
+        
+        .status-indicator {
+          position: absolute;
+          top: 10px;
+          right: 15px;
+          background: rgba(139, 0, 0, 0.8);
+          padding: 5px 10px;
+          border-radius: 15px;
+          font-size: 0.8rem;
+          color: white;
+          display: none;
+        }
+        
+        .status-indicator.active {
+          display: block;
+          animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+
+        /* Botones encima de la pizarra */
+        .visualization-controls {
+          display: flex;
+          justify-content: center;
+          gap: 8px;
+          margin-bottom: 15px;
+          flex-wrap: wrap;
+        }
+        
+        .visualization-btn {
+          background: #0f1724;
+          color: #e8f6ff;
+          border: none;
+          padding: 8px 12px;
+          border-radius: 12px;
+          cursor: pointer;
+          font-size: 0.85rem;
+          font-weight: 600;
+          transition: all 0.3s ease;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          border: 1px solid var(--panel-border);
+          position: relative;
+        }
+        
+        .visualization-btn:hover {
+          background: var(--accent);
+          transform: translateY(-2px);
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .visualization-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+        }
+        
+        .visualization-btn:disabled:hover {
+          transform: none;
+          box-shadow: none;
+        }
+
+        /* Tooltips para botones */
+        .btn-tooltip, .visualization-btn-tooltip {
+          position: absolute;
+          bottom: -30px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: rgba(0, 0, 0, 0.8);
+          color: white;
+          padding: 5px 10px;
+          border-radius: 4px;
+          font-size: 0.75rem;
+          white-space: nowrap;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.3s;
+          z-index: 1000;
+        }
+        
+        .btn:hover .btn-tooltip, .visualization-btn:hover .visualization-btn-tooltip {
+          opacity: 1;
+        }
+
+        /* Modal */
+        .modal {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.7);
+          z-index: 10000;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .modal-content {
+          background: linear-gradient(135deg, var(--bg2), var(--dark-purple));
+          border-radius: 15px;
+          padding: 30px;
+          width: 90%;
+          max-width: 600px;
+          max-height: 90vh;
+          overflow-y: auto;
+          box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+          border: 1px solid var(--panel-border);
+        }
+        
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+        }
+        
+        .modal-title {
+          font-size: 1.5rem;
+          color: var(--accent);
+        }
+        
+        .close-modal {
+          background: none;
+          border: none;
+          color: var(--ink);
+          font-size: 1.5rem;
+          cursor: pointer;
+          transition: color 0.3s;
+        }
+        
+        .close-modal:hover {
+          color: var(--accent);
+        }
+        
+        .input-group {
+          margin-bottom: 15px;
+        }
+        
+        .input-label {
+          display: block;
+          margin-bottom: 8px;
+          font-weight: 600;
+        }
+        
+        .input-field {
+          width: 100%;
+          padding: 12px;
+          border-radius: 8px;
+          border: 1px solid var(--panel-border);
+          background: #0b1326;
+          color: var(--ink);
+          font-size: 1rem;
+        }
+        
+        .input-field:focus {
+          outline: none;
+          border-color: var(--accent);
+          box-shadow: 0 0 0 .15rem var(--accent);
+        }
+        
+        .help-content {
+          line-height: 1.6;
+        }
+        
+        .help-section {
+          margin-bottom: 20px;
+        }
+        
+        .help-section h3 {
+          color: var(--accent);
+          margin-bottom: 10px;
+        }
+        
+        .help-section p {
+          margin-bottom: 8px;
+        }
+        
+        .help-list {
+          padding-left: 20px;
+          margin-bottom: 10px;
+        }
+        
+        .help-list li {
+          margin-bottom: 5px;
+        }
+        
+        .json-area {
+          width: 100%;
+          height: 150px;
+          padding: 12px;
+          border-radius: 8px;
+          border: 1px solid var(--panel-border);
+          background: #0b1326;
+          color: var(--ink);
+          font-family: 'Courier New', monospace;
+          font-size: 0.9rem;
+          resize: vertical;
+        }
+        
+        .json-area:focus {
+          outline: none;
+          border-color: var(--accent);
+        }
+        
+        .json-error {
+          color: var(--stop);
+          font-size: 0.9rem;
+          margin-top: 5px;
+          display: none;
+        }
+
+        /* Estilos para entrada manual mejorada */
+        .array-input-container {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        
+        .array-values-input {
+          display: flex;
+          gap: 10px;
+        }
+        
+        .array-values-input input {
+          flex: 1;
+        }
+        
+        .array-values-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 10px;
+          max-height: 120px;
+          overflow-y: auto;
+          padding: 10px;
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 8px;
+        }
+        
+        .array-value-item {
+          background: var(--violet-red);
+          color: white;
+          padding: 5px 10px;
+          border-radius: 20px;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          font-size: 0.9rem;
+        }
+        
+        .remove-value {
+          background: none;
+          border: none;
+          color: white;
+          cursor: pointer;
+          font-size: 1rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .remove-value:hover {
+          background: #8B0000;
+        }
+
+        /* Indicador de estado del array */
+        .array-status {
+          margin-top: 10px;
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-size: 0.85rem;
+          text-align: center;
+          background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .array-status.complete {
+          background: rgba(0, 184, 148, 0.2);
+          color: #00b894;
+        }
+        
+        .array-status.incomplete {
+          background: rgba(253, 203, 110, 0.2);
+          color: var(--pastel-orange);
+        }
+        
+        /* Estilos para nombres personalizados */
+        .filename-input {
+          display: flex;
+          gap: 10px;
+          align-items: center;
+        }
+        
+        .filename-input input {
+          flex: 1;
+        }
+        
+        .filename-hint {
+          font-size: 0.8rem;
+          color: rgba(255, 255, 255, 0.6);
+          margin-top: 5px;
+        }
+        
+        .filename-error {
+          color: #ff6b6b;
+          font-size: 0.8rem;
+          margin-top: 5px;
+          display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <header class="app-header">
+            <div class="title-wrap">
+                <h1 class="app-title">Sistema de Ordenamiento Interactivo con Burbujas</h1>
+                <p class="app-sub">Visualiza y compara algoritmos de ordenamiento en tiempo real</p>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="controls card-lite">
+                <div class="control-group">
+                    <h2>Configuración</h2>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Tamaño del Array:</span>
+                            <span id="size-value">20</span>
+                        </div>
+                        <input type="range" min="5" max="50" value="20" class="slider" id="array-size">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Velocidad de Animación:</span>
+                            <span id="speed-value">Normal</span>
+                        </div>
+                        <input type="range" min="1" max="5" value="3" class="slider" id="animation-speed">
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn" id="manual-input">
+                            ✏️
+                            <span class="btn-tooltip">Entrada Manual</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h2>Dirección</h2>
+                    <div class="btn-group">
+                        <button class="btn" id="ascending">Ascendente</button>
+                        <button class="btn" id="descending">Descendente</button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h2>Acciones</h2>
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" id="generate-array">Generar Nuevo Array</button>
+                        <button class="btn btn-accent" id="start-sort">Iniciar Ordenamiento</button>
+                        <button class="btn btn-stop" id="stop-sort">Detener</button>
+                        <button class="btn" id="reset">Reiniciar</button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <div class="collapsible">
+                        <div class="collapsible-header" id="algorithms-header">
+                            <h2>Algoritmos (Opcional)</h2>
+                            <span class="arrow">▼</span>
+                        </div>
+                        <div class="collapsible-content" id="algorithms-content">
+                            <div class="btn-group" style="margin-top: 15px;">
+                                <button class="btn" id="shell-sort">Shell Sort</button>
+                                <button class="btn" id="merge-sort">Merge Sort</button>
+                                <button class="btn" id="selection-sort">Selection Sort</button>
+                                <button class="btn" id="insertion-sort">Insertion Sort</button>
+                            </div>
+                            <div class="algorithm-description">
+                                <p><span class="highlight">Nota:</span> Si no selecciona un algoritmo específico, se usará un método genérico de ordenamiento.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="algorithm-info">
+                    <p><span class="highlight">Shell Sort:</span> Ordena elementos separados por brechas que se reducen progresivamente.</p>
+                    <p><span class="highlight">Merge Sort:</span> Divide y vencerás dividiendo el array en mitades, ordenándolas y fusionándolas.</p>
+                    <p><span class="highlight">Selection Sort:</span> Encuentra el elemento mínimo/máximo y lo coloca en su posición correcta.</p>
+                    <p><span class="highlight">Insertion Sort:</span> Construye el array ordenado insertando un elemento a la vez en su posición correcta.</p>
+                </div>
+            </div>
+            
+            <div class="visualization card-lite">
+                <!-- Botones encima de la pizarra -->
+                <div class="visualization-controls">
+                    <button class="visualization-btn" id="import-json">
+                        📥
+                        <span class="visualization-btn-tooltip">Importar JSON</span>
+                    </button>
+                    <button class="visualization-btn" id="export-json">
+                        📤
+                        <span class="visualization-btn-tooltip">Exportar JSON</span>
+                    </button>
+                    <button class="visualization-btn" id="download-json">
+                        💾
+                        <span class="visualization-btn-tooltip">Descargar JSON</span>
+                    </button>
+                    <button class="visualization-btn" id="download-image">
+                        🖼️
+                        <span class="visualization-btn-tooltip">Capturar Imagen</span>
+                    </button>
+                    <button class="visualization-btn" id="help-button">
+                        ❓
+                        <span class="visualization-btn-tooltip">Ayuda</span>
+                    </button>
+                </div>
+                
+                <div class="bubbles-container" id="bubbles-container">
+                    <!-- Las burbujas se generarán dinámicamente con JavaScript -->
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="comparisons">0</div>
+                        <div class="stat-label">Comparaciones</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="swaps">0</div>
+                        <div class="stat-label">Intercambios</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="time">0 ms</div>
+                        <div class="stat-label">Tiempo</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para entrada manual -->
+    <div class="modal" id="manual-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Entrada Manual de Datos</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="array-input-container">
+                <div class="input-group">
+                    <label class="input-label">Tamaño del Array:</label>
+                    <input type="number" id="manual-size" class="input-field" min="1" max="50" value="20">
+                    <button class="btn btn-secondary" id="generate-random" style="margin-top: 10px; width: 100%;">
+                        🎲 Generar Valores Aleatorios
+                    </button>
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">Agregar Valor (uno por uno):</label>
+                    <div class="array-values-input">
+                        <input type="number" id="manual-value" class="input-field" min="10" max="100" placeholder="Valor entre 10 y 100">
+                        <button class="btn" id="add-value" disabled>➕ Agregar</button>
+                    </div>
+                    <div class="array-values-list" id="values-list">
+                        <!-- Los valores se agregarán aquí dinámicamente -->
+                    </div>
+                    <div class="array-status incomplete" id="array-status">
+                        Array incompleto: 0/20 elementos
+                    </div>
+                    <button class="btn btn-stop" id="clear-array" style="margin-top: 10px; width: 100%;">
+                        🗑️ Limpiar Array
+                    </button>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" id="apply-manual" disabled>✅ Aplicar</button>
+                <button class="btn btn-secondary" id="cancel-manual">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para importar JSON -->
+    <div class="modal" id="import-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Importar desde JSON</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Seleccionar archivo JSON:</label>
+                <input type="file" id="json-file" class="input-field" accept=".json">
+                <div style="text-align: center; margin: 10px 0; color: var(--accent);">O</div>
+                <label class="input-label">Pegar JSON Data:</label>
+                <textarea id="json-input" class="json-area" placeholder='{"array": [10, 20, 30, 40, 50], "size": 5}'></textarea>
+                <div class="json-error" id="json-error">Error: JSON inválido</div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" id="apply-json">✅ Importar</button>
+                <button class="btn btn-secondary" id="cancel-json">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para exportar JSON -->
+    <div class="modal" id="export-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Exportar a JSON</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="input-group">
+                <label class="input-label">JSON Data:</label>
+                <textarea id="json-output" class="json-area" readonly></textarea>
+            </div>
+            <div class="btn-group">
+                <button class="btn" id="copy-json">📋 Copiar al Portapapeles</button>
+                <button class="btn btn-secondary" id="close-export">❌ Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para descargar JSON con nombre personalizado -->
+    <div class="modal" id="download-json-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Descargar JSON</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Nombre del archivo:</label>
+                <div class="filename-input">
+                    <input type="text" id="json-filename" class="input-field" value="sorting-array" placeholder="Ingrese nombre del archivo">
+                    <span>.json</span>
+                </div>
+                <div class="filename-hint">El archivo se descargará con extensión .json</div>
+                <div class="filename-error" id="json-filename-error">Nombre de archivo no válido</div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" id="confirm-download-json">💾 Descargar</button>
+                <button class="btn btn-secondary" id="cancel-download-json">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para descargar imagen con nombre personalizado -->
+    <div class="modal" id="download-image-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Capturar Imagen</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Nombre del archivo:</label>
+                <div class="filename-input">
+                    <input type="text" id="image-filename" class="input-field" value="sorting-visualization" placeholder="Ingrese nombre del archivo">
+                    <span>.png</span>
+                </div>
+                <div class="filename-hint">La imagen se descargará en formato PNG</div>
+                <div class="filename-error" id="image-filename-error">Nombre de archivo no válido</div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" id="confirm-download-image">🖼️ Capturar y Descargar</button>
+                <button class="btn btn-secondary" id="cancel-download-image">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de ayuda -->
+    <div class="modal" id="help-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Ayuda - Sistema de Ordenamiento</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="help-content">
+                <div class="help-section">
+                    <h3>¿Qué es este sistema?</h3>
+                    <p>Este es un sistema interactivo para visualizar algoritmos de ordenamiento en tiempo real. Puedes ver cómo diferentes algoritmos ordenan datos representados como burbujas animadas.</p>
+                </div>
+                
+                <div class="help-section">
+                    <h3>Cómo usar la aplicación</h3>
+                    <ul class="help-list">
+                        <li><strong>Generar Aleatorio:</strong> Crea un array con valores aleatorios</li>
+                        <li><strong>Entrada Manual:</strong> Permite ingresar el tamaño y valores específicos del array</li>
+                        <li><strong>Importar JSON:</strong> Carga un array desde un archivo JSON o texto</li>
+                        <li><strong>Exportar JSON:</strong> Muestra el array actual en formato JSON</li>
+                        <li><strong>Descargar JSON:</strong> Guarda el array actual en un archivo JSON</li>
+                        <li><strong>Capturar Imagen:</strong> Descarga una imagen del algoritmo ordenado</li>
+                        <li><strong>Iniciar Ordenamiento:</strong> Comienza la visualización del algoritmo</li>
+                        <li><strong>Detener:</strong> Pausa la visualización en curso</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>Algoritmos disponibles</h3>
+                    <ul class="help-list">
+                        <li><strong>Shell Sort:</strong> Ordena elementos separados por brechas que se reducen progresivamente</li>
+                        <li><strong>Merge Sort:</strong> Divide y vencerás dividiendo el array en mitades, ordenándolas y fusionándolas</li>
+                        <li><strong>Selection Sort:</strong> Encuentra el elemento mínimo/máximo y lo coloca en su posición correcta</li>
+                        <li><strong>Insertion Sort:</strong> Construye el array ordenado insertando un elemento a la vez en su posición correcta</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>Formatos de entrada</h3>
+                    <p><strong>Entrada Manual:</strong> Puede generar valores aleatorios o agregar valores uno por uno</p>
+                    <p><strong>Importar JSON:</strong> El formato debe ser: {"array": [valores], "size": tamaño}. El tamaño debe coincidir con la longitud del array.</p>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn" id="close-help">❌ Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script>
+        // Variables globales
+        let array = [];
+        let arraySize = 20;
+        let animationSpeed = 150;
+        let isSorting = false;
+        let currentAlgorithm = null;
+        let sortDirection = 'ascending'; // 'ascending' o 'descending'
+        let stopRequested = false;
+        let startTime = null;
+        let bubbleInterval = null;
+        let bubblePositions = [];
+        let currentSortPromise = null;
+        let manualArray = [];
+        
+        // Elementos del DOM
+        const bubblesContainer = document.getElementById('bubbles-container');
+        const arraySizeSlider = document.getElementById('array-size');
+        const sizeValue = document.getElementById('size-value');
+        const animationSpeedSlider = document.getElementById('animation-speed');
+        const speedValue = document.getElementById('speed-value');
+        const generateArrayBtn = document.getElementById('generate-array');
+        const startSortBtn = document.getElementById('start-sort');
+        const stopSortBtn = document.getElementById('stop-sort');
+        const resetBtn = document.getElementById('reset');
+        const ascendingBtn = document.getElementById('ascending');
+        const descendingBtn = document.getElementById('descending');
+        const comparisonsElement = document.getElementById('comparisons');
+        const swapsElement = document.getElementById('swaps');
+        const timeElement = document.getElementById('time');
+        
+        // Elementos para sección colapsable
+        const algorithmsHeader = document.getElementById('algorithms-header');
+        const algorithmsContent = document.getElementById('algorithms-content');
+        const arrow = document.querySelector('.arrow');
+        
+        // Botones de algoritmos
+        const shellSortBtn = document.getElementById('shell-sort');
+        const mergeSortBtn = document.getElementById('merge-sort');
+        const selectionSortBtn = document.getElementById('selection-sort');
+        const insertionSortBtn = document.getElementById('insertion-sort');
+        
+        // Nuevos botones
+        const manualInputBtn = document.getElementById('manual-input');
+        const importJsonBtn = document.getElementById('import-json');
+        const exportJsonBtn = document.getElementById('export-json');
+        const downloadJsonBtn = document.getElementById('download-json');
+        const downloadImageBtn = document.getElementById('download-image');
+        const helpButton = document.getElementById('help-button');
+        
+        // Modales
+        const manualModal = document.getElementById('manual-modal');
+        const importModal = document.getElementById('import-modal');
+        const exportModal = document.getElementById('export-modal');
+        const helpModal = document.getElementById('help-modal');
+        const downloadJsonModal = document.getElementById('download-json-modal');
+        const downloadImageModal = document.getElementById('download-image-modal');
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            generateNewArray();
+            setupEventListeners();
+            updateButtonStates();
+            startBubbleMovement();
+        });
+        
+        // Configurar event listeners
+        function setupEventListeners() {
+            arraySizeSlider.addEventListener('input', () => {
+                arraySize = parseInt(arraySizeSlider.value);
+                sizeValue.textContent = arraySize;
+                generateNewArray();
+            });
+            
+            animationSpeedSlider.addEventListener('input', () => {
+                const speed = parseInt(animationSpeedSlider.value);
+                animationSpeed = 300 - (speed * 50); // Rango: 50ms a 250ms
+                
+                // Actualizar texto de velocidad
+                const speedLabels = ['Muy Lento', 'Lento', 'Normal', 'Rápido', 'Muy Rápido'];
+                speedValue.textContent = speedLabels[speed - 1];
+            });
+            
+            generateArrayBtn.addEventListener('click', generateNewArray);
+            startSortBtn.addEventListener('click', startSorting);
+            stopSortBtn.addEventListener('click', stopSorting);
+            resetBtn.addEventListener('click', resetVisualization);
+            
+            ascendingBtn.addEventListener('click', () => {
+                sortDirection = 'ascending';
+                updateDirectionButtons();
+            });
+            
+            descendingBtn.addEventListener('click', () => {
+                sortDirection = 'descending';
+                updateDirectionButtons();
+            });
+            
+            // Sección colapsable de algoritmos
+            algorithmsHeader.addEventListener('click', () => {
+                algorithmsContent.classList.toggle('expanded');
+                arrow.classList.toggle('expanded');
+            });
+            
+            // Botones de algoritmos
+            shellSortBtn.addEventListener('click', () => {
+                currentAlgorithm = 'shell';
+                updateAlgorithmButtons();
+            });
+            
+            mergeSortBtn.addEventListener('click', () => {
+                currentAlgorithm = 'merge';
+                updateAlgorithmButtons();
+            });
+            
+            selectionSortBtn.addEventListener('click', () => {
+                currentAlgorithm = 'selection';
+                updateAlgorithmButtons();
+            });
+            
+            insertionSortBtn.addEventListener('click', () => {
+                currentAlgorithm = 'insertion';
+                updateAlgorithmButtons();
+            });
+            
+            // Nuevos botones
+            manualInputBtn.addEventListener('click', showManualInputModal);
+            importJsonBtn.addEventListener('click', showImportModal);
+            exportJsonBtn.addEventListener('click', showExportModal);
+            downloadJsonBtn.addEventListener('click', showDownloadJsonModal);
+            downloadImageBtn.addEventListener('click', showDownloadImageModal);
+            helpButton.addEventListener('click', showHelpModal);
+            
+            // Eventos para modales
+            document.querySelectorAll('.close-modal').forEach(button => {
+                button.addEventListener('click', closeAllModals);
+            });
+            
+            document.getElementById('apply-manual').addEventListener('click', applyManualInput);
+            document.getElementById('cancel-manual').addEventListener('click', closeAllModals);
+            document.getElementById('generate-random').addEventListener('click', generateRandomValues);
+            document.getElementById('add-value').addEventListener('click', addManualValue);
+            document.getElementById('clear-array').addEventListener('click', clearManualArray);
+            document.getElementById('manual-value').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addManualValue();
+                }
+            });
+            
+            // Actualizar estado cuando cambia el tamaño del array
+            document.getElementById('manual-size').addEventListener('input', updateManualArrayStatus);
+            
+            document.getElementById('apply-json').addEventListener('click', applyJsonImport);
+            document.getElementById('cancel-json').addEventListener('click', closeAllModals);
+            document.getElementById('json-file').addEventListener('change', handleFileSelect);
+            
+            document.getElementById('copy-json').addEventListener('click', copyJsonToClipboard);
+            document.getElementById('close-export').addEventListener('click', closeAllModals);
+            
+            // Eventos para nombres personalizados
+            document.getElementById('confirm-download-json').addEventListener('click', confirmDownloadJson);
+            document.getElementById('cancel-download-json').addEventListener('click', closeAllModals);
+            document.getElementById('confirm-download-image').addEventListener('click', confirmDownloadImage);
+            document.getElementById('cancel-download-image').addEventListener('click', closeAllModals);
+            
+            // Validación de nombres de archivo
+            document.getElementById('json-filename').addEventListener('input', validateFilename);
+            document.getElementById('image-filename').addEventListener('input', validateFilename);
+            
+            document.getElementById('close-help').addEventListener('click', closeAllModals);
+            
+            // Cerrar modales al hacer clic fuera
+            window.addEventListener('click', (event) => {
+                if (event.target.classList.contains('modal')) {
+                    closeAllModals();
+                }
+            });
+        }
+        
+        // Mostrar modal de entrada manual
+        function showManualInputModal() {
+            if (isSorting) return;
+            
+            document.getElementById('manual-size').value = arraySize;
+            document.getElementById('manual-value').value = '';
+            manualArray = [...array];
+            updateManualArrayDisplay();
+            updateManualArrayStatus();
+            manualModal.style.display = 'flex';
+        }
+        
+        // Generar valores aleatorios para entrada manual
+        function generateRandomValues() {
+            const size = parseInt(document.getElementById('manual-size').value);
+            manualArray = [];
+            for (let i = 0; i < size; i++) {
+                manualArray.push(Math.floor(Math.random() * 90) + 10);
+            }
+            updateManualArrayDisplay();
+            updateManualArrayStatus();
+        }
+        
+        // Agregar valor manual
+        function addManualValue() {
+            const valueInput = document.getElementById('manual-value');
+            const value = parseInt(valueInput.value);
+            const targetSize = parseInt(document.getElementById('manual-size').value);
+            
+            if (isNaN(value) || value < 0 || value > 10000) {
+                alert('Por favor ingrese un valor válido entre 10 y 100');
+                return;
+            }
+            
+            // Verificar si el array ya está completo
+            if (manualArray.length >= targetSize) {
+                alert('El array ya está completo. No se pueden agregar más valores.');
+                return;
+            }
+            
+            manualArray.push(value);
+            valueInput.value = '';
+            updateManualArrayDisplay();
+            updateManualArrayStatus();
+        }
+        
+        // Limpiar array manual
+        function clearManualArray() {
+            manualArray = [];
+            updateManualArrayDisplay();
+            updateManualArrayStatus();
+        }
+        
+        // Actualizar visualización del array manual
+        function updateManualArrayDisplay() {
+            const valuesList = document.getElementById('values-list');
+            valuesList.innerHTML = '';
+            
+            manualArray.forEach((value, index) => {
+                const valueItem = document.createElement('div');
+                valueItem.classList.add('array-value-item');
+                valueItem.innerHTML = `
+                    ${value}
+                    <button class="remove-value" data-index="${index}">×</button>
+                `;
+                valuesList.appendChild(valueItem);
+            });
+            
+            // Agregar event listeners a los botones de eliminar
+            document.querySelectorAll('.remove-value').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.getAttribute('data-index'));
+                    manualArray.splice(index, 1);
+                    updateManualArrayDisplay();
+                    updateManualArrayStatus();
+                });
+            });
+        }
+        
+        // Actualizar estado del array manual
+        function updateManualArrayStatus() {
+            const targetSize = parseInt(document.getElementById('manual-size').value);
+            const currentSize = manualArray.length;
+            const arrayStatus = document.getElementById('array-status');
+            const addValueBtn = document.getElementById('add-value');
+            const applyBtn = document.getElementById('apply-manual');
+            
+            // Actualizar texto de estado
+            if (currentSize === targetSize) {
+                arrayStatus.textContent = `Array completo: ${currentSize}/${targetSize} elementos`;
+                arrayStatus.className = 'array-status complete';
+                // Deshabilitar agregar valores cuando está completo
+                addValueBtn.disabled = true;
+                // Habilitar aplicar cuando está completo
+                applyBtn.disabled = false;
+            } else {
+                arrayStatus.textContent = `Array incompleto: ${currentSize}/${targetSize} elementos`;
+                arrayStatus.className = 'array-status incomplete';
+                // Habilitar agregar valores cuando está incompleto
+                addValueBtn.disabled = false;
+                // Deshabilitar aplicar cuando está incompleto
+                applyBtn.disabled = true;
+            }
+        }
+        
+        // Aplicar entrada manual
+        function applyManualInput() {
+            const sizeInput = document.getElementById('manual-size');
+            const newSize = parseInt(sizeInput.value);
+            
+            if (newSize < 1 || newSize > 50) {
+                alert('El tamaño debe estar entre 1 y 50');
+                return;
+            }
+            
+            // Verificar que el array esté completo
+            if (manualArray.length !== newSize) {
+                alert(`El array debe tener exactamente ${newSize} elementos. Actualmente tiene ${manualArray.length}.`);
+                return;
+            }
+            
+            array = [...manualArray];
+            arraySize = newSize;
+            arraySizeSlider.value = arraySize;
+            sizeValue.textContent = arraySize;
+            
+            renderBubbles();
+            resetStats();
+            startBubbleMovement();
+            closeAllModals();
+        }
+        
+        // Mostrar modal de importación JSON
+        function showImportModal() {
+            if (isSorting) return;
+            
+            document.getElementById('json-input').value = '';
+            document.getElementById('json-file').value = '';
+            document.getElementById('json-error').style.display = 'none';
+            importModal.style.display = 'flex';
+        }
+        
+        // Manejar selección de archivo
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('json-input').value = e.target.result;
+            };
+            reader.readAsText(file);
+        }
+        
+        // Aplicar importación JSON
+        function applyJsonImport() {
+            const jsonInput = document.getElementById('json-input').value.trim();
+            const errorElement = document.getElementById('json-error');
+            
+            if (!jsonInput) {
+                errorElement.textContent = 'Error: El campo JSON está vacío';
+                errorElement.style.display = 'block';
+                return;
+            }
+            
+            try {
+                const data = JSON.parse(jsonInput);
+                
+                if (!data.array || !Array.isArray(data.array)) {
+                    errorElement.textContent = 'Error: El JSON debe contener un campo "array" con un array de números';
+                    errorElement.style.display = 'block';
+                    return;
+                }
+                
+                // Validar que todos los elementos sean números
+                const isValidArray = data.array.every(val => typeof val === 'number' && !isNaN(val));
+                if (!isValidArray) {
+                    errorElement.textContent = 'Error: Todos los elementos del array deben ser números válidos';
+                    errorElement.style.display = 'block';
+                    return;
+                }
+                
+                // Aplicar los datos
+                array = data.array;
+                arraySize = array.length;
+                
+                // Actualizar controles
+                arraySizeSlider.value = arraySize;
+                sizeValue.textContent = arraySize;
+                
+                renderBubbles();
+                resetStats();
+                startBubbleMovement();
+                closeAllModals();
+                
+            } catch (error) {
+                errorElement.textContent = 'Error: JSON inválido - ' + error.message;
+                errorElement.style.display = 'block';
+            }
+        }
+        
+        // Mostrar modal de exportación JSON
+        function showExportModal() {
+            const jsonData = {
+                array: array,
+                size: arraySize,
+                description: "Array para Sistema de Ordenamiento",
+                timestamp: new Date().toISOString()
+            };
+            
+            document.getElementById('json-output').value = JSON.stringify(jsonData, null, 2);
+            exportModal.style.display = 'flex';
+        }
+        
+        // Mostrar modal para descargar JSON con nombre personalizado
+        function showDownloadJsonModal() {
+            if (isSorting) return;
+            
+            document.getElementById('json-filename').value = "sorting-array-" + new Date().getTime();
+            document.getElementById('json-filename-error').style.display = 'none';
+            downloadJsonModal.style.display = 'flex';
+        }
+        
+        // Mostrar modal para descargar imagen con nombre personalizado
+        function showDownloadImageModal() {
+            if (isSorting) return;
+            
+            document.getElementById('image-filename').value = "sorting-visualization-" + new Date().getTime();
+            document.getElementById('image-filename-error').style.display = 'none';
+            downloadImageModal.style.display = 'flex';
+        }
+        
+        // Confirmar descarga de JSON con nombre personalizado
+        function confirmDownloadJson() {
+            const filenameInput = document.getElementById('json-filename');
+            const filename = filenameInput.value.trim();
+            
+            if (!validateFilename()) {
+                return;
+            }
+            
+            const jsonData = {
+                array: array,
+                size: arraySize,
+                description: "Array para Sistema de Ordenamiento",
+                timestamp: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(jsonData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `${filename}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            closeAllModals();
+        }
+        
+        // Confirmar descarga de imagen con nombre personalizado
+        function confirmDownloadImage() {
+            const filenameInput = document.getElementById('image-filename');
+            const filename = filenameInput.value.trim();
+            
+            if (!validateFilename()) {
+                return;
+            }
+            
+            // Usar html2canvas para capturar la visualización
+            html2canvas(document.querySelector('.visualization'), {
+                backgroundColor: '#0a192e',
+                scale: 2,
+                logging: false,
+                useCORS: true
+            }).then(canvas => {
+                // Convertir canvas a imagen y descargar
+                const link = document.createElement('a');
+                link.download = `${filename}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+            
+            closeAllModals();
+        }
+        
+        // Validar nombre de archivo
+        function validateFilename() {
+            const activeModal = document.querySelector('.modal[style*="display: flex"]');
+            if (!activeModal) return true;
+            
+            let filenameInput, errorElement;
+            
+            if (activeModal.id === 'download-json-modal') {
+                filenameInput = document.getElementById('json-filename');
+                errorElement = document.getElementById('json-filename-error');
+            } else if (activeModal.id === 'download-image-modal') {
+                filenameInput = document.getElementById('image-filename');
+                errorElement = document.getElementById('image-filename-error');
+            } else {
+                return true;
+            }
+            
+            const filename = filenameInput.value.trim();
+            
+            // Validar que no esté vacío
+            if (filename === '') {
+                errorElement.textContent = 'El nombre del archivo no puede estar vacío';
+                errorElement.style.display = 'block';
+                return false;
+            }
+            
+            // Validar caracteres no permitidos
+            const invalidChars = /[<>:"/\\|?*]/;
+            if (invalidChars.test(filename)) {
+                errorElement.textContent = 'El nombre contiene caracteres no permitidos: < > : " / \\ | ? *';
+                errorElement.style.display = 'block';
+                return false;
+            }
+            
+            // Validar longitud
+            if (filename.length > 10000) {
+                errorElement.textContent = 'El nombre es demasiado largo (máximo 100 caracteres)';
+                errorElement.style.display = 'block';
+                return false;
+            }
+            
+            // Si pasa todas las validaciones
+            errorElement.style.display = 'none';
+            return true;
+        }
+        
+        // Copiar JSON al portapapeles
+        function copyJsonToClipboard() {
+            const jsonOutput = document.getElementById('json-output');
+            jsonOutput.select();
+            jsonOutput.setSelectionRange(0, 99999); // Para dispositivos móviles
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    alert('JSON copiado al portapapeles');
+                } else {
+                    alert('Error al copiar al portapapeles');
+                }
+            } catch (err) {
+                console.error('Error al copiar: ', err);
+                alert('Error al copiar al portapapeles');
+            }
+        }
+        
+        // Mostrar modal de ayuda
+        function showHelpModal() {
+            helpModal.style.display = 'flex';
+        }
+        
+        // Cerrar todos los modales
+        function closeAllModals() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.style.display = 'none';
+            });
+        }
+        
+        // Actualizar estados de los botones
+        function updateButtonStates() {
+            startSortBtn.disabled = isSorting;
+            stopSortBtn.disabled = !isSorting;
+            generateArrayBtn.disabled = isSorting;
+            manualInputBtn.disabled = isSorting;
+            importJsonBtn.disabled = isSorting;
+            exportJsonBtn.disabled = isSorting;
+            downloadJsonBtn.disabled = isSorting;
+            downloadImageBtn.disabled = isSorting;
+            arraySizeSlider.disabled = isSorting;
+            resetBtn.disabled = isSorting;
+            
+            // Deshabilitar botones de algoritmos durante el ordenamiento
+            const algorithmButtons = [shellSortBtn, mergeSortBtn, selectionSortBtn, insertionSortBtn];
+            algorithmButtons.forEach(btn => {
+                btn.disabled = isSorting;
+            });
+        }
+        
+        // Generar nuevo array aleatorio
+        function generateNewArray() {
+            if (isSorting) return;
+            
+            array = [];
+            for (let i = 0; i < arraySize; i++) {
+                array.push(Math.floor(Math.random() * 90) + 10); // Valores entre 10 y 100
+            }
+            
+            renderBubbles();
+            resetStats();
+            startBubbleMovement();
+        }
+        
+        // Renderizar el array como burbujas
+        function renderBubbles() {
+            bubblesContainer.innerHTML = '';
+            bubblePositions = [];
+            
+            const containerWidth = bubblesContainer.clientWidth;
+            const containerHeight = bubblesContainer.clientHeight;
+            const maxValue = Math.max(...array);
+            const minSize = 25; // Tamaño mínimo de burbuja
+            const maxSize = 120; // Tamaño máximo de burbuja
+            
+            array.forEach((value, index) => {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble', 'moving');
+                
+                // Calcular tamaño proporcional al valor con mayor contraste
+                const normalizedValue = (value - 10) / 90; // Normalizar entre 0 y 1
+                const size = minSize + (normalizedValue * (maxSize - minSize));
+                
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                
+                // Ajustar tamaño de fuente según el tamaño de la burbuja
+                const fontSize = Math.max(12, Math.min(20, size * 0.3));
+                bubble.style.fontSize = `${fontSize}px`;
+                
+                // Mostrar el valor dentro de la burbuja
+                bubble.textContent = value;
+                
+                // Posición inicial aleatoria dentro de los límites del contenedor
+                const x = Math.random() * (containerWidth - size);
+                const y = Math.random() * (containerHeight - size);
+                
+                bubble.style.left = `${x}px`;
+                bubble.style.top = `${y}px`;
+                
+                // Guardar posición y velocidad
+                bubblePositions.push({
+                    x: x,
+                    y: y,
+                    dx: (Math.random() - 0.5) * 2, // Velocidad en X (-1 a 1)
+                    dy: (Math.random() - 0.5) * 2, // Velocidad en Y (-1 a 1)
+                    element: bubble
+                });
+                
+                bubblesContainer.appendChild(bubble);
+            });
+        }
+        
+        // Iniciar movimiento de burbujas
+        function startBubbleMovement() {
+            if (bubbleInterval) {
+                clearInterval(bubbleInterval);
+            }
+            
+            bubbleInterval = setInterval(moveBubbles, 50);
+        }
+        
+        // Detener movimiento de burbujas
+        function stopBubbleMovement() {
+            if (bubbleInterval) {
+                clearInterval(bubbleInterval);
+                bubbleInterval = null;
+            }
+        }
+        
+        // Mover burbujas
+        function moveBubbles() {
+            if (isSorting) return;
+            
+            const containerWidth = bubblesContainer.clientWidth;
+            const containerHeight = bubblesContainer.clientHeight;
+            
+            bubblePositions.forEach((bubble, index) => {
+                // Actualizar posición
+                bubble.x += bubble.dx;
+                bubble.y += bubble.dy;
+                
+                // Rebotar en los bordes
+                const bubbleSize = parseInt(bubble.element.style.width);
+                
+                if (bubble.x <= 0 || bubble.x >= containerWidth - bubbleSize) {
+                    bubble.dx *= -1;
+                    bubble.x = Math.max(0, Math.min(containerWidth - bubbleSize, bubble.x));
+                }
+                
+                if (bubble.y <= 0 || bubble.y >= containerHeight - bubbleSize) {
+                    bubble.dy *= -1;
+                    bubble.y = Math.max(0, Math.min(containerHeight - bubbleSize, bubble.y));
+                }
+                
+                // Aplicar nueva posición
+                bubble.element.style.left = `${bubble.x}px`;
+                bubble.element.style.top = `${bubble.y}px`;
+            });
+        }
+        
+        // Alinear burbujas para el ordenamiento
+        function alignBubblesForSorting() {
+            stopBubbleMovement();
+            
+            const bubbles = bubblesContainer.querySelectorAll('.bubble');
+            const containerWidth = bubblesContainer.clientWidth;
+            const containerHeight = bubblesContainer.clientHeight;
+            
+            // NUEVA REGLA: Si hay más de 20 elementos, usar 2 filas
+            const rows = arraySize > 20 ? 2 : 1;
+            const bubblesPerRow = Math.ceil(array.length / rows);
+            
+            // Calcular el espacio entre burbujas
+            const horizontalMargin = 20;
+            const verticalMargin = 20;
+            const availableWidth = containerWidth - (2 * horizontalMargin);
+            const availableHeight = containerHeight - (2 * verticalMargin);
+            
+            const gapX = availableWidth / bubblesPerRow;
+            const gapY = availableHeight / rows;
+            
+            bubbles.forEach((bubble, index) => {
+                bubble.classList.remove('moving');
+                
+                // Calcular tamaño de la burbuja
+                const bubbleSize = parseInt(bubble.style.width);
+                
+                // Calcular fila y columna
+                const row = Math.floor(index / bubblesPerRow);
+                const col = index % bubblesPerRow;
+                
+                // Calcular posición X centrada en la columna
+                const x = horizontalMargin + (col * gapX) + (gapX - bubbleSize) / 2;
+                
+                // Calcular posición Y centrada en la fila
+                const y = verticalMargin + (row * gapY) + (gapY - bubbleSize) / 2;
+                
+                // Aplicar transición suave
+                bubble.style.transition = 'all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                bubble.style.position = 'absolute';
+                bubble.style.left = `${x}px`;
+                bubble.style.top = `${y}px`;
+                bubble.style.transform = 'none';
+            });
+            
+            // Esperar a que termine la transición
+            return new Promise(resolve => {
+                setTimeout(resolve, 1000);
+            });
+        }
+        
+        // Actualizar la visualización del array
+        function updateBubblesVisualization(highlightIndices = [], sortedIndices = [], swappingIndices = [], pivotIndex = null, partitionIndices = [], gapIndices = [], mergeIndices = []) {
+            if (stopRequested) return;
+            
+            const bubbles = bubblesContainer.querySelectorAll('.bubble');
+            const maxValue = Math.max(...array);
+            const minSize = 25;
+            const maxSize = 120;
+            
+            // Remover indicador de operación actual si existe
+            const existingOperation = document.querySelector('.current-operation');
+            if (existingOperation) {
+                existingOperation.remove();
+            }
+            
+            // Remover límites de partición si existen
+            const existingBoundaries = document.querySelectorAll('.partition-boundary, .merge-boundary');
+            existingBoundaries.forEach(boundary => boundary.remove());
+            
+            // Mostrar indicador de operación actual
+            if (highlightIndices.length > 0 || pivotIndex !== null || mergeIndices.length > 0) {
+                const operationIndicator = document.createElement('div');
+                operationIndicator.classList.add('current-operation');
+                
+                if (currentAlgorithm === 'shell' && gapIndices.length > 0) {
+                    operationIndicator.textContent = `Gap: ${gapIndices[0]} | Comparando elementos separados`;
+                    operationIndicator.style.color = 'var(--violet-red)';
+                    operationIndicator.style.borderColor = 'var(--violet-red)';
+                } else if (currentAlgorithm === 'merge' && mergeIndices.length > 0) {
+                    operationIndicator.textContent = `Fusionando subarrays`;
+                    operationIndicator.style.color = 'var(--hot-pink)';
+                    operationIndicator.style.borderColor = 'var(--hot-pink)';
+                } else if (partitionIndices.length > 0) {
+                    operationIndicator.textContent = `Partición activa`;
+                    operationIndicator.style.color = 'var(--dark-purple)';
+                    operationIndicator.style.borderColor = 'var(--dark-purple)';
+                } else if (highlightIndices.length === 2) {
+                    operationIndicator.textContent = `Comparando: ${array[highlightIndices[0]]} vs ${array[highlightIndices[1]]}`;
+                    operationIndicator.style.color = 'var(--carrot-orange)';
+                    operationIndicator.style.borderColor = 'var(--carrot-orange)';
+                }
+                
+                bubblesContainer.appendChild(operationIndicator);
+            }
+            
+            // Mostrar límites de partición para Merge Sort
+            if (currentAlgorithm === 'merge' && mergeIndices.length === 2) {
+                const [start, end] = mergeIndices;
+                const bubblesArray = Array.from(bubbles);
+                
+                if (start > 0) {
+                    const leftBoundary = document.createElement('div');
+                    leftBoundary.classList.add('merge-boundary');
+                    leftBoundary.style.left = `${bubblesArray[start].offsetLeft - 6}px`;
+                    bubblesContainer.appendChild(leftBoundary);
+                }
+                
+                if (end < bubbles.length - 1) {
+                    const rightBoundary = document.createElement('div');
+                    rightBoundary.classList.add('merge-boundary');
+                    rightBoundary.style.left = `${bubblesArray[end].offsetLeft + bubblesArray[end].offsetWidth + 3}px`;
+                    bubblesContainer.appendChild(rightBoundary);
+                }
+            }
+            
+            bubbles.forEach((bubble, index) => {
+                // Actualizar tamaño con mayor contraste
+                const normalizedValue = (array[index] - 10) / 90;
+                const size = minSize + (normalizedValue * (maxSize - minSize));
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                
+                // Ajustar tamaño de fuente
+                const fontSize = Math.max(12, Math.min(20, size * 0.3));
+                bubble.style.fontSize = `${fontSize}px`;
+                
+                // Actualizar valor
+                bubble.textContent = array[index];
+                
+                // Quitar clases anteriores
+                bubble.classList.remove('comparing', 'sorted', 'swapping', 'pivot', 'partition', 'gap', 'merge');
+                
+                // Aplicar clases según el estado
+                if (pivotIndex === index) {
+                    bubble.classList.add('pivot');
+                } else if (gapIndices.includes(index)) {
+                    bubble.classList.add('gap');
+                } else if (mergeIndices.length >= 2 && index >= mergeIndices[0] && index <= mergeIndices[1]) {
+                    bubble.classList.add('merge');
+                } else if (partitionIndices.length >= 2 && index >= partitionIndices[0] && index <= partitionIndices[1]) {
+                    bubble.classList.add('partition');
+                } else if (swappingIndices.includes(index)) {
+                    bubble.classList.add('swapping');
+                } else if (highlightIndices.includes(index)) {
+                    bubble.classList.add('comparing');
+                }
+                
+                if (sortedIndices.includes(index)) {
+                    bubble.classList.add('sorted');
+                }
+            });
+        }
+        
+        // Iniciar el ordenamiento
+        async function startSorting() {
+            if (isSorting) return;
+            
+            isSorting = true;
+            stopRequested = false;
+            updateButtonStates();
+            
+            // Añadir clase para indicar que se está ordenando
+            document.body.classList.add('sorting');
+            
+            // Alinear burbujas antes de comenzar
+            await alignBubblesForSorting();
+            
+            // Reiniciar estadísticas
+            resetStats();
+            startTime = performance.now();
+            
+            // Ejecutar el algoritmo seleccionado o uno genérico
+            try {
+                if (currentAlgorithm) {
+                    // Usar algoritmo específico
+                    switch(currentAlgorithm) {
+                        case 'shell':
+                            await shellSort();
+                            break;
+                        case 'merge':
+                            await mergeSort();
+                            break;
+                        case 'selection':
+                            await selectionSort();
+                            break;
+                        case 'insertion':
+                            await insertionSort();
+                            break;
+                    }
+                } else {
+                    // Usar algoritmo genérico (basado en la dirección)
+                    await genericSort();
+                }
+            } catch (e) {
+                console.log('Ordenamiento detenido:', e);
+            }
+            
+            finishSorting();
+        }
+        
+        // Detener el ordenamiento - CORREGIDO
+        function stopSorting() {
+            if (!isSorting) return;
+            
+            stopRequested = true;
+            finishSorting();
+        }
+        
+        // Finalizar el ordenamiento
+        function finishSorting() {
+            isSorting = false;
+            stopRequested = false;
+            updateButtonStates();
+            
+            // Quitar clase de ordenamiento
+            document.body.classList.remove('sorting');
+            
+            // Actualizar tiempo final si se completó
+            if (startTime) {
+                const endTime = performance.now();
+                timeElement.textContent = `${Math.round(endTime - startTime)} ms`;
+            }
+            
+            // Limpiar variables
+            startTime = null;
+        }
+        
+        // Reiniciar visualización
+        function resetVisualization() {
+            if (isSorting) return;
+            
+            generateNewArray();
+            resetStats();
+            currentAlgorithm = null;
+            updateAlgorithmButtons();
+        }
+        
+        // Reiniciar estadísticas
+        function resetStats() {
+            comparisonsElement.textContent = '0';
+            swapsElement.textContent = '0';
+            timeElement.textContent = '0 ms';
+        }
+        
+        // Actualizar botones de dirección
+        function updateDirectionButtons() {
+            ascendingBtn.classList.toggle('btn-accent', sortDirection === 'ascending');
+            descendingBtn.classList.toggle('btn-accent', sortDirection === 'descending');
+        }
+        
+        // Actualizar botones de algoritmos
+        function updateAlgorithmButtons() {
+            shellSortBtn.classList.toggle('pulse', currentAlgorithm === 'shell');
+            mergeSortBtn.classList.toggle('pulse', currentAlgorithm === 'merge');
+            selectionSortBtn.classList.toggle('pulse', currentAlgorithm === 'selection');
+            insertionSortBtn.classList.toggle('pulse', currentAlgorithm === 'insertion');
+        }
+        
+        // Función de utilidad para pausar la animación (con verificación de stop)
+        function sleep(ms) {
+            return new Promise(resolve => {
+                if (stopRequested) {
+                    resolve();
+                } else {
+                    setTimeout(resolve, ms);
+                }
+            });
+        }
+        
+        // Verificar si se solicitó detener
+        function shouldStop() {
+            return stopRequested;
+        }
+        
+        // Algoritmo genérico (cuando no se selecciona un algoritmo específico)
+        async function genericSort() {
+            let comparisons = 0;
+            let swaps = 0;
+            
+            // Usamos un algoritmo simple basado en la dirección
+            for (let i = 0; i < array.length && !shouldStop(); i++) {
+                for (let j = 0; j < array.length - i - 1 && !shouldStop(); j++) {
+                    // Resaltar elementos comparados
+                    updateBubblesVisualization([j, j + 1]);
+                    
+                    comparisons++;
+                    comparisonsElement.textContent = comparisons;
+                    
+                    // Esperar para la animación
+                    await sleep(animationSpeed);
+                    if (shouldStop()) return;
+                    
+                    const shouldSwap = sortDirection === 'ascending' 
+                        ? array[j] > array[j + 1] 
+                        : array[j] < array[j + 1];
+                    
+                    if (shouldSwap) {
+                        // Intercambiar elementos
+                        [array[j], array[j + 1]] = [array[j + 1], array[j]];
+                        swaps++;
+                        swapsElement.textContent = swaps;
+                        
+                        // Actualizar visualización
+                        updateBubblesVisualization([], [], [j, j + 1]);
+                        await sleep(animationSpeed);
+                        if (shouldStop()) return;
+                    }
+                }
+                
+                if (shouldStop()) return;
+                
+                // Marcar el último elemento como ordenado
+                const sortedIndex = array.length - i - 1;
+                updateBubblesVisualization([], [sortedIndex]);
+            }
+        }
+        
+        // Algoritmo Shell Sort
+        async function shellSort() {
+            let comparisons = 0;
+            let swaps = 0;
+            
+            let gap = Math.floor(array.length / 2);
+            
+            while (gap > 0 && !shouldStop()) {
+                for (let i = gap; i < array.length && !shouldStop(); i++) {
+                    const temp = array[i];
+                    let j = i;
+                    
+                    // Mostrar elementos separados por el gap
+                    const gapIndices = [j, j - gap];
+                    updateBubblesVisualization([], [], [], null, [], gapIndices);
+                    await sleep(animationSpeed);
+                    if (shouldStop()) return;
+                    
+                    while (j >= gap && !shouldStop()) {
+                        // Resaltar elementos comparados
+                        updateBubblesVisualization([j, j - gap], [], [], null, [], gapIndices);
+                        
+                        comparisons++;
+                        comparisonsElement.textContent = comparisons;
+                        
+                        await sleep(animationSpeed);
+                        if (shouldStop()) return;
+                        
+                        const shouldSwap = sortDirection === 'ascending' 
+                            ? array[j - gap] > temp 
+                            : array[j - gap] < temp;
+                        
+                        if (!shouldSwap) break;
+                        
+                        // Mostrar animación de intercambio
+                        updateBubblesVisualization([], [], [j, j - gap], null, [], gapIndices);
+                        await sleep(animationSpeed * 0.7);
+                        if (shouldStop()) return;
+                        
+                        array[j] = array[j - gap];
+                        swaps++;
+                        swapsElement.textContent = swaps;
+                        
+                        updateBubblesVisualization([j, j - gap], [], [], null, [], gapIndices);
+                        await sleep(animationSpeed * 0.3);
+                        if (shouldStop()) return;
+                        
+                        j -= gap;
+                    }
+                    
+                    if (shouldStop()) return;
+                    
+                    array[j] = temp;
+                    updateBubblesVisualization([], [], [], null, [], gapIndices);
+                    await sleep(animationSpeed);
+                    if (shouldStop()) return;
+                }
+                
+                if (shouldStop()) return;
+                
+                gap = Math.floor(gap / 2);
+            }
+            
+            if (!shouldStop()) {
+                // Marcar todo como ordenado
+                updateBubblesVisualization([], Array.from({length: array.length}, (_, i) => i));
+            }
+        }
+        
+        // Algoritmo Merge Sort
+        async function mergeSort() {
+            let comparisons = 0;
+            let swaps = 0;
+            
+            // Función auxiliar para fusionar dos subarrays
+            async function merge(left, mid, right) {
+                const leftArray = array.slice(left, mid + 1);
+                const rightArray = array.slice(mid + 1, right + 1);
+                
+                let i = 0, j = 0, k = left;
+                
+                while (i < leftArray.length && j < rightArray.length && !shouldStop()) {
+                    // Resaltar elementos comparados
+                    updateBubblesVisualization([left + i, mid + 1 + j], [], [], null, [], [], [left, right]);
+                    
+                    comparisons++;
+                    comparisonsElement.textContent = comparisons;
+                    
+                    await sleep(animationSpeed);
+                    if (shouldStop()) return;
+                    
+                    const shouldTakeLeft = sortDirection === 'ascending' 
+                        ? leftArray[i] <= rightArray[j] 
+                        : leftArray[i] >= rightArray[j];
+                    
+                    if (shouldTakeLeft) {
+                        array[k] = leftArray[i];
+                        i++;
+                    } else {
+                        array[k] = rightArray[j];
+                        j++;
+                    }
+                    
+                    swaps++;
+                    swapsElement.textContent = swaps;
+                    
+                    // Actualizar visualización
+                    updateBubblesVisualization([k], [], [], null, [], [], [left, right]);
+                    await sleep(animationSpeed);
+                    if (shouldStop()) return;
+                    
+                    k++;
+                }
+                
+                // Copiar elementos restantes
+                while (i < leftArray.length && !shouldStop()) {
+                    array[k] = leftArray[i];
+                    i++;
+                    k++;
+                    
+                    swaps++;
+                    swapsElement.textContent = swaps;
+                    
+                    updateBubblesVisualization([k - 1], [], [], null, [], [], [left, right]);
+                    await sleep(animationSpeed);
+                    if (shouldStop()) return;
+                }
+                
+                while (j < rightArray.length && !shouldStop()) {
+                    array[k] = rightArray[j];
+                    j++;
+                    k++;
+                    
+                    swaps++;
+                    swapsElement.textContent = swaps;
+                    
+                    updateBubblesVisualization([k - 1], [], [], null, [], [], [left, right]);
+                    await sleep(animationSpeed);
+                    if (shouldStop()) return;
+                }
+            }
+            
+            // Función principal recursiva de Merge Sort
+            async function mergeSortHelper(left, right) {
+                if (left >= right || shouldStop()) return;
+                
+                const mid = Math.floor((left + right) / 2);
+                
+                // Resaltar la división
+                updateBubblesVisualization([], [], [], null, [], [], [left, right]);
+                await sleep(animationSpeed);
+                if (shouldStop()) return;
+                
+                // Ordenar recursivamente las dos mitades
+                await mergeSortHelper(left, mid);
+                if (shouldStop()) return;
+                await mergeSortHelper(mid + 1, right);
+                if (shouldStop()) return;
+                
+                // Fusionar las mitades ordenadas
+                await merge(left, mid, right);
+                if (shouldStop()) return;
+                
+                // Marcar como ordenado
+                const sortedIndices = Array.from({length: right - left + 1}, (_, i) => left + i);
+                updateBubblesVisualization([], sortedIndices, [], null, [], [], [left, right]);
+                await sleep(animationSpeed);
+            }
+            
+            await mergeSortHelper(0, array.length - 1);
+            
+            if (!shouldStop()) {
+                // Marcar todo como ordenado
+                updateBubblesVisualization([], Array.from({length: array.length}, (_, i) => i));
+            }
+        }
+        
+        // Algoritmo Selection Sort
+        async function selectionSort() {
+            let comparisons = 0;
+            let swaps = 0;
+            
+            for (let i = 0; i < array.length - 1 && !shouldStop(); i++) {
+                let targetIndex = i;
+                
+                for (let j = i + 1; j < array.length && !shouldStop(); j++) {
+                    // Resaltar elementos comparados
+                    updateBubblesVisualization([targetIndex, j]);
+                    
+                    comparisons++;
+                    comparisonsElement.textContent = comparisons;
+                    
+                    // Esperar para la animación
+                    await sleep(animationSpeed);
+                    if (shouldStop()) return;
+                    
+                    const shouldUpdateTarget = sortDirection === 'ascending' 
+                        ? array[j] < array[targetIndex] 
+                        : array[j] > array[targetIndex];
+                    
+                    if (shouldUpdateTarget) {
+                        targetIndex = j;
+                    }
+                }
+                
+                if (shouldStop()) return;
+                
+                if (targetIndex !== i) {
+                    // Mostrar animación de intercambio
+                    updateBubblesVisualization([], [], [i, targetIndex]);
+                    await sleep(animationSpeed);
+                    if (shouldStop()) return;
+                    
+                    // Intercambiar elementos
+                    [array[i], array[targetIndex]] = [array[targetIndex], array[i]];
+                    swaps++;
+                    swapsElement.textContent = swaps;
+                    
+                    // Actualizar visualización
+                    updateBubblesVisualization([i, targetIndex]);
+                    await sleep(animationSpeed);
+                    if (shouldStop()) return;
+                }
+                
+                // Marcar el elemento actual como ordenado
+                updateBubblesVisualization([], [i]);
+            }
+            
+            if (!shouldStop()) {
+                // Marcar el último elemento como ordenado
+                updateBubblesVisualization([], [array.length - 1]);
+            }
+        }
+        
+        // Algoritmo Insertion Sort
+        async function insertionSort() {
+            let comparisons = 0;
+            let swaps = 0;
+            
+            for (let i = 1; i < array.length && !shouldStop(); i++) {
+                let j = i;
+                
+                while (j > 0 && !shouldStop()) {
+                    // Resaltar elementos comparados
+                    updateBubblesVisualization([j, j - 1]);
+                    
+                    comparisons++;
+                    comparisonsElement.textContent = comparisons;
+                    
+                    // Esperar para la animación
+                    await sleep(animationSpeed);
+                    if (shouldStop()) return;
+                    
+                    const shouldSwap = sortDirection === 'ascending' 
+                        ? array[j] < array[j - 1] 
+                        : array[j] > array[j - 1];
+                    
+                    if (!shouldSwap) break;
+                    
+                    // Mostrar animación de intercambio
+                    updateBubblesVisualization([], [], [j, j - 1]);
+                    await sleep(animationSpeed * 0.7);
+                    if (shouldStop()) return;
+                    
+                    // Intercambiar elementos
+                    [array[j], array[j - 1]] = [array[j - 1], array[j]];
+                    swaps++;
+                    swapsElement.textContent = swaps;
+                    
+                    // Actualizar visualización
+                    updateBubblesVisualization([j, j - 1]);
+                    await sleep(animationSpeed * 0.3);
+                    if (shouldStop()) return;
+                    
+                    j--;
+                }
+                
+                if (shouldStop()) return;
+                
+                // Marcar elementos ordenados
+                const sortedIndices = Array.from({length: i + 1}, (_, idx) => idx);
+                updateBubblesVisualization([], sortedIndices);
+            }
+        }
+        
+        // Inicializar con dirección ascendente
+        updateDirectionButtons();
+    </script>
+</body>
+</html>
