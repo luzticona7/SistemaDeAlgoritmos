@@ -1,0 +1,118 @@
+/* Estilos específicos para visualización de matrices */
+/* Extraído de estilos embebidos en Asignacion.html */
+
+.matrix-container {
+  background: var(--bg2);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.table-matrix {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+}
+
+.table-matrix th,
+.table-matrix td {
+  text-align: center;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.table-matrix th {
+  background: rgba(0, 0, 0, 0.3);
+  font-weight: 600;
+  color: var(--pastel-orange);
+}
+
+.table-matrix td {
+  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.table-matrix td:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+/* Estilos para matriz de asignación */
+.table-assignment td {
+  position: relative;
+}
+
+.table-assignment .assigned {
+  background: linear-gradient(45deg, var(--hot-pink), var(--violet-red)) !important;
+  color: white !important;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(231, 92, 180, 0.5);
+}
+
+/* Resultados de asignación */
+.assignment-header {
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  border-left: 4px solid var(--hot-pink);
+}
+
+.assignment-pairs {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.75rem;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.assignment-total {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--pastel-orange);
+  padding: 0.5rem;
+  background: rgba(251, 189, 64, 0.1);
+  border-radius: 5px;
+  text-align: center;
+}
+
+.assignment-details summary {
+  padding: 0.5rem;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+.assignment-details summary:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.matrix-section {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .table-matrix {
+    font-size: 0.75rem;
+  }
+  
+  .table-matrix th,
+  .table-matrix td {
+    padding: 0.3rem 0.4rem;
+  }
+  
+  .assignment-pairs {
+    font-size: 0.9rem;
+  }
+}
+
+/* Animaciones */
+@keyframes highlight-assignment {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.highlight-cell {
+  animation: highlight-assignment 0.6s ease;
+}

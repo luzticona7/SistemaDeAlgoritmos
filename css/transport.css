@@ -1,0 +1,184 @@
+/**
+ * transport.css
+ * Estilos específicos para el módulo de transporte
+ * Se complementa con styles.css (estilos base del sistema)
+ */
+
+/* ========== LAYOUT DE 2 COLUMNAS ========== */
+.wrap {
+  max-width: 100%;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 16px;
+}
+
+@media (max-width: 1200px) {
+  .wrap {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========== MATRIZ DE EDITOR ========== */
+.matrix {
+  overflow: auto;
+  max-height: 300px;
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(11, 19, 38, 0.5);
+}
+
+/* ========== ÁREAS DE SALIDA ========== */
+.output {
+  white-space: pre-wrap;
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  background: rgba(11, 19, 38, 0.7);
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  max-height: 200px;
+  overflow-y: auto;
+  color: var(--ink);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* ========== SVG CONTAINER ========== */
+#svgBox {
+  width: 100%;
+  height: 360px;
+  background: rgba(11, 19, 38, 0.5);
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  overflow: hidden;
+}
+
+/* ========== BARRA DE PROGRESO ========== */
+.progress-bar {
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  margin: 12px 0;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--pastel-orange), var(--carrot-orange));
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+/* ========== LEYENDA ========== */
+.legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+}
+
+/* ========== SELECTOR DE MODO ========== */
+.mode-selector {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.mode-button {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  background: rgba(15, 23, 36, 0.8);
+  border: 1px solid var(--panel-border);
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.mode-button.active {
+  background: linear-gradient(180deg, var(--pastel-orange), var(--carrot-orange));
+  color: #05121a;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(251, 189, 64, 0.2);
+}
+
+.mode-button:hover:not(.active) {
+  background: rgba(25, 35, 55, 0.9);
+  border-color: rgba(255,255,255,0.2);
+}
+
+/* ========== ITERACIONES ========== */
+.iterations-container {
+  margin-top: 20px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.iteration {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  background: rgba(11, 19, 38, 0.5);
+}
+
+.iteration-header {
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: var(--pastel-orange);
+}
+
+.iteration-table {
+  width: 100%;
+  font-size: 12px;
+  border-collapse: collapse;
+}
+
+.iteration-table th,
+.iteration-table td {
+  padding: 4px 6px;
+  border: 1px solid rgba(255,255,255,0.1);
+  text-align: center;
+}
+
+.iteration-table th {
+  background: rgba(15, 23, 36, 0.7);
+}
+
+.iteration-table .current-cell {
+  background: rgba(238, 144, 41, 0.2);
+  border: 1px solid var(--carrot-orange);
+}
+
+/* ========== CONTROL DE ITERACIONES ========== */
+.iterations-control {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.iterations-control input {
+  width: 80px;
+}
+
+/* ========== PASO ACTUAL ========== */
+.current-step {
+  background: rgba(238, 144, 41, 0.2);
+  border: 1px solid var(--carrot-orange);
+}

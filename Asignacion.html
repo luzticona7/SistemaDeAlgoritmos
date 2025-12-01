@@ -3,17 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Editor de Grafos</title>
+  <title>Editor de Grafos - Asignación</title>
 
   <!-- Bootstrap + Icons + animate -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
-  <!-- Google Fonts (letra bonita) -->
+  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-
-  <!-- html2canvas for matrix PNG (kept for potential future use) -->
-  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
   <!-- Link to external CSS file -->
   <link rel="stylesheet" href="css/styles.css">
@@ -68,53 +65,47 @@
         <button id="btn-delete" class="btn btn-tool" style="background-color: var(--dark-purple, #2F0C33)" title="Borrar (nodo/arista)">
           <i class="bi bi-eraser"></i> Borrar
         </button>
-
         <button id="btn-clear" class="btn btn-tool">Limpiar</button>
-<div>
-
       </div>
 
       <div class="vr"></div>
 
       <button id="btn-assignment" class="btn btn-outline-warning">
-  <i class="bi bi-grid-3x3-gap"></i> Asignación
-</button>
+        <i class="bi bi-grid-3x3-gap"></i> Asignación
+      </button>
 
       <div class="pill d-flex align-items-center gap-1" title="Tipo de arista">
-        
         <input type="radio" class="btn-check" name="edgeType" id="edgeDirected" autocomplete="off" checked>
-        <label class="btn btn-sm btn-outline-light" for="edgeDirected" style="color: var(--pastel-orange, #FBBD40)"><i class="bi bi-arrow-right"></i> Dirigida</label>
+        <label class="btn btn-sm btn-outline-light" for="edgeDirected" style="color: var(--pastel-orange, #FBBD40)">
+          <i class="bi bi-arrow-right"></i> Dirigida
+        </label>
 
         <input type="radio" class="btn-check" name="edgeType" id="edgeUndirected" autocomplete="off">
-        <label class="btn btn-sm btn-outline-light" for="edgeUndirected" style="color: var(--carrot-orange, #EE9029)"><i class="bi bi-arrow-left-right"></i> No dirigida</label>
+        <label class="btn btn-sm btn-outline-light" for="edgeUndirected" style="color: var(--carrot-orange, #EE9029)">
+          <i class="bi bi-arrow-left-right"></i> No dirigida
+        </label>
 
         <input type="radio" class="btn-check" name="edgeType" id="edgeBidirectional" autocomplete="off">
-        <label class="btn btn-sm btn-outline-light" for="edgeBidirectional" style="color: var(--hot-pink, #E75CB4)"><i class="bi bi-arrow-repeat"></i> Bidireccional</label>
+        <label class="btn btn-sm btn-outline-light" for="edgeBidirectional" style="color: var(--hot-pink, #E75CB4)">
+          <i class="bi bi-arrow-repeat"></i> Bidireccional
+        </label>
       </div>
-
-      
-
     </div>
   </div>
-
     <div class="card-lite section-card">
           <div class="d-flex align-items-center mb-2">
             <h6 class="m-0"><i class="bi bi-star me-2 text-danger"></i>Ruta Crítica</h6>
           </div>
           <div id="critical-path-result" class="small-muted"></div>
         </div>
-</div>
-<div>
-<button id="btn-assignment" class="btn btn-tool" 
+
+  <button id="btn-assignment" class="btn btn-tool" 
           style="background-color: var(--pastel-orange, #FBBD40); border-color: var(--pastel-orange, #FBBD40); color: #05121a; font-weight: 600;" 
           onclick="window.location.href='Asig.html'" 
           title="Ir al Algoritmo de Asignación">
     <i class="bi bi-grid-3x3-gap me-1"></i> Algoritmo de Asignación por Matriz
   </button>
-
-</div>
-
-
+  <!-- Main Content -->
   <div class="container-fluid">
     <div class="row g-3">
       <div class="col-lg-8">
@@ -126,6 +117,7 @@
       </div>
 
       <div class="col-lg-4">
+        <!-- Node Properties -->
         <div class="card-lite mb-2 section-card">
           <div class="d-flex align-items-center">
             <h6 class="m-0"><i class="bi bi-sliders me-2 text-info"></i>Propiedades</h6>
@@ -156,35 +148,50 @@
               </div>
             </div>
             <div class="d-flex gap-2 justify-content-end">
-              <button id="node-save" type="button" class="btn btn-sm btn-success" style="background-color: var(--hot-pink, #E75CB4); border-color: var(--hot-pink, #E75CB4)"><i class="bi bi-check2-circle"></i> Guardar</button>
-              <button id="node-delete" type="button" class="btn btn-sm btn-outline-danger" style="color: var(--violet-red, #8C144E)"><i class="bi bi-trash3"></i> Borrar</button>
+              <button id="node-save" type="button" class="btn btn-sm btn-success" style="background-color: var(--hot-pink, #E75CB4); border-color: var(--hot-pink, #E75CB4)">
+                <i class="bi bi-check2-circle"></i> Guardar
+              </button>
+              <button id="node-delete" type="button" class="btn btn-sm btn-outline-danger" style="color: var(--violet-red, #8C144E)">
+                <i class="bi bi-trash3"></i> Borrar
+              </button>
             </div>
           </form>
         </div>
 
+        <!-- Edges Table -->
         <div class="card-lite mb-2 section-card">
           <h6 class="m-0"><i class="bi bi-diagram-3 me-2 text-warning"></i>Aristas</h6>
           <div class="table-responsive" style="max-height:180px; overflow:auto; margin-top:.6rem;">
             <table class="table table-sm table-dark align-middle mb-0">
-              <thead><tr><th>#</th><th>Origen</th><th>Destino</th><th>Tipo</th><th>Peso</th><th>Holgura</th><th></th></tr></thead>
+              <thead><tr><th>#</th><th>Origen</th><th>Destino</th><th>Tipo</th><th>Peso</th><th></th></tr></thead>
               <tbody id="edges-tbody"></tbody>
             </table>
           </div>
         </div>
 
-        <div class="card-lite section-card">
+        <!-- Adjacency Matrix -->
+        <div class="card-lite mb-2 section-card">
           <div class="d-flex align-items-center mb-2">
             <h6 class="m-0"><i class="bi bi-grid-1x2 me-2 text-primary"></i>Matriz de Adyacencia</h6>
             <div class="ms-auto d-flex gap-1">
-              <button id="refresh-matrix" class="btn btn-sm btn-outline-light" title="Refrescar"><i class="bi bi-arrow-repeat"></i></button>
-              <button id="show-matrix-modal" class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#matrixModal" title="Ver grande"><i class="bi bi-table"></i></button>
+              <button id="refresh-matrix" class="btn btn-sm btn-outline-light" title="Refrescar">
+                <i class="bi bi-arrow-repeat"></i>
+              </button>
+              <button id="show-matrix-modal" class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#matrixModal" title="Ver grande">
+                <i class="bi bi-table"></i>
+              </button>
             </div>
           </div>
           <div style="max-height:180px; overflow:auto">
             <table class="table table-sm table-matrix table-dark mb-0" id="matrix-table"></table>
           </div>
-          <div>
-            <!-- Matrix modal -->
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Matrix Modal -->
   <div class="modal fade" id="matrixModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content bg-dark text-light">
@@ -203,12 +210,8 @@
       </div>
     </div>
   </div>
-    
-      </div>
-    </div>
-  </div>
 
-  <!-- Tutorial modal -->
+  <!-- Tutorial Modal -->
   <div class="modal fade" id="tutorialModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content bg-dark text-light">
@@ -219,9 +222,10 @@
         <div class="modal-body">
           <ol>
             <li>Selecciona <b>Nodo</b> y haz clic en el lienzo para crear un nodo.</li>
-            <li>Selecciona <b>Arista</b>, luego clic en origen y clic en destino para crear una arista. Para <em>loop</em> haz clic dos veces en el mismo nodo.</li>
+            <li>Selecciona <b>Arista</b>, luego clic en origen y clic en destino para crear una arista.</li>
             <li>Selecciona un nodo para editar su nombre, color y tamaño en el panel.</li>
             <li>En la tabla de aristas puedes cambiar su tipo, peso o eliminarla.</li>
+            <li>Pulsa <b>Asignación</b> para ejecutar el algoritmo húngaro de asignación.</li>
             <li>Pulsa <b>Imagen</b> para descargar la imagen del grafo.</li>
             <li>Pulsa <b>JSON</b> para exportar el grafo o usa <b>Importar</b> para cargar uno.</li>
           </ol>
@@ -234,9 +238,7 @@
     </div>
   </div>
 
-  
-
-  <!-- Enhanced Custom Input Modal -->
+  <!-- Custom Input Modal -->
   <div class="modal fade" id="inputModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-transparent border-0" style="background: linear-gradient(135deg, var(--dark-purple, #2F0C33), var(--violet-red, #8C144E)); border-radius: 15px; box-shadow: 0 10px 30px rgba(47, 12, 51, 0.7);">
@@ -257,6 +259,79 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="js/algorithm.js"></script>
+  
+  <!-- Modular Scripts -->
+  <script type="module">
+    // Importar módulos de algoritmo de asignación
+    import { showOptimizationDialog, computeAssignment } from './js/modules/matrix/AssignmentUI.js';
+    
+    // Importar algoritmo base (esto mantendrá la funcionalidad del grafo)
+    // Nota: algorithm.js debe ser convertido a módulo ES6 también
+    // Por ahora, usaremos la versión legacy hasta que se modularice completamente
+  </script>
+  
+  <!-- Temporary: Legacy algorithm.js hasta modularización completa -->
+  <script src="js/legacy/algorithm.js"></script>
+  
+  <!-- Assignment Integration -->
+  <script type="module">
+    import { showOptimizationDialog, computeAssignment } from './js/modules/matrix/AssignmentUI.js';
+    
+    // Vincular botón de asignación
+    document.getElementById('btn-assignment').onclick = async () => {
+      const mode = await showOptimizationDialog();
+      if (mode !== null) {
+        // Acceder a datos globales del algorithm.js legacy
+        const { nodes, edges, render } = window.__G || {};
+        
+        if (!nodes || !edges || !render) {
+          console.error('GraphApp no disponible');
+          return;
+        }
+        
+        // Función para construir matriz de adyacencia (del legacy)
+        const buildAdjacencyMatrix = () => {
+          const table = document.getElementById('matrix-table');
+          const tableModal = document.getElementById('matrix-table-modal');
+          table.innerHTML = '';
+          tableModal.innerHTML = '';
+          const ordered = [...nodes].sort((a,b)=> (a.label||'').localeCompare(b.label||''));
+          if(ordered.length === 0) return { matrix: [], ordered: [] };
+          const indexById = new Map(ordered.map((n,i)=>[n.id,i]));
+          const n = ordered.length;
+          const M = Array.from({length:n},()=>Array(n).fill(0));
+          edges.forEach(e=>{
+            const i = indexById.get(e.source), j = indexById.get(e.target);
+            if(i==null || j==null) return;
+            const w = (e.weight==null || isNaN(e.weight)) ? 1 : Number(e.weight);
+            if(e.type === 'directed') M[i][j] += w;
+            else { M[i][j] += w; M[j][i] += w; }
+          });
+
+          const createMatrixTable = (target) => {
+            const thead = document.createElement('thead');
+            thead.innerHTML = '<tr>' + ordered.map(o=>`<th>${o.label}</th>`).join('') + '</tr></thead>';
+            target.appendChild(thead);
+            
+            const tbody = document.createElement('tbody');
+            for(let i=0;i<n;i++){
+              const row = document.createElement('tr');
+              row.innerHTML = M[i].map(v=>`<td>${Number.isInteger(v)?v:v.toFixed(2)}</td>`).join('');
+              tbody.appendChild(row);
+            }
+            target.appendChild(tbody);
+            target.classList.add('table-dark');
+          };
+
+          createMatrixTable(table);
+          createMatrixTable(tableModal);
+          
+          return { matrix: M, ordered };
+        };
+        
+        computeAssignment(nodes, edges, buildAdjacencyMatrix, render, mode);
+      }
+    };
+  </script>
 </body>
 </html>
